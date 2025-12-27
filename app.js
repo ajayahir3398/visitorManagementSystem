@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
-import swaggerSpec from './config/swagger/index.js';
 import apiRoutes from './routes/index.js';
+import swaggerSpec from './swagger/index.js';
 import { healthCheck } from './controllers/v1/healthController.js';
 
 const app = express();
