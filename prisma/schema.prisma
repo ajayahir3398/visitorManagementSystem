@@ -1,0 +1,339 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  users     User[]
+
+  @@map("roles")
+}
+
+model Society {
+  id            Int            @id @default(autoincrement())
+  name           String          @db.VarChar(255)
+  type           String          @db.VarChar(50) // apartment / office
+  address        String?         @db.VarChar(500)
+  city           String?         @db.VarChar(100)
+  state          String?         @db.VarChar(100)
+  pincode        String?         @db.VarChar(10)
+  subscriptionId Int?            @map("subscription_id")
+  status         String          @default("active") @db.VarChar(20) // active / expired
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  users          User[]
+  subscriptions  Subscription[]
+  payments       Payment[]
+  invoices       Invoice[]
+  gates          Gate[]
+  visitorLogs    VisitorLog[]
+  units          Unit[]
+  preApprovedGuests PreApprovedGuest[]
+  auditLogs      AuditLog[]
+
+  @@index([status], map: "idx_societies_status")
+  @@index([type], map: "idx_societies_type")
+  @@index([subscriptionId], map: "idx_societies_subscription_id")
+  @@map("societies")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  societyId     Int?           @map("society_id")
+  name          String         @db.VarChar(255)
+  mobile        String         @unique @db.VarChar(20)
+  email         String?        @unique @db.VarChar(255)
+  passwordHash  String?        @map("password_hash") @db.VarChar(255)
+  roleId        Int            @map("role_id")
+  status        String         @default("active") @db.VarChar(20)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  role          Role           @relation(fields: [roleId], references: [id])
+  society       Society?       @relation(fields: [societyId], references: [id])
+  refreshTokens RefreshToken[]
+  visitorLogsCreated VisitorLog[] @relation("VisitorLogCreatedBy")
+  approvals    Approval[]
+  unitMembers  UnitMember[]
+  preApprovedGuests PreApprovedGuest[] @relation("PreApprovedGuestResident")
+  auditLogs    AuditLog[]
+
+  @@index([societyId], map: "idx_users_society_id")
+  @@index([roleId], map: "idx_users_role_id")
+  @@index([mobile], map: "idx_users_mobile")
+  @@index([email], map: "idx_users_email")
+  @@index([status], map: "idx_users_status")
+  @@map("users")
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  mobile    String   @db.VarChar(20)
+  otpCode   String   @map("otp_code") @db.VarChar(6)
+  expiresAt DateTime @map("expires_at")
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([mobile], map: "idx_otps_mobile")
+  @@index([expiresAt], map: "idx_otps_expires_at")
+  @@map("otps")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @unique @db.VarChar(500)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_refresh_tokens_user_id")
+  @@index([token], map: "idx_refresh_tokens_token")
+  @@index([expiresAt], map: "idx_refresh_tokens_expires_at")
+  @@map("refresh_tokens")
+}
+
+model SubscriptionPlan {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique @db.VarChar(50)
+  price         Decimal        @db.Decimal(10, 2)
+  durationMonths Int           @map("duration_months")
+  visitorLimit  Int?           @map("visitor_limit")
+  features      Json?          // JSONB for features
+  isActive      Boolean        @default(true) @map("is_active")
+  subscriptions Subscription[]
+
+  @@index([isActive], map: "idx_subscription_plans_is_active")
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id          Int              @id @default(autoincrement())
+  societyId   Int              @map("society_id")
+  planId      Int              @map("plan_id")
+  status      String           @db.VarChar(20) // TRIAL / ACTIVE / GRACE / LOCKED / SUSPENDED
+  startDate   DateTime         @map("start_date") @db.Date
+  expiryDate  DateTime?        @map("expiry_date") @db.Date
+  graceDays   Int              @default(3) @map("grace_days")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  society     Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  plan        SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([societyId], map: "idx_subscriptions_society_id")
+  @@index([planId], map: "idx_subscriptions_plan_id")
+  @@index([status], map: "idx_subscriptions_status")
+  @@index([expiryDate], map: "idx_subscriptions_expiry_date")
+  @@map("subscriptions")
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  societyId     Int       @map("society_id")
+  amount        Decimal   @db.Decimal(10, 2)
+  gateway       String?   @db.VarChar(20)
+  transactionId String?   @map("transaction_id") @db.VarChar(100)
+  status        String    @db.VarChar(20)
+  paidAt        DateTime? @map("paid_at")
+  society       Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  invoices      Invoice[]
+
+  @@index([societyId], map: "idx_payments_society_id")
+  @@index([transactionId], map: "idx_payments_transaction_id")
+  @@index([status], map: "idx_payments_status")
+  @@index([paidAt], map: "idx_payments_paid_at")
+  @@map("payments")
+}
+
+model Invoice {
+  id        Int      @id @default(autoincrement())
+  societyId Int      @map("society_id")
+  paymentId Int?     @map("payment_id")
+  invoiceNo String  @unique @map("invoice_no") @db.VarChar(50)
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  society   Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([societyId], map: "idx_invoices_society_id")
+  @@index([paymentId], map: "idx_invoices_payment_id")
+  @@index([invoiceNo], map: "idx_invoices_invoice_no")
+  @@index([createdAt], map: "idx_invoices_created_at")
+  @@map("invoices")
+}
+
+model Gate {
+  id        Int         @id @default(autoincrement())
+  societyId Int         @map("society_id")
+  name      String      @db.VarChar(100) // Main Gate, Back Gate
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  society   Society     @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  visitorLogs VisitorLog[]
+
+  @@index([societyId], map: "idx_gates_society_id")
+  @@map("gates")
+}
+
+model Visitor {
+  id        Int         @id @default(autoincrement())
+  name      String      @db.VarChar(255)
+  mobile    String      @db.VarChar(20)
+  photoUrl  String?     @map("photo_url") @db.VarChar(500)
+  createdAt DateTime    @default(now()) @map("created_at")
+  visitorLogs VisitorLog[]
+
+  @@index([mobile], map: "idx_visitors_mobile")
+  @@index([createdAt], map: "idx_visitors_created_at")
+  @@map("visitors")
+}
+
+model VisitorLog {
+  id             Int                @id @default(autoincrement())
+  societyId      Int                 @map("society_id")
+  gateId         Int                 @map("gate_id")
+  visitorId      Int?                @map("visitor_id")
+  unitId         Int?                @map("unit_id")
+  flatNo         String?             @map("flat_no") @db.VarChar(50) // Keep for backward compatibility
+  purpose        String?             @db.VarChar(500)
+  preApprovalId  Int?                @map("pre_approval_id")
+  entryTime      DateTime?           @map("entry_time")
+  exitTime       DateTime?           @map("exit_time")
+  status         String              @default("pending") @db.VarChar(20) // pending / approved / rejected / exited
+  createdBy      Int                 @map("created_by") // security user_id
+  createdAt      DateTime            @default(now()) @map("created_at")
+  society        Society             @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  gate           Gate                @relation(fields: [gateId], references: [id], onDelete: Cascade)
+  visitor        Visitor?            @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  unit           Unit?               @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  createdByUser  User                @relation("VisitorLogCreatedBy", fields: [createdBy], references: [id])
+  preApproval    PreApprovedGuest?   @relation(fields: [preApprovalId], references: [id], onDelete: SetNull)
+  approvals      Approval[]
+
+  @@index([societyId], map: "idx_visitor_logs_society_id")
+  @@index([gateId], map: "idx_visitor_logs_gate_id")
+  @@index([visitorId], map: "idx_visitor_logs_visitor_id")
+  @@index([unitId], map: "idx_visitor_logs_unit_id")
+  @@index([createdBy], map: "idx_visitor_logs_created_by")
+  @@index([preApprovalId], map: "idx_visitor_logs_pre_approval_id")
+  @@index([status], map: "idx_visitor_logs_status")
+  @@index([entryTime], map: "idx_visitor_logs_entry_time")
+  @@index([exitTime], map: "idx_visitor_logs_exit_time")
+  @@index([createdAt], map: "idx_visitor_logs_created_at")
+  @@map("visitor_logs")
+}
+
+model Approval {
+  id            Int         @id @default(autoincrement())
+  visitorLogId   Int         @map("visitor_log_id")
+  residentId    Int         @map("resident_id")
+  decision      String      @db.VarChar(20) // approved / rejected
+  decisionTime  DateTime    @default(now()) @map("decision_time")
+  visitorLog    VisitorLog  @relation(fields: [visitorLogId], references: [id], onDelete: Cascade)
+  resident      User        @relation(fields: [residentId], references: [id])
+
+  @@index([visitorLogId], map: "idx_approvals_visitor_log_id")
+  @@index([residentId], map: "idx_approvals_resident_id")
+  @@index([decision], map: "idx_approvals_decision")
+  @@index([decisionTime], map: "idx_approvals_decision_time")
+  @@map("approvals")
+}
+
+model Unit {
+  id        Int         @id @default(autoincrement())
+  societyId Int         @map("society_id")
+  unitNo    String      @map("unit_no") @db.VarChar(20) // A-302 / 201 / HR-01
+  unitType  String?     @map("unit_type") @db.VarChar(20) // FLAT / OFFICE / SHOP
+  status    String      @default("ACTIVE") @db.VarChar(20) // ACTIVE / INACTIVE
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  society   Society     @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  members   UnitMember[]
+  visitorLogs VisitorLog[]
+  preApprovedGuests PreApprovedGuest[]
+
+  @@unique([societyId, unitNo], map: "uq_units_society_unit_no")
+  @@index([societyId], map: "idx_units_society_id")
+  @@index([unitNo], map: "idx_units_unit_no")
+  @@index([status], map: "idx_units_status")
+  @@map("units")
+}
+
+model UnitMember {
+  id        Int      @id @default(autoincrement())
+  unitId    Int      @map("unit_id")
+  userId    Int      @map("user_id")
+  role      String   @db.VarChar(20) // OWNER / TENANT / EMPLOYEE
+  isPrimary Boolean  @default(false) @map("is_primary")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, userId], map: "uq_unit_members_unit_user")
+  @@index([unitId], map: "idx_unit_members_unit_id")
+  @@index([userId], map: "idx_unit_members_user_id")
+  @@index([isPrimary], map: "idx_unit_members_is_primary")
+  @@map("unit_members")
+}
+
+model PreApprovedGuest {
+  id          Int         @id @default(autoincrement())
+  societyId   Int         @map("society_id")
+  unitId      Int         @map("unit_id")
+  residentId  Int         @map("resident_id")
+  guestName   String?     @map("guest_name") @db.VarChar(255)
+  guestMobile String?     @map("guest_mobile") @db.VarChar(20)
+  accessCode  String      @unique @map("access_code") @db.VarChar(20)
+  validFrom   DateTime    @map("valid_from")
+  validTill   DateTime    @map("valid_till")
+  maxUses     Int         @default(1) @map("max_uses")
+  usedCount   Int         @default(0) @map("used_count")
+  status      String      @default("ACTIVE") @db.VarChar(20) // ACTIVE / EXPIRED / USED / REVOKED
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  society     Society     @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  unit        Unit        @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  resident    User        @relation("PreApprovedGuestResident", fields: [residentId], references: [id], onDelete: Cascade)
+  visitorLogs VisitorLog[]
+
+  @@index([societyId], map: "idx_pre_approved_guests_society_id")
+  @@index([unitId], map: "idx_pre_approved_guests_unit_id")
+  @@index([residentId], map: "idx_pre_approved_guests_resident_id")
+  @@index([accessCode], map: "idx_pre_approved_guests_access_code")
+  @@index([status], map: "idx_pre_approved_guests_status")
+  @@index([validTill], map: "idx_pre_approved_guests_valid_till")
+  @@map("pre_approved_guests")
+}
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int?     @map("user_id")
+  societyId   Int?     @map("society_id")
+  role        String?  @db.VarChar(50)
+  action      String   @db.VarChar(100)
+  entity      String   @db.VarChar(100)
+  entityId    Int?     @map("entity_id")
+  description String?  @db.VarChar(500)
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  userAgent   String?  @map("user_agent") @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  society     Society? @relation(fields: [societyId], references: [id], onDelete: SetNull)
+
+  @@index([userId], map: "idx_audit_logs_user_id")
+  @@index([societyId], map: "idx_audit_logs_society_id")
+  @@index([action], map: "idx_audit_logs_action")
+  @@index([entity], map: "idx_audit_logs_entity")
+  @@index([createdAt], map: "idx_audit_logs_created_at")
+  @@index([role], map: "idx_audit_logs_role")
+  @@map("audit_logs")
+}
