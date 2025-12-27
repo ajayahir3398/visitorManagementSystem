@@ -43,9 +43,11 @@ export default {
         type: 'object',
         properties: {
           id: { type: 'integer', example: 1 },
-          name: { type: 'string', example: 'TRIAL' },
-          price: { type: 'number', example: 0 },
-          durationMonths: { type: 'integer', example: 0 },
+          code: { type: 'string', example: 'MONTHLY' },
+          name: { type: 'string', example: 'Monthly Plan' },
+          price: { type: 'integer', example: 800 },
+          durationMonths: { type: 'integer', example: 1 },
+          billingCycle: { type: 'string', example: 'MONTHLY' },
         },
       },
       society: {
@@ -120,6 +122,18 @@ export default {
             },
           },
         },
+      },
+    },
+  },
+  BuySubscriptionRequest: {
+    type: 'object',
+    required: ['planId'],
+    properties: {
+      planId: {
+        type: 'integer',
+        minimum: 1,
+        example: 2,
+        description: 'ID of the subscription plan to purchase',
       },
     },
   },

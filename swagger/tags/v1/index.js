@@ -17,7 +17,11 @@ export default [
   },
   {
     name: 'v1 - Subscriptions',
-    description: 'API v1 - Subscription management endpoints (view, extend trial period)',
+    description: 'API v1 - Subscription management endpoints (view, buy, extend trial period)',
+  },
+  {
+    name: 'v1 - Plans',
+    description: 'API v1 - Subscription plan management endpoints (view plans, create/update plans for super admin)',
   },
   {
     name: 'v1 - Gates',

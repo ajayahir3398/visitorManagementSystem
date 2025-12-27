@@ -245,3 +245,157 @@ export const getAllSubscriptions = async (req, res) => {
   }
 };
 
+/**
+ * Get current subscription for logged-in society admin
+ * GET /api/v1/subscriptions/current
+ * Access: SOCIETY_ADMIN only
+ */
+export const getCurrentSubscription = async (req, res) => {
+  try {
+    const societyId = req.user.society_id;
+
+    if (!societyId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not associated with a society',
+      });
+    }
+
+    let subscription = await getSubscription(societyId);
+
+    if (!subscription) {
+      return res.status(404).json({
+        success: false,
+        message: 'No subscription found for your society',
+      });
+    }
+
+    // Auto-update status
+    subscription = await updateSubscriptionStatus(subscription);
+
+    res.json({
+      success: true,
+      message: 'Current subscription retrieved successfully',
+      data: { subscription },
+    });
+  } catch (error) {
+    console.error('Get current subscription error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve current subscription',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Buy/Activate a subscription plan
+ * POST /api/v1/subscriptions/buy
+ * Access: SOCIETY_ADMIN only
+ * 
+ * Note: This is MVP version without payment gateway integration.
+ * Payment gateway (Razorpay) can be integrated later.
+ */
+export const buySubscription = async (req, res) => {
+  try {
+    const { planId } = req.body;
+    const societyId = req.user.society_id;
+
+    if (!societyId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not associated with a society',
+      });
+    }
+
+    if (!planId) {
+      return res.status(400).json({
+        success: false,
+        message: 'planId is required',
+      });
+    }
+
+    const planIdInt = parseInt(planId);
+    if (isNaN(planIdInt)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid planId',
+      });
+    }
+
+    // Validate plan exists and is active
+    const plan = await prisma.subscriptionPlan.findUnique({
+      where: { id: planIdInt },
+    });
+
+    if (!plan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plan not found',
+      });
+    }
+
+    if (!plan.isActive) {
+      return res.status(400).json({
+        success: false,
+        message: 'This plan is not available for purchase',
+      });
+    }
+
+    // Calculate dates
+    const startDate = new Date();
+    const expiryDate = new Date();
+    expiryDate.setMonth(expiryDate.getMonth() + plan.durationMonths);
+
+    // Upsert subscription (create or update existing)
+    const subscription = await prisma.subscription.upsert({
+      where: { societyId },
+      update: {
+        planId: plan.id,
+        status: 'ACTIVE',
+        startDate,
+        expiryDate,
+      },
+      create: {
+        societyId,
+        planId: plan.id,
+        status: 'ACTIVE',
+        startDate,
+        expiryDate,
+      },
+      include: {
+        plan: true,
+        society: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Log subscription purchase
+    await logAction({
+      user: req.user,
+      action: AUDIT_ACTIONS.SUBSCRIPTION_PURCHASED,
+      entity: AUDIT_ENTITIES.SUBSCRIPTION,
+      entityId: subscription.id,
+      description: `Subscription purchased: ${plan.name} (${plan.code}) for society "${subscription.society.name}". Expires: ${expiryDate.toISOString().split('T')[0]}`,
+      req,
+    });
+
+    res.json({
+      success: true,
+      message: 'Subscription activated successfully',
+      data: { subscription },
+    });
+  } catch (error) {
+    console.error('Buy subscription error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to activate subscription',
+      error: error.message,
+    });
+  }
+};
+

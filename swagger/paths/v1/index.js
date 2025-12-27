@@ -3,6 +3,7 @@ import healthPaths from './health.js';
 import societyPaths from './society.js';
 import userPaths from './user.js';
 import subscriptionPaths from './subscription.js';
+import planPaths from './plan.js';
 import gatePaths from './gate.js';
 import visitorPaths from './visitor.js';
 import visitorLogPaths from './visitorLog.js';
@@ -17,6 +18,7 @@ export default {
   ...societyPaths,
   ...userPaths,
   ...subscriptionPaths,
+  ...planPaths,
   ...gatePaths,
   ...visitorPaths,
   ...visitorLogPaths,

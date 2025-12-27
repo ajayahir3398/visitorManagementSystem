@@ -103,15 +103,19 @@ model RefreshToken {
 
 model SubscriptionPlan {
   id            Int            @id @default(autoincrement())
-  name          String         @unique @db.VarChar(50)
-  price         Decimal        @db.Decimal(10, 2)
+  code          String?        @unique @db.VarChar(20) // MONTHLY, YEARLY, TRIAL
+  name          String         @db.VarChar(50)
+  price         Int            // Store in smallest unit (₹800 → 800)
   durationMonths Int           @map("duration_months")
+  billingCycle  String?        @db.VarChar(20) // MONTHLY, YEARLY
   visitorLimit  Int?           @map("visitor_limit")
   features      Json?          // JSONB for features
   isActive      Boolean        @default(true) @map("is_active")
+  createdAt     DateTime       @default(now()) @map("created_at")
   subscriptions Subscription[]
 
   @@index([isActive], map: "idx_subscription_plans_is_active")
+  @@index([code], map: "idx_subscription_plans_code")
   @@map("subscription_plans")
 }
 
@@ -127,6 +131,7 @@ model Subscription {
   society     Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
   plan        SubscriptionPlan @relation(fields: [planId], references: [id])
 
+  @@unique([societyId], map: "uq_subscriptions_society_id")
   @@index([societyId], map: "idx_subscriptions_society_id")
   @@index([planId], map: "idx_subscriptions_plan_id")
   @@index([status], map: "idx_subscriptions_status")

@@ -6,6 +6,8 @@ import {
   extendSubscriptionById,
   extendSubscriptionBySocietyId,
   getAllSubscriptions,
+  getCurrentSubscription,
+  buySubscription,
 } from '../../controllers/v1/subscriptionController.js';
 
 const router = express.Router();
@@ -43,8 +45,34 @@ const validateSocietyId = [
   handleValidationErrors,
 ];
 
+const validateBuySubscription = [
+  body('planId')
+    .notEmpty()
+    .withMessage('planId is required')
+    .isInt({ min: 1 })
+    .withMessage('planId must be a positive integer'),
+  handleValidationErrors,
+];
+
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/subscription.js
+
+// Get current subscription (for logged-in society admin)
+router.get(
+  '/current',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  getCurrentSubscription
+);
+
+// Buy/Activate subscription plan
+router.post(
+  '/buy',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  validateBuySubscription,
+  buySubscription
+);
 
 // Get subscription by society ID
 router.get(
