@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create a new visitor
@@ -39,6 +40,9 @@ export const createVisitor = async (req, res) => {
         data: { visitor: existingVisitor },
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('visitors');
 
     // Create visitor
     const visitor = await prisma.visitor.create({

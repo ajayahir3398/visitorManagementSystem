@@ -11,6 +11,7 @@ import unitPaths from './unit.js';
 import approvalPaths from './approval.js';
 import preApprovalPaths from './preApproval.js';
 import auditLogPaths from './auditLog.js';
+import securityPaths from './security.js';
 
 export default {
   ...healthPaths,
@@ -26,5 +27,6 @@ export default {
   ...approvalPaths,
   ...preApprovalPaths,
   ...auditLogPaths,
+  ...securityPaths,
 };
 

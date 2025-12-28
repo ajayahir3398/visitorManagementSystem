@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import prisma from '../../lib/prisma.js';
 import { createTrialSubscription } from '../../services/subscriptionService.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create a new user (Society Admin)
@@ -97,6 +98,9 @@ export const createUser = async (req, res) => {
       const saltRounds = 10;
       passwordHash = await bcrypt.hash(password, saltRounds);
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('users');
 
     // Create user
     const user = await prisma.user.create({

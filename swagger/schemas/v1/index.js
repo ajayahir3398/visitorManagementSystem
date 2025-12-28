@@ -12,6 +12,7 @@ import unitSchemas from './unit.js';
 import approvalSchemas from './approval.js';
 import preApprovalSchemas from './preApproval.js';
 import auditLogSchemas from './auditLog.js';
+import securitySchemas from './security.js';
 
 export default {
   ...commonSchemas,
@@ -28,5 +29,6 @@ export default {
   ...approvalSchemas,
   ...preApprovalSchemas,
   ...auditLogSchemas,
+  ...securitySchemas,
 };
 

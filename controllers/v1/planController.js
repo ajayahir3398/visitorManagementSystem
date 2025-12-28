@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Get all available subscription plans (Public)
@@ -119,6 +120,9 @@ export const createPlan = async (req, res) => {
         message: 'Price must be >= 0 and durationMonths must be >= 1',
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('subscription_plans');
 
     const plan = await prisma.subscriptionPlan.create({
       data: {

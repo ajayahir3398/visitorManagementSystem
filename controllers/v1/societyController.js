@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create a new society
@@ -24,6 +25,9 @@ export const createSociety = async (req, res) => {
         message: 'Type must be either "apartment" or "office"',
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('societies');
 
     // Create society
     const society = await prisma.society.create({

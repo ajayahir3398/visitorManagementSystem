@@ -47,5 +47,9 @@ export default [
     name: 'v1 - Pre-Approvals',
     description: 'API v1 - Pre-approve guests with access codes (for residents and security)',
   },
+  {
+    name: 'v1 - Security',
+    description: 'API v1 - Security dashboard endpoints (for security guards)',
+  },
 ];
 

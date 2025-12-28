@@ -70,7 +70,7 @@ const validateUserId = [
 router.post(
   '/',
   authenticate,
-  authorize('SUPER_ADMIN'),
+  authorize('SUPER_ADMIN','SOCIETY_ADMIN'),
   validateCreateUser,
   createUser
 );

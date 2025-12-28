@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Generate a unique 6-digit access code
@@ -113,6 +114,9 @@ export const createPreApproval = async (req, res) => {
         message: 'Failed to generate unique access code. Please try again.',
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('pre_approved_guests');
 
     // Create pre-approval
     const preApproval = await prisma.preApprovedGuest.create({
@@ -524,6 +528,9 @@ export const verifyPreApprovalCode = async (req, res) => {
       if (existingVisitor) {
         finalVisitorId = existingVisitor.id;
       } else if (preApproval.guestName) {
+        // Fix sequence if out of sync
+        await fixSequence('visitors');
+        
         // Create new visitor if mobile exists but visitor doesn't
         const newVisitor = await prisma.visitor.create({
           data: {
@@ -534,6 +541,9 @@ export const verifyPreApprovalCode = async (req, res) => {
         finalVisitorId = newVisitor.id;
       }
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('visitor_logs');
 
     // Create visitor log entry (auto-approved)
     const visitorLog = await prisma.visitorLog.create({

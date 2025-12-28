@@ -46,6 +46,21 @@ async function createSuperAdminQuick() {
       process.exit(0);
     }
 
+    // Fix PostgreSQL sequence if it's out of sync
+    // This can happen if rows were manually deleted or inserted with specific IDs
+    try {
+      await prisma.$executeRawUnsafe(`
+        SELECT setval(
+          pg_get_serial_sequence('users', 'id'),
+          COALESCE((SELECT MAX(id) FROM users), 0) + 1,
+          true
+        );
+      `);
+    } catch (seqError) {
+      // If sequence fix fails, log but continue (might work anyway)
+      console.warn('⚠️  Warning: Could not fix sequence:', seqError.message);
+    }
+
     // Hash password
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(defaultAdmin.password, saltRounds);

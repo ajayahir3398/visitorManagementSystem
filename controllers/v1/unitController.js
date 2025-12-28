@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create a new unit
@@ -53,6 +54,9 @@ export const createUnit = async (req, res) => {
       });
     }
 
+    // Fix sequence if out of sync (prevents unique constraint errors on id)
+    await fixSequence('units');
+
     // Create unit
     const unit = await prisma.unit.create({
       data: {
@@ -92,6 +96,63 @@ export const createUnit = async (req, res) => {
     });
   } catch (error) {
     console.error('Create unit error:', error);
+    
+    // Handle sequence out of sync error (unique constraint on id field)
+    // This is a fallback - the automatic fix above should prevent most cases
+    if (
+      error.code === 'P2002' &&
+      error.meta?.modelName === 'Unit' &&
+      (error.message?.includes('id') || error.message?.includes('Unique constraint'))
+    ) {
+      // Try to fix sequence one more time and retry
+      try {
+        await fixSequence('units');
+        // If fix succeeded, retry creating the unit
+        const unit = await prisma.unit.create({
+          data: {
+            unitNo: req.body.unitNo.trim(),
+            unitType: req.body.unitType || null,
+            societyId: parseInt(req.body.societyId),
+            status: req.body.status || 'ACTIVE',
+          },
+          include: {
+            society: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+            _count: {
+              select: { members: true, visitorLogs: true },
+            },
+          },
+        });
+
+        await logAction({
+          user: req.user,
+          action: AUDIT_ACTIONS.CREATE_UNIT,
+          entity: AUDIT_ENTITIES.UNIT,
+          entityId: unit.id,
+          description: `Unit "${unit.unitNo}" created for society "${unit.society.name}"`,
+          req,
+        });
+
+        return res.status(201).json({
+          success: true,
+          message: 'Unit created successfully (after sequence fix)',
+          data: { unit },
+        });
+      } catch (retryError) {
+        return res.status(500).json({
+          success: false,
+          message: 'Database sequence error. The ID sequence for units table is out of sync.',
+          error: 'Please run: npm run fix:sequences',
+          details: 'Automatic sequence fix failed. Please run the fix script manually.',
+        });
+      }
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create unit',
@@ -540,6 +601,9 @@ export const addUnitMember = async (req, res) => {
         },
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('unit_members');
 
     // Add member
     const member = await prisma.unitMember.create({

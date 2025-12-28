@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create visitor entry (log)
@@ -8,7 +9,7 @@ import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogge
  */
 export const createVisitorEntry = async (req, res) => {
   try {
-    const { visitorId, gateId, unitId, flatNo, purpose, entryTime } = req.body;
+    const { visitorId, gateId, unitId, flatNo, purpose } = req.body;
 
     // Validation
     if (!visitorId || !gateId) {
@@ -110,6 +111,9 @@ export const createVisitorEntry = async (req, res) => {
       });
     }
 
+    // Fix sequence if out of sync
+    await fixSequence('visitor_logs');
+
     // Create visitor log entry
     const visitorLog = await prisma.visitorLog.create({
       data: {
@@ -119,7 +123,7 @@ export const createVisitorEntry = async (req, res) => {
         unitId: unitId ? parseInt(unitId) : null,
         flatNo: flatNo || null, // Keep for backward compatibility
         purpose: purpose || null,
-        entryTime: entryTime ? new Date(entryTime) : new Date(),
+        entryTime: null, // Will be set when visitor is approved
         status: 'pending', // Will be approved/rejected by resident
         createdBy: req.user.id,
       },

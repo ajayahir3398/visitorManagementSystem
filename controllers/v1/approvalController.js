@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Approve visitor entry
@@ -152,10 +153,13 @@ export const approveVisitor = async (req, res) => {
         },
       });
 
-      // Update visitor log status
+      // Update visitor log status and set entry time (if not already set)
       const updatedLog = await prisma.visitorLog.update({
         where: { id: visitorLogId },
-        data: { status: 'approved' },
+        data: { 
+          status: 'approved',
+          entryTime: visitorLog.entryTime || new Date(), // Set entry time if not already set
+        },
         include: {
           visitor: {
             select: {
@@ -201,6 +205,9 @@ export const approveVisitor = async (req, res) => {
     });
     }
 
+    // Fix sequence if out of sync
+    await fixSequence('approvals');
+
     // Create new approval
     const approval = await prisma.approval.create({
       data: {
@@ -220,10 +227,13 @@ export const approveVisitor = async (req, res) => {
       },
     });
 
-    // Update visitor log status
+    // Update visitor log status and set entry time
     const updatedLog = await prisma.visitorLog.update({
       where: { id: visitorLogId },
-      data: { status: 'approved' },
+      data: { 
+        status: 'approved',
+        entryTime: new Date(), // Set entry time when approved
+      },
       include: {
         visitor: {
           select: {
@@ -490,6 +500,9 @@ export const rejectVisitor = async (req, res) => {
         },
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('approvals');
 
     // Create new rejection
     const approval = await prisma.approval.create({

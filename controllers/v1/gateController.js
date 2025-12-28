@@ -1,5 +1,6 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Create a new gate
@@ -52,6 +53,9 @@ export const createGate = async (req, res) => {
         message: 'Gate with this name already exists for this society',
       });
     }
+
+    // Fix sequence if out of sync
+    await fixSequence('gates');
 
     // Create gate
     const gate = await prisma.gate.create({

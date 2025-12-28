@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import prisma from '../../lib/prisma.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../../utils/jwt.js';
 import { generateOTP, storeOTP, verifyOTP } from '../../utils/otp.js';
+import { fixSequence } from '../../utils/sequenceFix.js';
 
 /**
  * Login with email/mobile and password (for admins)
@@ -79,6 +80,9 @@ export const login = async (req, res) => {
     // Store refresh token in database
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+
+    // Fix sequence if out of sync
+    await fixSequence('refresh_tokens');
 
     await prisma.refreshToken.create({
       data: {
@@ -247,6 +251,9 @@ export const verifyOTPLogin = async (req, res) => {
     // Store refresh token in database
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
+
+    // Fix sequence if out of sync
+    await fixSequence('refresh_tokens');
 
     await prisma.refreshToken.create({
       data: {
