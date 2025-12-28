@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma.js';
-
+import { fixSequence } from './sequenceFix.js';
 /**
  * Central Audit Logger Utility
  * 
@@ -50,6 +50,7 @@ export const logAction = async ({
     const role = user?.role_name || user?.role?.name || null;
 
     // Create audit log entry
+    await fixSequence('auditLogs');
     await prisma.auditLog.create({
       data: {
         userId: user?.id || null,

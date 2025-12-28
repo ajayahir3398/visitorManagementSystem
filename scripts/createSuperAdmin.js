@@ -2,6 +2,7 @@ import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import prisma from '../lib/prisma.js';
 import readline from 'readline';
+import { fixSequence } from '../utils/sequenceFix.js';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -57,6 +58,8 @@ async function createSuperAdmin() {
     // Hash password
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    await fixSequence('users');
 
     // Create super admin user
     const user = await prisma.user.create({

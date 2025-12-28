@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import prisma from '../lib/prisma.js';
+import { fixSequence } from '../utils/sequenceFix.js';
 
 /**
  * Quick script to create a super admin user with default credentials
@@ -65,6 +66,7 @@ async function createSuperAdminQuick() {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(defaultAdmin.password, saltRounds);
 
+    await fixSequence('users');
     // Create super admin user
     const user = await prisma.user.create({
       data: {

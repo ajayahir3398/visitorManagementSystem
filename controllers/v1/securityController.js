@@ -92,6 +92,9 @@ export const getSecurityDashboard = async (req, res) => {
           gte: today,
           lte: todayEnd,
         },
+        status: {
+          in: ['approved', 'exited'],
+        },
       },
     });
 
@@ -171,9 +174,7 @@ export const getSecurityDashboard = async (req, res) => {
     const activeVisitors = await prisma.visitorLog.findMany({
       where: {
         societyId,
-        status: {
-          not: 'exited',
-        },
+        status: 'approved',
         exitTime: null,
       },
       take: 10,

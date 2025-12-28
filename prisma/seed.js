@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import prisma from '../lib/prisma.js';
+import { fixSequence } from '../utils/sequenceFix.js';
 
 async function main() {
   console.log('Seeding database...');
@@ -103,6 +104,7 @@ async function main() {
       console.log(`✅ Updated subscription plan ${plan.code}`);
     } else {
       // Create new plan
+      await fixSequence('subscriptionPlans');
       await prisma.subscriptionPlan.create({
         data: plan,
       });

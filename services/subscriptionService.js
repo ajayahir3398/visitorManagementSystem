@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js';
+import { fixSequence } from '../utils/sequenceFix.js';
 
 /**
  * Get subscription for a society
@@ -154,6 +155,8 @@ export const createTrialSubscription = async (societyId, durationDays = 60) => {
       },
     });
 
+    await fixSequence('subscriptionPlans');
+
     if (!trialPlan) {
       // Create default TRIAL plan if it doesn't exist
       trialPlan = await prisma.subscriptionPlan.create({
@@ -180,6 +183,7 @@ export const createTrialSubscription = async (societyId, durationDays = 60) => {
     expiryDate.setHours(23, 59, 59, 999);
 
     // Create subscription
+    await fixSequence('subscriptions');
     const subscription = await prisma.subscription.create({
       data: {
         societyId,

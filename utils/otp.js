@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma.js';
-
+import { fixSequence } from './sequenceFix.js';
 /**
  * Generate 6-digit OTP
  */
@@ -26,6 +26,7 @@ export const storeOTP = async (mobile, otpCode, expiresInMinutes = 10) => {
   });
 
   // Insert new OTP
+  await fixSequence('otps');
   const otp = await prisma.otp.create({
     data: {
       mobile,
