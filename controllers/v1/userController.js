@@ -554,7 +554,7 @@ export const updateUser = async (req, res) => {
 /**
  * Delete user
  * DELETE /api/v1/users/:id
- * Access: SUPER_ADMIN only
+ * Access: SUPER_ADMIN (all users except SUPER_ADMIN), SOCIETY_ADMIN (SECURITY and RESIDENT from their society only)
  */
 export const deleteUser = async (req, res) => {
   try {
@@ -583,11 +583,55 @@ export const deleteUser = async (req, res) => {
       });
     }
 
+    const currentUserRole = req.user.role_name;
+
     // Prevent deleting SUPER_ADMIN
     if (user.role.name === 'SUPER_ADMIN') {
       return res.status(403).json({
         success: false,
         message: 'Cannot delete SUPER_ADMIN user',
+      });
+    }
+
+    // Authorization: SOCIETY_ADMIN can only delete SECURITY and RESIDENT users from their own society
+    if (currentUserRole === 'SOCIETY_ADMIN') {
+      // SOCIETY_ADMIN cannot delete SUPER_ADMIN or SOCIETY_ADMIN users
+      if (user.role.name === 'SUPER_ADMIN' || user.role.name === 'SOCIETY_ADMIN') {
+        return res.status(403).json({
+          success: false,
+          message: 'SOCIETY_ADMIN can only delete SECURITY and RESIDENT users.',
+        });
+      }
+
+      // SOCIETY_ADMIN can only delete users from their own society
+      if (!req.user.society_id || user.societyId !== req.user.society_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only delete users from your own society.',
+        });
+      }
+    }
+
+    // Check for related records that might prevent deletion
+    const [approvalsCount, visitorLogsCount] = await Promise.all([
+      prisma.approval.count({ where: { residentId: userId } }),
+      prisma.visitorLog.count({ where: { createdBy: userId } }),
+    ]);
+
+    // Build error message for related records
+    const relatedRecords = [];
+    if (approvalsCount > 0) {
+      relatedRecords.push(`${approvalsCount} approval record(s)`);
+    }
+    if (visitorLogsCount > 0) {
+      relatedRecords.push(`${visitorLogsCount} visitor log(s) created by this user`);
+    }
+
+    // If there are related records, prevent deletion with clear message
+    if (relatedRecords.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete user. This user has ${relatedRecords.join(' and ')}. Please remove or reassign these records first.`,
       });
     }
 
@@ -601,7 +645,7 @@ export const deleteUser = async (req, res) => {
       req,
     });
 
-    // Delete user (cascade will handle refresh tokens)
+    // Delete user (cascade will handle refresh tokens, unitMembers, preApprovedGuests)
     await prisma.user.delete({
       where: { id: userId },
     });
@@ -612,6 +656,15 @@ export const deleteUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Delete user error:', error);
+    
+    // Handle foreign key constraint violations
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete user. This user has related records in the system. Please remove or reassign related records first.',
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to delete user',
