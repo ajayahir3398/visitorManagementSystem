@@ -71,7 +71,7 @@ router.post(
 router.get(
   '/',
   authenticate,
-  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
+  authorize('SUPER_ADMIN'),
   getSocieties
 );
 

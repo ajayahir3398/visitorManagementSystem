@@ -71,7 +71,7 @@ export const createSociety = async (req, res) => {
 /**
  * Get all societies
  * GET /api/v1/societies
- * Access: SUPER_ADMIN, SOCIETY_ADMIN
+ * Access: SUPER_ADMIN only
  */
 export const getSocieties = async (req, res) => {
   try {
@@ -88,11 +88,6 @@ export const getSocieties = async (req, res) => {
         { city: { contains: search, mode: 'insensitive' } },
         { state: { contains: search, mode: 'insensitive' } },
       ];
-    }
-
-    // If user is SOCIETY_ADMIN, only show their society
-    if (req.user.role_name === 'SOCIETY_ADMIN' && req.user.society_id) {
-      where.id = req.user.society_id;
     }
 
     const [societies, total] = await Promise.all([
