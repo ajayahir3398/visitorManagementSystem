@@ -13,11 +13,13 @@ import approvalSchemas from './approval.js';
 import preApprovalSchemas from './preApproval.js';
 import auditLogSchemas from './auditLog.js';
 import securitySchemas from './security.js';
+import publicSchemas from './public.js';
 
 export default {
   ...commonSchemas,
   ...userSchemas,
   ...authSchemas,
+  ...publicSchemas,
   ...societySchemas,
   ...userManagementSchemas,
   ...subscriptionSchemas,

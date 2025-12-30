@@ -12,10 +12,12 @@ import approvalPaths from './approval.js';
 import preApprovalPaths from './preApproval.js';
 import auditLogPaths from './auditLog.js';
 import securityPaths from './security.js';
+import publicPaths from './public.js';
 
 export default {
   ...healthPaths,
   ...authPaths,
+  ...publicPaths,
   ...societyPaths,
   ...userPaths,
   ...subscriptionPaths,

@@ -131,7 +131,7 @@ export const createUser = async (req, res) => {
 
         // Only create trial if no subscription exists
         if (!existingSubscription) {
-          await createTrialSubscription(user.societyId, 60); // 60 days trial
+          await createTrialSubscription(user.societyId, 14); // 14 days trial
         }
       } catch (subscriptionError) {
         console.error('Error creating trial subscription:', subscriptionError);
@@ -144,8 +144,8 @@ export const createUser = async (req, res) => {
     delete user.passwordHash;
 
     // Determine action type based on role
-    const action = role.name === 'SOCIETY_ADMIN' 
-      ? AUDIT_ACTIONS.CREATE_SOCIETY_ADMIN 
+    const action = role.name === 'SOCIETY_ADMIN'
+      ? AUDIT_ACTIONS.CREATE_SOCIETY_ADMIN
       : AUDIT_ACTIONS.CREATE_USER;
 
     // Log user creation
@@ -656,7 +656,7 @@ export const deleteUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Delete user error:', error);
-    
+
     // Handle foreign key constraint violations
     if (error.code === 'P2003') {
       return res.status(400).json({
@@ -664,7 +664,7 @@ export const deleteUser = async (req, res) => {
         message: 'Cannot delete user. This user has related records in the system. Please remove or reassign related records first.',
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to delete user',

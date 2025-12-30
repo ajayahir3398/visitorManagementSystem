@@ -75,13 +75,14 @@ export const createSociety = async (req, res) => {
  */
 export const getSocieties = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, type, search } = req.query;
+    const { page = 1, limit = 10, status, type, search, source } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build where clause
     const where = {};
     if (status) where.status = status;
     if (type) where.type = type.toLowerCase();
+    if (source) where.source = source;
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -257,7 +258,7 @@ export const updateSociety = async (req, res) => {
     if (pincode !== undefined && pincode !== existingSociety.pincode) changes.push('pincode updated');
     if (subscriptionId !== undefined && subscriptionId !== existingSociety.subscriptionId) changes.push(`subscriptionId: ${existingSociety.subscriptionId || 'N/A'} → ${subscriptionId || 'N/A'}`);
 
-    const description = changes.length > 0 
+    const description = changes.length > 0
       ? `Society "${society.name}" updated: ${changes.join(', ')}`
       : `Society "${society.name}" updated`;
 

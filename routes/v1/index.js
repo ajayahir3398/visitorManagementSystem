@@ -12,10 +12,15 @@ import approvalRoutes from './approvalRoutes.js';
 import preApprovalRoutes from './preApprovalRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import securityRoutes from './securityRoutes.js';
+import publicRoutes from './publicRoutes.js';
 
 const router = express.Router();
 
 // Mount all v1 routes
+// Public routes (no authentication required)
+router.use('/public', publicRoutes);
+
+// Auth routes
 router.use('/auth', authRoutes);
 router.use('/societies', societyRoutes);
 router.use('/users', userRoutes);
