@@ -66,6 +66,17 @@ const validateCreatePlan = [
 
 // Public routes (no authentication)
 router.get('/', getPlans);
+
+// Super Admin route for getting all plans (including inactive)
+// Must be defined before /:id to avoid route conflict
+router.get(
+  '/all',
+  authenticate,
+  authorize('SUPER_ADMIN'),
+  getAllPlans
+);
+
+// Public route for getting a specific plan by ID
 router.get('/:id', validatePlanId, getPlanById);
 
 // Super Admin route for creating a new plan
@@ -93,14 +104,6 @@ router.post(
   authorize('SUPER_ADMIN'),
   validatePlanId,
   togglePlanStatus
-);
-
-// Super Admin route for getting all plans
-router.get(
-  '/all',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  getAllPlans
 );
 
 export default router;
