@@ -7,6 +7,7 @@ import {
   getUnitById,
   updateUnit,
   deleteUnit,
+  bulkUploadUnits,
   addUnitMember,
   removeUnitMember,
 } from '../../controllers/v1/unitController.js';
@@ -74,6 +75,9 @@ const validateMemberId = [
 
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/unit.js
+
+// Bulk upload units (Society Admin only)
+router.post('/bulk-upload', authenticate, authorize('SOCIETY_ADMIN'), bulkUploadUnits);
 
 // Create unit
 router.post(

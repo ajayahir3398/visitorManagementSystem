@@ -135,6 +135,94 @@ export default {
       },
     },
   },
+  '/api/v1/units/bulk-upload': {
+    post: {
+      summary: 'Bulk upload units via CSV',
+      tags: ['v1 - Units'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        required: true,
+        content: {
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              properties: {
+                file: {
+                  type: 'string',
+                  format: 'binary',
+                  description: 'CSV file containing units (columns: unit_no, unit_type, floor, block)',
+                },
+              },
+              required: ['file'],
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk upload completed successfully',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: true },
+                  message: { type: 'string', example: 'Bulk upload completed' },
+                  data: {
+                    type: 'object',
+                    properties: {
+                      success: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            unitNo: { type: 'string' },
+                            unitType: { type: 'string' },
+                            floor: { type: 'integer' },
+                            block: { type: 'string' },
+                          },
+                        },
+                      },
+                      failed: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            unitNo: { type: 'string' },
+                            reason: { type: 'string' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: 'Validation error or invalid file',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        403: {
+          description: 'Forbidden - Only Society Admins',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   '/api/v1/units/{id}': {
     get: {
       summary: 'Get unit by ID',

@@ -283,6 +283,73 @@ export default {
         },
       },
     },
+    delete: {
+      summary: 'Delete a subscription plan',
+      description: 'Super Admin only. Delete a subscription plan. Cannot delete plans that are currently in use.',
+      tags: ['v1 - Plans'],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: 'id',
+          in: 'path',
+          required: true,
+          schema: { type: 'integer' },
+          description: 'Plan ID',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Plan deleted successfully',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/PlanResponse',
+              },
+            },
+          },
+        },
+        400: {
+          description: 'Invalid plan ID or Plan in use',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        403: {
+          description: 'Forbidden - SUPER_ADMIN only',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        404: {
+          description: 'Plan not found',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+      },
+    },
   },
   '/api/v1/plans/{id}/toggle': {
     post: {

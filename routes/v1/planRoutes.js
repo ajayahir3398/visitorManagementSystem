@@ -8,6 +8,7 @@ import {
   updatePlan,
   togglePlanStatus,
   getAllPlans,
+  deletePlan,
 } from '../../controllers/v1/planController.js';
 
 const router = express.Router();
@@ -104,6 +105,15 @@ router.post(
   authorize('SUPER_ADMIN'),
   validatePlanId,
   togglePlanStatus
+);
+
+// Super Admin route for deleting a plan
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('SUPER_ADMIN'),
+  validatePlanId,
+  deletePlan
 );
 
 export default router;

@@ -10,7 +10,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
 export const getPlans = async (req, res) => {
   try {
     const plans = await prisma.subscriptionPlan.findMany({
-      where: { 
+      where: {
         isActive: true,
         code: { not: null }, // Only return plans with code
       },
@@ -334,6 +334,71 @@ export const getAllPlans = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve plans',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Delete a subscription plan
+ * DELETE /api/v1/plans/:id
+ * Access: SUPER_ADMIN only
+ */
+export const deletePlan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const planId = parseInt(id);
+
+    if (isNaN(planId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid plan ID',
+      });
+    }
+
+    // Check if plan exists
+    const existingPlan = await prisma.subscriptionPlan.findUnique({
+      where: { id: planId },
+    });
+
+    if (!existingPlan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Plan not found',
+      });
+    }
+
+    const deletedPlan = await prisma.subscriptionPlan.delete({
+      where: { id: planId },
+    });
+
+    // Log action
+    await logAction({
+      user: req.user,
+      action: AUDIT_ACTIONS.DELETED,
+      entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
+      entityId: planId,
+      description: `Deleted subscription plan: ${deletedPlan.name} (${deletedPlan.code})`,
+      req,
+    });
+
+    res.json({
+      success: true,
+      message: 'Plan deleted successfully',
+      data: { plan: deletedPlan },
+    });
+  } catch (error) {
+    console.error('Delete plan error:', error);
+    // P2003 is Prisma's error code for foreign key constraint violation
+    if (error.code === 'P2003') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete plan as it is associated with existing subscriptions',
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete plan',
       error: error.message,
     });
   }

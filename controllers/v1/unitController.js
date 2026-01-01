@@ -1,6 +1,8 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import busboy from 'busboy';
+import csv from 'csv-parser';
 
 /**
  * Create a new unit
@@ -735,6 +737,236 @@ export const removeUnitMember = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to remove member from unit',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Bulk upload units via CSV
+ * POST /api/v1/units/bulk-upload
+ * Access: SOCIETY_ADMIN only
+ */
+export const bulkUploadUnits = async (req, res) => {
+  try {
+    // Check if user is society admin
+    if (req.user.role_name !== 'SOCIETY_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Society Admins can upload units.',
+      });
+    }
+
+    const bb = busboy({ headers: req.headers });
+    const units = [];
+    const errors = [];
+    let fileFound = false;
+
+    bb.on('file', (name, file, info) => {
+      // Basic validation
+      if (name !== 'file') {
+        file.resume();
+        return;
+      }
+
+      const { mimeType } = info;
+      if (mimeType !== 'text/csv' && mimeType !== 'application/vnd.ms-excel') {
+        // Just resume stream to consume it
+        file.resume();
+        errors.push({ error: 'Invalid file type. Only CSV is allowed.' });
+        return;
+      }
+
+      fileFound = true;
+
+      file
+        .pipe(csv())
+        .on('data', (row) => {
+          // Normalize keys to lowercase/trimmed if needed, or rely on specific CSV headers
+          // Expecting: unit_no, unit_type, floor, block
+          // Or keys might be case-sensitive depending on csv-parser config. Default is case-sensitive headers.
+          // Let's assume headers are as specified: 'unit_no', 'unit_type', 'floor', 'block'
+
+          if (!row.unit_no) {
+            errors.push({ row, error: 'unit_no is required' });
+            return;
+          }
+
+          units.push({
+            societyId: req.user.society_id,
+            unitNo: row.unit_no.trim(),
+            unitType: row.unit_type?.toUpperCase() || 'FLAT',
+            floor: row.floor ? parseInt(row.floor) : null,
+            block: row.block?.trim() || null,
+            status: 'ACTIVE',
+          });
+        })
+        .on('error', (err) => {
+          console.error('CSV parse error:', err);
+          errors.push({ error: 'Failed to parse CSV file.' });
+        });
+    });
+
+    bb.on('close', async () => {
+      if (!fileFound) {
+        return res.status(400).json({
+          success: false,
+          message: 'No file uploaded or invalid field name. Key must be "file".',
+        });
+      }
+
+      if (units.length === 0 && errors.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'No valid units found in CSV.',
+        });
+      }
+
+      if (units.length > 0) {
+        try {
+          const results = {
+            success: [],
+            failed: [],
+          };
+
+          // Iterate and create units individually to capture per-item status
+          for (const unit of units) {
+            try {
+              const createdUnit = await prisma.unit.create({
+                data: unit,
+              });
+              results.success.push({
+                unitNo: createdUnit.unitNo,
+                unitType: createdUnit.unitType,
+                floor: createdUnit.floor,
+                block: createdUnit.block,
+              });
+            } catch (err) {
+              let reason = err.message;
+              if (err.code === 'P2002') {
+                reason = 'Unit already exists';
+              }
+              results.failed.push({
+                unitNo: unit.unitNo,
+                reason: reason,
+              });
+            }
+          }
+
+          // Log action
+          const successCount = results.success.length;
+          const failedCount = results.failed.length;
+
+          await logAction({
+            user: req.user,
+            action: 'BULK_UNITS_CREATED',
+            entity: AUDIT_ENTITIES.UNIT,
+            description: `Bulk upload: ${successCount} created, ${failedCount} failed`,
+            req,
+          });
+
+          res.json({
+            success: true,
+            message: 'Bulk upload processing completed',
+            data: results,
+          });
+        } catch (dbError) {
+          console.error('Bulk insert error:', dbError);
+          res.status(500).json({
+            success: false,
+            message: 'Database error during bulk insert',
+            error: dbError.message,
+          });
+        }
+      } else {
+        // Only errors
+        res.status(400).json({
+          success: false,
+          message: 'Failed to process units',
+          data: { errors },
+        });
+      }
+    });
+
+    req.pipe(bb);
+  } catch (error) {
+    console.error('Bulk upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during upload',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Bulk delete units
+ * POST /api/v1/units/bulk-delete
+ * Access: SOCIETY_ADMIN only
+ */
+export const bulkDeleteUnits = async (req, res) => {
+  try {
+    const { unitIds } = req.body;
+
+    // Check if user is society admin
+    if (req.user.role_name !== 'SOCIETY_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Society Admins can delete units.',
+      });
+    }
+
+    if (!Array.isArray(unitIds) || unitIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'unitIds array is required and must not be empty',
+      });
+    }
+
+    // Verify all units belong to the society
+    const count = await prisma.unit.count({
+      where: {
+        id: { in: unitIds },
+        societyId: req.user.society_id,
+      },
+    });
+
+    if (count !== unitIds.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'One or more units not found or do not belong to your society',
+      });
+    }
+
+    // Delete units
+    const result = await prisma.unit.deleteMany({
+      where: {
+        id: { in: unitIds },
+        societyId: req.user.society_id,
+      },
+    });
+
+    // Log action
+    await logAction({
+      user: req.user,
+      action: 'BULK_UNITS_DELETED',
+      entity: AUDIT_ENTITIES.UNIT,
+      description: `${result.count} units deleted via bulk delete`,
+      req,
+    });
+
+    res.json({
+      success: true,
+      message: 'Units deleted successfully',
+      data: {
+        deletedCount: result.count,
+      },
+    });
+  } catch (error) {
+    console.error('Bulk delete error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete units',
       error: error.message,
     });
   }
