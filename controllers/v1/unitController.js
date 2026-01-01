@@ -9,7 +9,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const createUnit = async (req, res) => {
   try {
-    const { unitNo, unitType, societyId, status } = req.body;
+    const { unitNo, unitType, societyId, status, floor, block } = req.body;
 
     // Validation
     if (!unitNo || !societyId) {
@@ -63,6 +63,8 @@ export const createUnit = async (req, res) => {
         unitNo: unitNo.trim(),
         unitType: unitType || null,
         societyId: parseInt(societyId),
+        floor: floor ? parseInt(floor) : null,
+        block: block || null,
         status: status || 'ACTIVE',
       },
       include: {
@@ -96,7 +98,7 @@ export const createUnit = async (req, res) => {
     });
   } catch (error) {
     console.error('Create unit error:', error);
-    
+
     // Handle sequence out of sync error (unique constraint on id field)
     // This is a fallback - the automatic fix above should prevent most cases
     if (
@@ -113,6 +115,8 @@ export const createUnit = async (req, res) => {
             unitNo: req.body.unitNo.trim(),
             unitType: req.body.unitType || null,
             societyId: parseInt(req.body.societyId),
+            floor: req.body.floor ? parseInt(req.body.floor) : null,
+            block: req.body.block || null,
             status: req.body.status || 'ACTIVE',
           },
           include: {
@@ -152,7 +156,7 @@ export const createUnit = async (req, res) => {
         });
       }
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to create unit',
@@ -331,7 +335,7 @@ export const updateUnit = async (req, res) => {
   try {
     const { id } = req.params;
     const unitId = parseInt(id);
-    const { unitNo, unitType, status } = req.body;
+    const { unitNo, unitType, status, floor, block } = req.body;
 
     if (isNaN(unitId)) {
       return res.status(400).json({
@@ -382,6 +386,8 @@ export const updateUnit = async (req, res) => {
     const updateData = {};
     if (unitNo) updateData.unitNo = unitNo.trim();
     if (unitType !== undefined) updateData.unitType = unitType;
+    if (floor !== undefined) updateData.floor = floor ? parseInt(floor) : null;
+    if (block !== undefined) updateData.block = block;
     if (status) updateData.status = status;
 
     const unit = await prisma.unit.update({
@@ -405,6 +411,8 @@ export const updateUnit = async (req, res) => {
     const changes = [];
     if (unitNo && unitNo.trim() !== existingUnit.unitNo) changes.push(`unitNo: "${existingUnit.unitNo}" → "${unitNo.trim()}"`);
     if (unitType !== undefined && unitType !== existingUnit.unitType) changes.push(`unitType: "${existingUnit.unitType || 'N/A'}" → "${unitType || 'N/A'}"`);
+    if (floor !== undefined && floor !== existingUnit.floor) changes.push(`floor: "${existingUnit.floor || 'N/A'}" → "${floor || 'N/A'}"`);
+    if (block !== undefined && block !== existingUnit.block) changes.push(`block: "${existingUnit.block || 'N/A'}" → "${block || 'N/A'}"`);
     if (status && status !== existingUnit.status) changes.push(`status: "${existingUnit.status}" → "${status}"`);
 
     const description = changes.length > 0

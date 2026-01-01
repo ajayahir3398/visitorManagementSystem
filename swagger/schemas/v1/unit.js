@@ -20,6 +20,16 @@ export default {
         example: 'FLAT',
         enum: ['FLAT', 'OFFICE', 'SHOP'],
       },
+      floor: {
+        type: 'integer',
+        nullable: true,
+        example: 3,
+      },
+      block: {
+        type: 'string',
+        nullable: true,
+        example: 'B',
+      },
       status: {
         type: 'string',
         enum: ['ACTIVE', 'INACTIVE'],
@@ -112,6 +122,19 @@ export default {
         nullable: true,
         example: 'FLAT',
       },
+      floor: {
+        type: 'integer',
+        nullable: true,
+        example: 3,
+        description: 'Floor number',
+      },
+      block: {
+        type: 'string',
+        nullable: true,
+        example: 'B',
+        description: 'Block identifier',
+        maxLength: 20,
+      },
       status: {
         type: 'string',
         enum: ['ACTIVE', 'INACTIVE'],
@@ -130,6 +153,14 @@ export default {
       unitType: {
         type: 'string',
         enum: ['FLAT', 'OFFICE', 'SHOP'],
+        nullable: true,
+      },
+      floor: {
+        type: 'integer',
+        nullable: true,
+      },
+      block: {
+        type: 'string',
         nullable: true,
       },
       status: {

@@ -139,6 +139,8 @@ export const createPreApproval = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
         resident: {
@@ -207,6 +209,8 @@ export const getPreApprovals = async (req, res) => {
               id: true,
               unitNo: true,
               unitType: true,
+              floor: true,
+              block: true,
             },
           },
         },
@@ -262,6 +266,8 @@ export const getPreApprovalById = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
         resident: {
@@ -359,6 +365,8 @@ export const revokePreApproval = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
       },
@@ -429,6 +437,8 @@ export const verifyPreApprovalCode = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
             societyId: true,
           },
         },
@@ -530,7 +540,7 @@ export const verifyPreApprovalCode = async (req, res) => {
       } else if (preApproval.guestName) {
         // Fix sequence if out of sync
         await fixSequence('visitors');
-        
+
         // Create new visitor if mobile exists but visitor doesn't
         const newVisitor = await prisma.visitor.create({
           data: {
@@ -572,6 +582,8 @@ export const verifyPreApprovalCode = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
         gate: {

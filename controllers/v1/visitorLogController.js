@@ -279,6 +279,8 @@ export const markVisitorExit = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
         createdByUser: {
@@ -563,6 +565,8 @@ export const getVisitorLogById = async (req, res) => {
             id: true,
             unitNo: true,
             unitType: true,
+            floor: true,
+            block: true,
           },
         },
         createdByUser: {
