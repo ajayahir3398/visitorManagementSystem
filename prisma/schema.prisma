@@ -42,6 +42,7 @@ model Society {
   auditLogs      AuditLog[]
   rules          Rule[]
   ruleViolations RuleViolation[]
+  notices        Notice[]
 
   @@index([status], map: "idx_societies_status")
   @@index([type], map: "idx_societies_type")
@@ -71,6 +72,8 @@ model User {
   rulesCreated Rule[]
   violations        RuleViolation[] @relation("Violator")
   reportedViolations RuleViolation[] @relation("Reporter")
+  noticesCreated    Notice[]
+  noticeReads       NoticeRead[]
 
   @@index([societyId], map: "idx_users_society_id")
   @@index([roleId], map: "idx_users_role_id")
@@ -397,4 +400,48 @@ model RuleViolation {
   @@index([societyId], map: "idx_violations_society")
   @@index([status], map: "idx_violations_status")
   @@map("rule_violations")
+}
+
+model Notice {
+  id            Int      @id @default(autoincrement())
+  societyId     Int      @map("society_id")
+  createdBy     Int      @map("created_by")
+
+  title         String
+  description   String?
+  attachmentUrl String?  @map("attachment_url")
+
+  noticeType    String   @map("notice_type")   // General / Maintenance / Emergency / Event
+  priority      String   @default("Medium")     // High / Medium / Low
+  audience      String   // All / Owners / Tenants / Security
+
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+
+  isActive      Boolean  @default(true)
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  society       Society  @relation(fields: [societyId], references: [id])
+  creator       User     @relation(fields: [createdBy], references: [id])
+  reads         NoticeRead[]
+
+  @@index([societyId], map: "idx_notices_society")
+  @@index([noticeType], map: "idx_notices_type")
+  @@index([priority], map: "idx_notices_priority")
+  @@map("notices")
+}
+
+model NoticeRead {
+  id        Int      @id @default(autoincrement())
+  noticeId  Int      @map("notice_id")
+  userId    Int      @map("user_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  notice    Notice   @relation(fields: [noticeId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([noticeId, userId])
+  @@map("notice_reads")
 }

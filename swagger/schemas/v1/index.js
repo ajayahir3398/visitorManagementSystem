@@ -15,6 +15,7 @@ import auditLogSchemas from './auditLog.js';
 import securitySchemas from './security.js';
 import ruleSchemas from './rule.js';
 import violationSchemas from './violation.js';
+import noticeSchemas from './notice.js';
 import publicSchemas from './public.js';
 
 export default {
@@ -36,5 +37,6 @@ export default {
   ...securitySchemas,
   ...ruleSchemas,
   ...violationSchemas,
+  ...noticeSchemas,
 };
 

@@ -1,0 +1,20 @@
+export default {
+    type: 'object',
+    properties: {
+        id: { type: 'integer', example: 1 },
+        societyId: { type: 'integer', example: 101 },
+        createdBy: { type: 'integer', example: 5 },
+        title: { type: 'string', example: 'Water Supply Shutdown' },
+        description: { type: 'string', example: 'Water will be unavailable from 10 AM to 2 PM' },
+        attachmentUrl: { type: 'string', example: 'https://cdn.app/notice.pdf' },
+        noticeType: { type: 'string', example: 'Maintenance' },
+        priority: { type: 'string', example: 'High' },
+        audience: { type: 'string', example: 'All' },
+        startDate: { type: 'string', format: 'date-time' },
+        endDate: { type: 'string', format: 'date-time' },
+        isActive: { type: 'boolean', example: true },
+        isRead: { type: 'boolean', example: false },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+    },
+};
