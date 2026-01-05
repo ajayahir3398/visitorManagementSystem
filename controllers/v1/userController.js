@@ -1,3 +1,5 @@
+import busboy from 'busboy';
+import csv from 'csv-parser';
 import bcrypt from 'bcrypt';
 import prisma from '../../lib/prisma.js';
 import { createTrialSubscription } from '../../services/subscriptionService.js';
@@ -672,4 +674,219 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+/**
+ * Bulk upload residents via CSV
+ * POST /api/v1/users/bulk-upload-residents
+ * Access: SOCIETY_ADMIN only
+ */
+export const bulkUploadResidents = async (req, res) => {
+  try {
+    // Check if user is society admin
+    if (req.user.role_name !== 'SOCIETY_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Only Society Admins can upload residents.',
+      });
+    }
+
+    const bb = busboy({ headers: req.headers });
+    const results = {
+      success: [],
+      failed: [],
+    };
+    let fileFound = false;
+
+    bb.on('file', (name, file, info) => {
+      // Basic validation
+      if (name !== 'file') {
+        file.resume();
+        return;
+      }
+
+      const { mimeType } = info;
+      if (mimeType !== 'text/csv' && mimeType !== 'application/vnd.ms-excel') {
+        file.resume();
+        results.failed.push({ error: 'Invalid file type. Only CSV is allowed.' });
+        return;
+      }
+
+      fileFound = true;
+      const rows = [];
+
+      file
+        .pipe(csv())
+        .on('data', (row) => {
+          rows.push(row);
+        })
+        .on('end', async () => {
+          // Process rows sequentially to avoid race conditions and sequence issues
+          for (const row of rows) {
+            // Normalize keys: unit_no, block, name, mobile, email, role
+            const unitNo = row.unit_no?.trim();
+            const block = row.block?.trim();
+            const name = row.name?.trim();
+            const mobile = row.mobile?.trim();
+            const email = row.email?.trim() || null;
+            const roleName = row.role?.trim().toUpperCase() || 'OWNER'; // Default to OWNER
+
+            if (!unitNo || !name || !mobile) {
+              results.failed.push({
+                row,
+                error: 'unit_no, name, and mobile are required',
+              });
+              continue;
+            }
+
+            // Validate mobile
+            if (!/^[0-9]{10}$/.test(mobile)) {
+              results.failed.push({
+                row,
+                error: 'Invalid mobile number format',
+              });
+              continue;
+            }
+
+            try {
+              // 1. Find Unit
+              const unit = await prisma.unit.findFirst({
+                where: {
+                  societyId: req.user.society_id,
+                  unitNo: unitNo,
+                  block: block || null, // Optional block check
+                },
+              });
+
+              if (!unit) {
+                results.failed.push({
+                  row,
+                  error: `Unit ${unitNo} ${block ? `(Block ${block})` : ''} not found`,
+                });
+                continue;
+              }
+
+              // 2. Find or Create User
+              let user = await prisma.user.findUnique({
+                where: { mobile },
+              });
+
+              if (!user) {
+                // Find Resident Role
+                const residentRole = await prisma.role.findUnique({ where: { name: 'RESIDENT' } });
+                if (!residentRole) throw new Error('Resident role not found in system');
+
+                await fixSequence('users');
+
+                user = await prisma.user.create({
+                  data: {
+                    name,
+                    mobile,
+                    email,
+                    roleId: residentRole.id,
+                    societyId: req.user.society_id,
+                    status: 'active',
+                  },
+                });
+
+                await logAction({
+                  user: req.user,
+                  action: AUDIT_ACTIONS.CREATE_USER,
+                  entity: AUDIT_ENTITIES.USER,
+                  entityId: user.id,
+                  description: `User "${user.name}" created via bulk upload`,
+                  req,
+                });
+              } else {
+                // User exists, check if they are already in this society or compatible
+                // For now we allow adding existing users to units
+              }
+
+              // 3. Add to Unit Member
+              const existingMember = await prisma.unitMember.findUnique({
+                where: {
+                  unitId_userId: {
+                    unitId: unit.id,
+                    userId: user.id,
+                  },
+                },
+              });
+
+              if (existingMember) {
+                results.failed.push({
+                  row,
+                  error: `User ${name} (${mobile}) is already a member of unit ${unitNo}`,
+                });
+                continue;
+              }
+
+              await fixSequence('unit_members');
+
+              await prisma.unitMember.create({
+                data: {
+                  unitId: unit.id,
+                  userId: user.id,
+                  role: roleName,
+                  isPrimary: false, // Default to false for safety
+                },
+              });
+
+              await logAction({
+                user: req.user,
+                action: AUDIT_ACTIONS.ADD_UNIT_MEMBER,
+                entity: AUDIT_ENTITIES.UNIT,
+                entityId: unit.id,
+                description: `User "${user.name}" added to unit "${unit.unitNo}" via bulk upload`,
+                req,
+              });
+
+              results.success.push({
+                unitNo: unit.unitNo,
+                name: user.name,
+                mobile: user.mobile,
+                status: 'Added',
+              });
+
+            } catch (err) {
+              console.error('Row processing error:', err);
+              results.failed.push({
+                row,
+                error: err.message,
+              });
+            }
+          }
+
+          // All processed
+          if (!res.headersSent) {
+            res.status(200).json({
+              success: true,
+              message: 'Bulk upload processing completed',
+              data: results,
+            });
+          }
+        });
+    });
+
+    bb.on('finish', () => {
+      if (!fileFound && !res.headersSent) {
+        res.status(400).json({
+          success: false,
+          message: 'No file uploaded',
+        });
+      }
+    });
+
+    req.pipe(bb);
+
+  } catch (error) {
+    console.error('Bulk upload residents error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process bulk upload',
+        error: error.message,
+      });
+    }
+  }
+};
+
 

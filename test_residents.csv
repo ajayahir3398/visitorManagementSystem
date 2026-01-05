@@ -1,0 +1,5 @@
+unit_no,block,name,mobile,email,role
+A-101,A,John Doe,9800000001,john.doe@example.com,OWNER
+A-101,A,Jane Doe,9800000002,jane.doe@example.com,TENANT
+B-202,B,Bob Smith,9800000003,,OWNER
+INVALID,C,Test Invalid,12345,,

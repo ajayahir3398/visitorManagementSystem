@@ -12,6 +12,8 @@ import approvalRoutes from './approvalRoutes.js';
 import preApprovalRoutes from './preApprovalRoutes.js';
 import auditLogRoutes from './auditLogRoutes.js';
 import securityRoutes from './securityRoutes.js';
+import ruleRoutes from './ruleRoutes.js';
+import violationRoutes from './violationRoutes.js';
 import publicRoutes from './publicRoutes.js';
 
 const router = express.Router();
@@ -34,6 +36,8 @@ router.use('/approvals', approvalRoutes);
 router.use('/pre-approvals', preApprovalRoutes);
 router.use('/audit-logs', auditLogRoutes);
 router.use('/security', securityRoutes);
+router.use('/rules', ruleRoutes);
+router.use('/violations', violationRoutes);
 
 export default router;
 

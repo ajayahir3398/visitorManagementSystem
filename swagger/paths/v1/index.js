@@ -12,6 +12,8 @@ import approvalPaths from './approval.js';
 import preApprovalPaths from './preApproval.js';
 import auditLogPaths from './auditLog.js';
 import securityPaths from './security.js';
+import rulePaths from './rule.js';
+import violationPaths from './violation.js';
 import publicPaths from './public.js';
 
 export default {
@@ -30,5 +32,7 @@ export default {
   ...preApprovalPaths,
   ...auditLogPaths,
   ...securityPaths,
+  ...rulePaths,
+  ...violationPaths,
 };
 

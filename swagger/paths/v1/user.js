@@ -346,5 +346,86 @@ export default {
       },
     },
   },
+  '/api/v1/users/bulk-upload-residents': {
+    post: {
+      summary: 'Bulk create resident users',
+      tags: ['v1 - Users'],
+      description: 'Upload a CSV file to create residents and assign them to units. Columns required -> unit_no, name, mobile. Optional -> block, email, role.',
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              properties: {
+                file: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk upload completed',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: {
+                    type: 'boolean',
+                    example: true,
+                  },
+                  message: {
+                    type: 'string',
+                    example: 'Bulk upload processing completed',
+                  },
+                  data: {
+                    type: 'object',
+                    properties: {
+                      success: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            unitNo: { type: 'string' },
+                            name: { type: 'string' },
+                            mobile: { type: 'string' },
+                            status: { type: 'string' },
+                          },
+                        },
+                      },
+                      failed: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            row: { type: 'object' },
+                            error: { type: 'string' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: 'Bad request or no file',
+        },
+        403: {
+          description: 'Access denied (only SOCIETY_ADMIN)',
+        },
+        500: {
+          description: 'Server error',
+        },
+      },
+    },
+  },
 };
 

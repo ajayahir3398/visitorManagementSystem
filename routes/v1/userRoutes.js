@@ -7,6 +7,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  bulkUploadResidents,
 } from '../../controllers/v1/userController.js';
 
 const router = express.Router();
@@ -70,7 +71,7 @@ const validateUserId = [
 router.post(
   '/',
   authenticate,
-  authorize('SUPER_ADMIN','SOCIETY_ADMIN'),
+  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
   validateCreateUser,
   createUser
 );
@@ -105,6 +106,13 @@ router.delete(
   authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
   validateUserId,
   deleteUser
+);
+
+router.post(
+  '/bulk-upload-residents',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  bulkUploadResidents
 );
 
 export default router;

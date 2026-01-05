@@ -13,6 +13,8 @@ import approvalSchemas from './approval.js';
 import preApprovalSchemas from './preApproval.js';
 import auditLogSchemas from './auditLog.js';
 import securitySchemas from './security.js';
+import ruleSchemas from './rule.js';
+import violationSchemas from './violation.js';
 import publicSchemas from './public.js';
 
 export default {
@@ -32,5 +34,7 @@ export default {
   ...preApprovalSchemas,
   ...auditLogSchemas,
   ...securitySchemas,
+  ...ruleSchemas,
+  ...violationSchemas,
 };
 
