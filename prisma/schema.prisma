@@ -445,3 +445,56 @@ model NoticeRead {
   @@unique([noticeId, userId])
   @@map("notice_reads")
 }
+
+model SocietyMaintenancePlan {
+  id          Int      @id @default(autoincrement())
+  societyId   Int      @map("society_id")
+  planType    String   @map("plan_type") @db.VarChar(20) // MONTHLY / YEARLY
+  amount      Int      // ₹ in whole numbers
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+
+  @@unique([societyId, planType])
+  @@map("society_maintenance_plans")
+}
+
+model MaintenanceBill {
+  id          Int      @id @default(autoincrement())
+  societyId   Int      @map("society_id")
+  unitId      Int      @map("unit_id")
+  billCycle   String   @map("bill_cycle") @db.VarChar(20) // MONTHLY / YEARLY
+  period      String   @db.VarChar(20) // 2025-03 OR 2025
+  amount      Int
+  dueDate     DateTime @map("due_date") @db.Date
+  status      String   @default("UNPAID") @db.VarChar(20) // UNPAID / PAID / OVERDUE
+  createdBy   Int      @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  admin       User     @relation(fields: [createdBy], references: [id])
+  payments    MaintenancePayment[]
+
+  @@unique([unitId, billCycle, period])
+  @@map("maintenance_bills")
+}
+
+model MaintenancePayment {
+  id            Int      @id @default(autoincrement())
+  billId        Int      @map("bill_id")
+  paidBy        Int      @map("paid_by")
+  amount        Int
+  paymentMode   String   @map("payment_mode") @db.VarChar(20) // ONLINE / UPI / CASH / CHEQUE
+  transactionId String?  @map("transaction_id") @db.VarChar(100)
+  status        String   @default("SUCCESS") @db.VarChar(20) // SUCCESS / FAILED
+  paidAt        DateTime @default(now()) @map("paid_at")
+
+  bill          MaintenanceBill @relation(fields: [billId], references: [id], onDelete: Cascade)
+  resident      User            @relation(fields: [paidBy], references: [id])
+
+  @@map("maintenance_payments")
+}

@@ -5,5 +5,5 @@ import v2Paths from './v2/index.js';
 // Combine all version paths
 export default {
   ...v1Paths,
-  ...v2Paths,
+  // ...v2Paths,
 };
