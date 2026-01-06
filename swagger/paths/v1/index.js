@@ -16,6 +16,7 @@ import rulePaths from './rule.js';
 import violationPaths from './violation.js';
 import noticePaths from './notice.js';
 import maintenancePaths from './maintenance.js';
+import emergencyPaths from './emergency.js';
 import publicPaths from './public.js';
 
 export default {
@@ -38,5 +39,6 @@ export default {
   ...violationPaths,
   ...noticePaths,
   ...maintenancePaths,
+  ...emergencyPaths,
 };
 
