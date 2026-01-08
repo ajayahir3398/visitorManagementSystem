@@ -23,21 +23,7 @@ export default {
                     description: 'Notices retrieved successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            notices: {
-                                                type: 'array',
-                                                items: { $ref: '#/components/schemas/Notice' },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/NoticesListResponse' },
                         },
                     },
                 },
@@ -48,21 +34,10 @@ export default {
             summary: 'Create a new notice',
             security: [{ bearerAuth: [] }],
             requestBody: {
+                required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                noticeType: { type: 'string' },
-                                priority: { type: 'string', enum: ['High', 'Medium', 'Low'] },
-                                audience: { type: 'string', enum: ['All', 'Owners', 'Tenants', 'Security'] },
-                                startDate: { type: 'string', format: 'date-time' },
-                                endDate: { type: 'string', format: 'date-time' },
-                                attachmentUrl: { type: 'string' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/CreateNoticeRequest' },
                     },
                 },
             },
@@ -71,18 +46,7 @@ export default {
                     description: 'Notice created successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            notice: { $ref: '#/components/schemas/Notice' },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/NoticeResponse' },
                         },
                     },
                 },
@@ -108,18 +72,7 @@ export default {
                     description: 'Notice retrieved successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            notice: { $ref: '#/components/schemas/Notice' },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/NoticeResponse' },
                         },
                     },
                 },
@@ -139,27 +92,22 @@ export default {
                 },
             ],
             requestBody: {
+                required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                noticeType: { type: 'string' },
-                                priority: { type: 'string' },
-                                audience: { type: 'string' },
-                                startDate: { type: 'string', format: 'date-time' },
-                                endDate: { type: 'string', format: 'date-time' },
-                                attachmentUrl: { type: 'string' },
-                                isActive: { type: 'boolean' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/UpdateNoticeRequest' },
                     },
                 },
             },
             responses: {
-                200: { description: 'Notice updated successfully' },
+                200: {
+                    description: 'Notice updated successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/NoticeResponse' },
+                        },
+                    },
+                },
                 403: { description: 'Access denied' },
                 404: { description: 'Notice not found' },
             },
@@ -177,7 +125,14 @@ export default {
                 },
             ],
             responses: {
-                200: { description: 'Notice deactivated successfully' },
+                200: {
+                    description: 'Notice deactivated successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/NoticeResponse' },
+                        },
+                    },
+                },
                 403: { description: 'Access denied' },
             },
         },
@@ -196,7 +151,20 @@ export default {
                 },
             ],
             responses: {
-                200: { description: 'Notice marked as read' },
+                200: {
+                    description: 'Notice marked as read',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    message: { type: 'string', example: 'Notice marked as read' },
+                                },
+                            },
+                        },
+                    },
+                },
                 500: { description: 'Server error' },
             },
         },

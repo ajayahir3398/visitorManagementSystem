@@ -1,19 +1,67 @@
 export default {
-    type: 'object',
-    properties: {
-        id: { type: 'integer', example: 1 },
-        societyId: { type: 'integer', example: 101 },
-        ruleId: { type: 'integer', example: 5 },
-        violatorUserId: { type: 'integer', example: 50 },
-        violatorUnitId: { type: 'integer', example: 20 },
-        reportedByUserId: { type: 'integer', example: 10 },
-        description: { type: 'string', example: 'Loud noise past 11 pm' },
-        proofImage: { type: 'string', example: 'https://example.com/image.jpg' },
-        status: { type: 'string', enum: ['PENDING', 'RESOLVED', 'DISMISSED', 'PAID'], example: 'PENDING' },
-        penaltyAmount: { type: 'number', format: 'float', example: 500.00 },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-        rule: { $ref: '#/components/schemas/Rule' },
+    RuleViolation: {
+        type: 'object',
+        properties: {
+            id: { type: 'integer', example: 1 },
+            societyId: { type: 'integer', example: 1 },
+            ruleId: { type: 'integer', example: 5 },
+            violatorUserId: { type: 'integer', example: 10 },
+            violatorUnitId: { type: 'integer', example: 12 },
+            reportedByUserId: { type: 'integer', example: 2 },
+            description: { type: 'string', example: 'Parked in No Parking zone' },
+            proofImage: { type: 'string', example: 'https://example.com/violation.jpg' },
+            status: { type: 'string', enum: ['PENDING', 'RESOLVED', 'DISMISSED', 'PAID'], example: 'PENDING' },
+            penaltyAmount: { type: 'number', example: 500.00 },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+        },
+    },
+    ReportViolationRequest: {
+        type: 'object',
+        properties: {
+            ruleId: { type: 'integer', example: 5 },
+            violatorUserId: { type: 'integer', example: 10 },
+            violatorUnitId: { type: 'integer', example: 12 },
+            description: { type: 'string', example: 'Parked in No Parking zone' },
+            proofImage: { type: 'string', example: 'https://example.com/violation.jpg' },
+            penaltyAmount: { type: 'number', example: 500.00 },
+        },
+        required: ['ruleId'],
+    },
+    UpdateViolationStatusRequest: {
+        type: 'object',
+        properties: {
+            status: { type: 'string', enum: ['PENDING', 'RESOLVED', 'DISMISSED', 'PAID'], example: 'RESOLVED' },
+            penaltyAmount: { type: 'number', example: 500.00 },
+        },
+    },
+    ViolationResponse: {
+        type: 'object',
+        properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Violation processed successfully' },
+            data: {
+                type: 'object',
+                properties: {
+                    violation: { $ref: '#/components/schemas/RuleViolation' },
+                },
+            },
+        },
+    },
+    ViolationsListResponse: {
+        type: 'object',
+        properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Violations retrieved successfully' },
+            data: {
+                type: 'object',
+                properties: {
+                    violations: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/RuleViolation' },
+                    },
+                },
+            },
+        },
     },
 };
-

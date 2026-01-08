@@ -21,21 +21,7 @@ export default {
                     description: 'Violations retrieved successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            violations: {
-                                                type: 'array',
-                                                items: { $ref: '#/components/schemas/RuleViolation' },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/ViolationsListResponse' },
                         },
                     },
                 },
@@ -48,23 +34,18 @@ export default {
             requestBody: {
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                ruleId: { type: 'integer' },
-                                violatorUserId: { type: 'integer' },
-                                violatorUnitId: { type: 'integer' },
-                                description: { type: 'string' },
-                                proofImage: { type: 'string' },
-                                penaltyAmount: { type: 'number' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/ReportViolationRequest' },
                     },
                 },
             },
             responses: {
                 201: {
                     description: 'Violation reported successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ViolationResponse' },
+                        },
+                    },
                 },
                 400: { description: 'Validation error' },
             },
@@ -86,18 +67,19 @@ export default {
             requestBody: {
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                status: { type: 'string', enum: ['PENDING', 'RESOLVED', 'DISMISSED', 'PAID'] },
-                                penaltyAmount: { type: 'number' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/UpdateViolationStatusRequest' },
                     },
                 },
             },
             responses: {
-                200: { description: 'Status updated successfully' },
+                200: {
+                    description: 'Status updated successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ViolationResponse' },
+                        },
+                    },
+                },
                 404: { description: 'Violation not found' },
             },
         },

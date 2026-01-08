@@ -116,7 +116,7 @@ export const getVisitors = async (req, res) => {
       });
 
       const visitorIds = visitorLogs.map(log => log.visitorId);
-      
+
       if (visitorIds.length === 0) {
         return res.json({
           success: true,
@@ -447,7 +447,7 @@ export const searchVisitors = async (req, res) => {
       });
 
       const visitorIds = visitorLogs.map(log => log.visitorId);
-      
+
       if (visitorIds.length === 0) {
         return res.json({
           success: true,

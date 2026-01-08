@@ -373,44 +373,7 @@ export default {
           content: {
             'application/json': {
               schema: {
-                type: 'object',
-                properties: {
-                  success: {
-                    type: 'boolean',
-                    example: true,
-                  },
-                  message: {
-                    type: 'string',
-                    example: 'Bulk upload processing completed',
-                  },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      success: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            unitNo: { type: 'string' },
-                            name: { type: 'string' },
-                            mobile: { type: 'string' },
-                            status: { type: 'string' },
-                          },
-                        },
-                      },
-                      failed: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            row: { type: 'object' },
-                            error: { type: 'string' },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
+                $ref: '#/components/schemas/BulkUploadResponse',
               },
             },
           },

@@ -8,33 +8,40 @@ export default {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                planType: { type: 'string', enum: ['MONTHLY', 'YEARLY'], example: 'MONTHLY' },
-                                amount: { type: 'integer', example: 2500 }
-                            },
-                            required: ['planType', 'amount']
-                        }
-                    }
-                }
+                        schema: { $ref: '#/components/schemas/CreateMaintenancePlanRequest' },
+                    },
+                },
             },
             responses: {
-                200: { description: 'Plan updated successfully' },
+                200: {
+                    description: 'Plan updated successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/StandardResponse' },
+                        },
+                    },
+                },
                 400: { description: 'Validation error' },
                 401: { description: 'Unauthorized' },
-                403: { description: 'Forbidden - Only Society Admin' }
-            }
+                403: { description: 'Forbidden - Only Society Admin' },
+            },
         },
         get: {
             summary: 'Get Maintenance Plans',
             tags: ['v1 - Maintenance'],
             security: [{ bearerAuth: [] }],
             responses: {
-                200: { description: 'Plans retrieved successfully' },
-                401: { description: 'Unauthorized' }
-            }
-        }
+                200: {
+                    description: 'Plans retrieved successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MaintenancePlansListResponse' },
+                        },
+                    },
+                },
+                401: { description: 'Unauthorized' },
+            },
+        },
     },
     '/api/v1/maintenance/bills/generate': {
         post: {
@@ -45,24 +52,23 @@ export default {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                billCycle: { type: 'string', enum: ['MONTHLY', 'YEARLY'], example: 'MONTHLY' },
-                                period: { type: 'string', example: '2025-03' },
-                                dueDate: { type: 'string', format: 'date', example: '2025-03-10' }
-                            },
-                            required: ['billCycle', 'period', 'dueDate']
-                        }
-                    }
-                }
+                        schema: { $ref: '#/components/schemas/GenerateBulkBillRequest' },
+                    },
+                },
             },
             responses: {
-                200: { description: 'Bills generated successfully' },
+                200: {
+                    description: 'Bills generated successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/StandardResponse' },
+                        },
+                    },
+                },
                 400: { description: 'Validation error or plan not found' },
-                403: { description: 'Forbidden' }
-            }
-        }
+                403: { description: 'Forbidden' },
+            },
+        },
     },
     '/api/v1/maintenance/bills/single': {
         post: {
@@ -73,28 +79,25 @@ export default {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                unitId: { type: 'integer', example: 12 },
-                                billCycle: { type: 'string', enum: ['MONTHLY', 'YEARLY', 'SPECIAL'], example: 'MONTHLY' },
-                                period: { type: 'string', example: '2025-03' },
-                                amount: { type: 'integer', example: 2500 },
-                                dueDate: { type: 'string', format: 'date', example: '2025-03-10' }
-                            },
-                            required: ['unitId', 'billCycle', 'period', 'amount', 'dueDate']
-                        }
-                    }
-                }
+                        schema: { $ref: '#/components/schemas/GenerateSingleBillRequest' },
+                    },
+                },
             },
             responses: {
-                201: { description: 'Bill created successfully' },
+                201: {
+                    description: 'Bill created successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MaintenanceBillResponse' },
+                        },
+                    },
+                },
                 400: { description: 'Validation error' },
                 403: { description: 'Forbidden (Locked society)' },
                 404: { description: 'Unit not found' },
-                409: { description: 'Bill already exists for this unit and period' }
-            }
-        }
+                409: { description: 'Bill already exists for this unit and period' },
+            },
+        },
     },
     '/api/v1/maintenance/bills/admin': {
         get: {
@@ -106,13 +109,20 @@ export default {
                 { name: 'unitId', in: 'query', schema: { type: 'integer' } },
                 { name: 'billCycle', in: 'query', schema: { type: 'string' } },
                 { name: 'period', in: 'query', schema: { type: 'string' } },
-                { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } }
+                { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
             ],
             responses: {
-                200: { description: 'Bills retrieved successfully' },
-                403: { description: 'Forbidden' }
-            }
-        }
+                200: {
+                    description: 'Bills retrieved successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MaintenanceBillsListResponse' },
+                        },
+                    },
+                },
+                403: { description: 'Forbidden' },
+            },
+        },
     },
     '/api/v1/maintenance/bills/my': {
         get: {
@@ -120,10 +130,17 @@ export default {
             tags: ['v1 - Maintenance'],
             security: [{ bearerAuth: [] }],
             responses: {
-                200: { description: 'Bills retrieved successfully' },
-                401: { description: 'Unauthorized' }
-            }
-        }
+                200: {
+                    description: 'Bills retrieved successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MaintenanceBillsListResponse' },
+                        },
+                    },
+                },
+                401: { description: 'Unauthorized' },
+            },
+        },
     },
     '/api/v1/maintenance/bills/{id}/pay': {
         post: {
@@ -131,28 +148,28 @@ export default {
             tags: ['v1 - Maintenance'],
             security: [{ bearerAuth: [] }],
             parameters: [
-                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
             ],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                paymentMode: { type: 'string', enum: ['ONLINE', 'UPI', 'CASH', 'CHEQUE'], example: 'UPI' },
-                                transactionId: { type: 'string', example: 'TXN_123456789' }
-                            },
-                            required: ['paymentMode']
-                        }
-                    }
-                }
+                        schema: { $ref: '#/components/schemas/PayBillRequest' },
+                    },
+                },
             },
             responses: {
-                200: { description: 'Payment recorded successfully' },
+                200: {
+                    description: 'Payment recorded successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/StandardResponse' },
+                        },
+                    },
+                },
                 400: { description: 'Invalid bill or already paid' },
-                403: { description: 'Access denied' }
-            }
-        }
-    }
+                403: { description: 'Access denied' },
+            },
+        },
+    },
 };

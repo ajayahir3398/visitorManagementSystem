@@ -21,7 +21,7 @@ export const createNotice = async (req, res) => {
         } = req.body;
 
         const societyId = req.user.society_id;
-        const userId = req.user.userId;
+        const userId = req.user.id;
 
         if (!societyId) {
             return res.status(400).json({
@@ -212,7 +212,7 @@ export const markNoticeRead = async (req, res) => {
     try {
         const { id } = req.params;
         const noticeId = parseInt(id);
-        const userId = req.user.userId;
+        const userId = req.user.id;
 
         await fixSequence('notice_reads');
 

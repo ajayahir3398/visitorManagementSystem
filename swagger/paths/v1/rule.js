@@ -5,40 +5,15 @@ export default {
             summary: 'Get all rules for the society',
             security: [{ bearerAuth: [] }],
             parameters: [
-                {
-                    name: 'category',
-                    in: 'query',
-                    schema: { type: 'string' },
-                    description: 'Filter by category',
-                },
-                {
-                    name: 'isActive',
-                    in: 'query',
-                    schema: { type: 'boolean' },
-                    description: 'Filter by status',
-                },
+                { name: 'category', in: 'query', schema: { type: 'string' }, description: 'Filter by category' },
+                { name: 'isActive', in: 'query', schema: { type: 'boolean' }, description: 'Filter by status' },
             ],
             responses: {
                 200: {
                     description: 'Rules retrieved successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    message: { type: 'string' },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            rules: {
-                                                type: 'array',
-                                                items: { $ref: '#/components/schemas/Rule' },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/RulesListResponse' },
                         },
                     },
                 },
@@ -51,16 +26,7 @@ export default {
             requestBody: {
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                category: { type: 'string' },
-                                priority: { type: 'string', enum: ['Low', 'Medium', 'High'] },
-                                violationPenalty: { type: 'string' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/CreateRuleRequest' },
                     },
                 },
             },
@@ -69,19 +35,7 @@ export default {
                     description: 'Rule created successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    message: { type: 'string' },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            rule: { $ref: '#/components/schemas/Rule' },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/RuleResponse' },
                         },
                     },
                 },
@@ -95,31 +49,14 @@ export default {
             summary: 'Get rule by ID',
             security: [{ bearerAuth: [] }],
             parameters: [
-                {
-                    name: 'id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'integer' },
-                },
+                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
             ],
             responses: {
                 200: {
                     description: 'Rule retrieved successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    message: { type: 'string' },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            rule: { $ref: '#/components/schemas/Rule' },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/RuleResponse' },
                         },
                     },
                 },
@@ -131,27 +68,12 @@ export default {
             summary: 'Update rule',
             security: [{ bearerAuth: [] }],
             parameters: [
-                {
-                    name: 'id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'integer' },
-                },
+                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
             ],
             requestBody: {
                 content: {
                     'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                category: { type: 'string' },
-                                priority: { type: 'string', enum: ['Low', 'Medium', 'High'] },
-                                violationPenalty: { type: 'string' },
-                                isActive: { type: 'boolean' },
-                            },
-                        },
+                        schema: { $ref: '#/components/schemas/UpdateRuleRequest' },
                     },
                 },
             },
@@ -160,19 +82,7 @@ export default {
                     description: 'Rule updated successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    message: { type: 'string' },
-                                    data: {
-                                        type: 'object',
-                                        properties: {
-                                            rule: { $ref: '#/components/schemas/Rule' },
-                                        },
-                                    },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/RuleResponse' },
                         },
                     },
                 },
@@ -185,25 +95,14 @@ export default {
             summary: 'Delete rule (Deactivate)',
             security: [{ bearerAuth: [] }],
             parameters: [
-                {
-                    name: 'id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'integer' },
-                },
+                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
             ],
             responses: {
                 200: {
                     description: 'Rule deactivated successfully',
                     content: {
                         'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    success: { type: 'boolean', example: true },
-                                    message: { type: 'string' },
-                                },
-                            },
+                            schema: { $ref: '#/components/schemas/RuleResponse' },
                         },
                     },
                 },

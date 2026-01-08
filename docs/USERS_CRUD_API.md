@@ -28,17 +28,17 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 | Method | Endpoint | Description | Required Role |
 |--------|----------|-------------|---------------|
-| POST | `/users` | Create a new user | SUPER_ADMIN |
+| POST | `/users` | Create a new user | SUPER_ADMIN, SOCIETY_ADMIN |
 | GET | `/users` | Get all users (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN |
 | GET | `/users/:id` | Get user by ID | SUPER_ADMIN, SOCIETY_ADMIN |
 | PUT | `/users/:id` | Update user | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/users/:id` | Delete user | SUPER_ADMIN |
+| DELETE | `/users/:id` | Delete user | SUPER_ADMIN, SOCIETY_ADMIN |
 
 ---
 
 ## 1. Create User
 
-Create a new user (typically a Society Admin). When creating a SOCIETY_ADMIN with a society, a 60-day trial subscription is automatically created.
+Create a new user (typically a Society Admin). When creating a SOCIETY_ADMIN with a society, a 14-day trial subscription is automatically created.
 
 ### Endpoint
 
@@ -48,7 +48,8 @@ POST /api/v1/users
 
 ### Authorization
 
-- **Required Role**: `SUPER_ADMIN` only
+- **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`
+- **Note**: `SOCIETY_ADMIN` users can only create users within their own society
 
 ### Request Body
 
@@ -895,7 +896,9 @@ DELETE /api/v1/users/:id
 
 ### Authorization
 
-- **Required Role**: `SUPER_ADMIN` only
+- **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`
+- **SUPER_ADMIN**: Can delete all users except other SUPER_ADMIN users
+- **SOCIETY_ADMIN**: Can only delete `SECURITY` and `RESIDENT` users from their own society
 
 ### Path Parameters
 
@@ -914,6 +917,14 @@ DELETE /api/v1/users/:id
 
 ### Error Responses
 
+**400 Bad Request** - User has related records
+```json
+{
+  "success": false,
+  "message": "Cannot delete user. This user has 5 approval record(s) and 10 visitor log(s) created by this user. Please remove or reassign these records first."
+}
+```
+
 **403 Forbidden** - Cannot delete SUPER_ADMIN
 ```json
 {
@@ -922,19 +933,27 @@ DELETE /api/v1/users/:id
 }
 ```
 
+**403 Forbidden** - SOCIETY_ADMIN trying to delete SUPER_ADMIN or SOCIETY_ADMIN
+```json
+{
+  "success": false,
+  "message": "SOCIETY_ADMIN can only delete SECURITY and RESIDENT users."
+}
+```
+
+**403 Forbidden** - SOCIETY_ADMIN trying to delete user from another society
+```json
+{
+  "success": false,
+  "message": "Access denied. You can only delete users from your own society."
+}
+```
+
 **404 Not Found**
 ```json
 {
   "success": false,
   "message": "User not found"
-}
-```
-
-**403 Forbidden** - Insufficient permissions
-```json
-{
-  "success": false,
-  "message": "Access denied. SUPER_ADMIN role required."
 }
 ```
 
@@ -954,11 +973,17 @@ const deleteUser = async (userId) => {
       throw new Error(response.data.message);
     }
   } catch (error) {
-    if (error.response?.status === 403) {
+    if (error.response?.status === 400) {
+      Alert.alert('Cannot Delete', error.response.data.message);
+    } else if (error.response?.status === 403) {
       if (error.response.data.message.includes('SUPER_ADMIN')) {
         Alert.alert('Cannot Delete', 'SUPER_ADMIN users cannot be deleted');
+      } else if (error.response.data.message.includes('SECURITY and RESIDENT')) {
+        Alert.alert('Access Denied', 'You can only delete SECURITY and RESIDENT users');
+      } else if (error.response.data.message.includes('your own society')) {
+        Alert.alert('Access Denied', 'You can only delete users from your own society');
       } else {
-        Alert.alert('Access Denied', 'Only Super Admins can delete users');
+        Alert.alert('Access Denied', error.response.data.message);
       }
     } else if (error.response?.status === 404) {
       Alert.alert('Not Found', 'User does not exist');
@@ -1330,11 +1355,11 @@ interface User {
 
 | Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
 |-----------|-------------|---------------|----------|----------|
-| Create User | ✅ | ❌ | ❌ | ❌ |
+| Create User | ✅ | ✅ (own society only) | ❌ | ❌ |
 | Get All Users | ✅ | ✅ (own society only) | ❌ | ❌ |
 | Get User by ID | ✅ | ✅ (own society only) | ❌ | ❌ |
 | Update User | ✅ | ✅ (own society only) | ❌ | ❌ |
-| Delete User | ✅ | ❌ | ❌ | ❌ |
+| Delete User | ✅ (except SUPER_ADMIN) | ✅ (SECURITY/RESIDENT in own society only) | ❌ | ❌ |
 
 ---
 
@@ -1342,7 +1367,7 @@ interface User {
 
 ### Trial Subscription
 
-When creating a `SOCIETY_ADMIN` user with a `societyId`, the system automatically creates a 60-day trial subscription for that society (if no subscription already exists).
+When creating a `SOCIETY_ADMIN` user with a `societyId`, the system automatically creates a 14-day trial subscription for that society (if no subscription already exists).
 
 ### Password Requirements
 
