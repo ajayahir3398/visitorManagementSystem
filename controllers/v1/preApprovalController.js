@@ -18,16 +18,37 @@ const generateAccessCode = (prefix = 'GV') => {
  */
 export const createPreApproval = async (req, res) => {
   try {
-    const { unitId, guestName, guestMobile, validFrom, validTill, maxUses = 1 } = req.body;
+    const { guestName, guestMobile, validFrom, validTill, maxUses = 1 } = req.body;
 
-    // Validation
-    if (!unitId) {
-      return res.status(400).json({
+    // Get resident's units
+    const userUnits = await prisma.unitMember.findMany({
+      where: {
+        userId: req.user.id,
+      },
+      include: {
+        unit: {
+          select: {
+            id: true,
+            societyId: true,
+            unitNo: true,
+          }
+        }
+      }
+    });
+
+    if (userUnits.length === 0) {
+      return res.status(403).json({
         success: false,
-        message: 'unitId is required',
+        message: 'Access denied. You must be associated with a unit to create pre-approvals.',
       });
     }
 
+    // Select unit: prioritize primary, otherwise use first one
+    const selectedUnitMember = userUnits.find(um => um.isPrimary) || userUnits[0];
+    const unit = selectedUnitMember.unit;
+    const unitId = unit.id;
+
+    // Validation
     if (!validFrom || !validTill) {
       return res.status(400).json({
         success: false,
@@ -49,38 +70,6 @@ export const createPreApproval = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'maxUses must be at least 1',
-      });
-    }
-
-    // Check if resident is a member of the unit
-    const isMember = await prisma.unitMember.findFirst({
-      where: {
-        unitId: parseInt(unitId),
-        userId: req.user.id,
-      },
-    });
-
-    if (!isMember) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You can only create pre-approvals for your units.',
-      });
-    }
-
-    // Get unit to verify society
-    const unit = await prisma.unit.findUnique({
-      where: { id: parseInt(unitId) },
-      select: {
-        id: true,
-        societyId: true,
-        unitNo: true,
-      },
-    });
-
-    if (!unit) {
-      return res.status(404).json({
-        success: false,
-        message: 'Unit not found',
       });
     }
 

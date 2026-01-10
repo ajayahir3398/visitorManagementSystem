@@ -88,13 +88,9 @@ export default {
   },
   CreatePreApprovalRequest: {
     type: 'object',
-    required: ['unitId', 'validFrom', 'validTill'],
+    required: ['validFrom', 'validTill'],
+    description: 'The unit is automatically identified from the logged-in resident\'s profile (primary unit or first available unit).',
     properties: {
-      unitId: {
-        type: 'integer',
-        example: 5,
-        description: 'Unit ID where guest will visit',
-      },
       guestName: {
         type: 'string',
         nullable: true,

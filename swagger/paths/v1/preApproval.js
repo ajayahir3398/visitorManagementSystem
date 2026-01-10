@@ -2,7 +2,7 @@ export default {
   '/api/v1/pre-approvals': {
     post: {
       summary: 'Create pre-approved guest',
-      description: 'Resident creates a pre-approval with a 6-digit access code. Guest can use this code at the gate for instant entry.',
+      description: 'Resident creates a pre-approval with a 6-digit access code. The unit is automatically identified from the token (primary unit or first available unit). Guest can use this code at the gate for instant entry.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       requestBody: {
