@@ -119,7 +119,7 @@ export const getNotices = async (req, res) => {
             where,
             include: {
                 reads: {
-                    where: { userId: req.user.userId },
+                    where: { userId: req.user.id },
                 },
             },
             orderBy: [
@@ -175,7 +175,7 @@ export const getNoticeById = async (req, res) => {
             },
             include: {
                 reads: {
-                    where: { userId: req.user.userId },
+                    where: { userId: req.user.id },
                 },
             },
         });

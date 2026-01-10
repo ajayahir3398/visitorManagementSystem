@@ -32,7 +32,7 @@ export const createRule = async (req, res) => {
                 category,
                 priority: priority || 'Medium',
                 violationPenalty,
-                createdBy: req.user.userId,
+                createdBy: req.user.id,
                 isActive: true,
             },
         });

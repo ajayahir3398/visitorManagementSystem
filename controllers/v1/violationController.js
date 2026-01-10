@@ -40,7 +40,7 @@ export const reportViolation = async (req, res) => {
                 ruleId: parseInt(ruleId),
                 violatorUserId: violatorUserId ? parseInt(violatorUserId) : null,
                 violatorUnitId: violatorUnitId ? parseInt(violatorUnitId) : null,
-                reportedByUserId: req.user.userId,
+                reportedByUserId: req.user.id,
                 description,
                 proofImage,
                 penaltyAmount: penaltyAmount ? parseFloat(penaltyAmount) : null,
@@ -81,7 +81,7 @@ export const getViolations = async (req, res) => {
     try {
         const { status, unitId } = req.query;
         const societyId = req.user.society_id;
-        const userId = req.user.userId;
+        const userId = req.user.id;
         const role = req.user.role_name;
 
         const where = {
