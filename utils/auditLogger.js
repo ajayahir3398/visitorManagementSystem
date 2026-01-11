@@ -50,7 +50,7 @@ export const logAction = async ({
     const role = user?.role_name || user?.role?.name || null;
 
     // Create audit log entry
-    await fixSequence('auditLogs');
+    await fixSequence('audit_logs');
     await prisma.auditLog.create({
       data: {
         userId: user?.id || null,

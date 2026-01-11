@@ -104,7 +104,7 @@ async function main() {
       console.log(`✅ Updated subscription plan ${plan.code}`);
     } else {
       // Create new plan
-      await fixSequence('subscriptionPlans');
+      await fixSequence('subscription_plans');
       await prisma.subscriptionPlan.create({
         data: plan,
       });

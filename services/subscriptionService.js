@@ -39,7 +39,7 @@ export const calculateSubscriptionStatus = (subscription) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const expiryDate = new Date(subscription.expiryDate);
   expiryDate.setHours(0, 0, 0, 0);
 
@@ -117,7 +117,7 @@ export const updateAllSubscriptionStatuses = async () => {
     for (const subscription of subscriptions) {
       try {
         const newStatus = calculateSubscriptionStatus(subscription);
-        
+
         if (newStatus !== subscription.status) {
           await prisma.subscription.update({
             where: { id: subscription.id },
@@ -155,7 +155,7 @@ export const createTrialSubscription = async (societyId, durationDays = 60) => {
       },
     });
 
-    await fixSequence('subscriptionPlans');
+    await fixSequence('subscription_plans');
 
     if (!trialPlan) {
       // Create default TRIAL plan if it doesn't exist
@@ -177,7 +177,7 @@ export const createTrialSubscription = async (societyId, durationDays = 60) => {
     // Calculate dates
     const startDate = new Date();
     startDate.setHours(0, 0, 0, 0);
-    
+
     const expiryDate = new Date(startDate);
     expiryDate.setDate(expiryDate.getDate() + durationDays);
     expiryDate.setHours(23, 59, 59, 999);
@@ -274,7 +274,7 @@ export const extendSubscription = async (subscriptionId, additionalDays) => {
       data: {
         expiryDate: newExpiryDate,
         // If subscription was LOCKED or GRACE, reactivate it
-        status: subscription.status === 'LOCKED' || subscription.status === 'GRACE' 
+        status: subscription.status === 'LOCKED' || subscription.status === 'GRACE'
           ? (subscription.plan.name === 'TRIAL' ? 'TRIAL' : 'ACTIVE')
           : subscription.status,
       },
