@@ -11,25 +11,18 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const login = async (req, res) => {
   try {
-    const { email, mobile, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Password is required',
+        message: 'Email and password are required',
       });
     }
 
-    if (!email && !mobile) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email or mobile is required',
-      });
-    }
-
-    // Find user by email or mobile
+    // Find user by email
     const user = await prisma.user.findFirst({
-      where: email ? { email } : { mobile },
+      where: { email },
       include: {
         role: true,
       },
@@ -47,6 +40,15 @@ export const login = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
+      });
+    }
+
+    // Role-based restriction: Only admins can use password login
+    const adminRoles = ['SOCIETY_ADMIN', 'SUPER_ADMIN'];
+    if (!adminRoles.includes(user.role.name)) {
+      return res.status(403).json({
+        success: false,
+        message: `Password login is not available for ${user.role.name} role. Please use OTP login.`,
       });
     }
 
@@ -158,10 +160,10 @@ export const requestOTP = async (req, res) => {
       });
     }
 
-    // Check if user exists
+    // Check if user exists and get role
     const user = await prisma.user.findUnique({
       where: { mobile },
-      select: { id: true, status: true },
+      include: { role: true },
     });
 
     if (!user) {
@@ -175,6 +177,15 @@ export const requestOTP = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
+      });
+    }
+
+    // Role-based restriction: Admins cannot use OTP login
+    const adminRoles = ['SOCIETY_ADMIN', 'SUPER_ADMIN'];
+    if (adminRoles.includes(user.role.name)) {
+      return res.status(403).json({
+        success: false,
+        message: 'OTP login is not available for administrator roles. Please use email and password login.',
       });
     }
 
@@ -264,6 +275,15 @@ export const verifyOTPLogin = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
+      });
+    }
+
+    // Role-based security check
+    const adminRoles = ['SOCIETY_ADMIN', 'SUPER_ADMIN'];
+    if (adminRoles.includes(user.role.name)) {
+      return res.status(403).json({
+        success: false,
+        message: 'OTP login is not available for administrator roles.',
       });
     }
 
@@ -628,3 +648,75 @@ export const logoutAll = async (req, res) => {
     });
   }
 };
+
+/**
+ * Change own password
+ * PUT /api/v1/auth/change-password
+ * Access: Authenticated users only
+ */
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required',
+      });
+    }
+
+    // Fetch user with password hash
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+    });
+
+    if (!user || !user.passwordHash) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found or password not set',
+      });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect current password',
+      });
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash },
+    });
+
+    // Log action
+    await logAction({
+      user: req.user,
+      action: AUDIT_ACTIONS.UPDATE_USER,
+      entity: AUDIT_ENTITIES.USER,
+      entityId: user.id,
+      description: `User "${user.name}" changed their password`,
+      req,
+    });
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change password',
+      error: error.message,
+    });
+  }
+};
+

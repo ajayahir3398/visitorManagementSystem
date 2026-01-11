@@ -1,7 +1,7 @@
 export default {
   '/api/v1/auth/login': {
     post: {
-      summary: 'Login with email/mobile and password (for admins)',
+      summary: 'Login with email and password (SOCIETY_ADMIN and SUPER_ADMIN only)',
       tags: ['v1 - Authentication'],
       requestBody: {
         required: true,
@@ -15,13 +15,6 @@ export default {
                 summary: 'Login with email',
                 value: {
                   email: 'admin@example.com',
-                  password: 'password123',
-                },
-              },
-              mobileLogin: {
-                summary: 'Login with mobile',
-                value: {
-                  mobile: '1234567890',
                   password: 'password123',
                 },
               },
@@ -85,7 +78,7 @@ export default {
   },
   '/api/v1/auth/otp': {
     post: {
-      summary: 'Request OTP for login',
+      summary: 'Request OTP for login (RESIDENT and SECURITY only)',
       tags: ['v1 - Authentication'],
       requestBody: {
         required: true,
@@ -122,7 +115,7 @@ export default {
           },
         },
         403: {
-          description: 'Account blocked',
+          description: 'Account blocked or Role restricted (Admins cannot use OTP)',
           content: {
             'application/json': {
               schema: {
@@ -194,7 +187,7 @@ export default {
           },
         },
         403: {
-          description: 'Account blocked',
+          description: 'Account blocked or Role restricted (Admins cannot use OTP)',
           content: {
             'application/json': {
               schema: {
@@ -430,5 +423,84 @@ export default {
       },
     },
   },
+  '/api/v1/auth/change-password': {
+    put: {
+      summary: 'Change own password',
+      tags: ['v1 - Authentication'],
+      description: 'Allows an authenticated user to change their own password by providing the current and new passwords.',
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['currentPassword', 'newPassword'],
+              properties: {
+                currentPassword: {
+                  type: 'string',
+                  format: 'password',
+                  description: 'The user\'s existing password',
+                },
+                newPassword: {
+                  type: 'string',
+                  format: 'password',
+                  description: 'The new password to set (minimum 6 characters)',
+                  minLength: 6,
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Password changed successfully',
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean', example: true },
+                  message: { type: 'string', example: 'Password changed successfully' },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: 'Validation error or incorrect current password',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
+
 

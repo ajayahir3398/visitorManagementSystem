@@ -7,8 +7,8 @@ const router = express.Router();
 // All emergency routes require authentication
 router.use(authenticate);
 
-// Raise Emergency (Residents and Security can raise)
-router.post('/', authorize('RESIDENT', 'SECURITY'), emergencyController.raiseEmergency);
+// Raise Emergency (Residents, Security and Society Admin can raise)
+router.post('/', authorize('RESIDENT', 'SECURITY', 'SOCIETY_ADMIN'), emergencyController.raiseEmergency);
 
 // Get Emergencies (List view with filters)
 router.get('/', authorize('RESIDENT', 'SECURITY', 'SOCIETY_ADMIN'), emergencyController.getEmergencies);

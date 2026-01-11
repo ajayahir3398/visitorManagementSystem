@@ -5,7 +5,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
 /**
  * Raise Emergency
  * POST /api/v1/emergencies
- * Access: RESIDENT, SECURITY
+ * Access: RESIDENT, SECURITY, SOCIETY_ADMIN
  */
 export const raiseEmergency = async (req, res) => {
     try {

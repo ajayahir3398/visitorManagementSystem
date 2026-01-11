@@ -139,7 +139,7 @@ export default {
   },
   '/api/v1/societies/{id}': {
     get: {
-      summary: 'Get society by ID',
+      summary: 'Get society by ID (SUPER_ADMIN, SOCIETY_ADMIN, RESIDENT, SECURITY)',
       tags: ['v1 - Societies'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -183,7 +183,7 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden',
+          description: 'Forbidden - You can only view your own society (applies to non-SUPER_ADMINs)',
           content: {
             'application/json': {
               schema: {
@@ -259,7 +259,7 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - SUPER_ADMIN only',
+          description: 'Forbidden - SOCIETY_ADMIN can only update their own society and cannot update status/subscription',
           content: {
             'application/json': {
               schema: {

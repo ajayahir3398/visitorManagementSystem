@@ -1,7 +1,7 @@
 export default {
     '/api/v1/emergencies': {
         post: {
-            summary: 'Raise an Emergency',
+            summary: 'Raise an Emergency (Residents, Security, or Society Admin)',
             tags: ['v1 - Emergency'],
             security: [{ bearerAuth: [] }],
             requestBody: {

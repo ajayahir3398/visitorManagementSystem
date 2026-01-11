@@ -4,8 +4,8 @@
 
 This document provides comprehensive API documentation for the Authentication endpoints (v1) for React Native integration. The authentication system supports two login methods:
 
-1. **Password Login** - For admin users (SUPER_ADMIN, SOCIETY_ADMIN)
-2. **OTP Login** - For all users (RESIDENT, SECURITY, etc.)
+1. **Password Login** - For admin users only (`SUPER_ADMIN`, `SOCIETY_ADMIN`). Requires Email and Password.
+2. **OTP Login** - For resident and security users only (`RESIDENT`, `SECURITY`). Requires Mobile and OTP.
 
 ---
 
@@ -43,22 +43,21 @@ For authenticated requests, include:
 
 **Endpoint:** `POST /api/v1/auth/login`
 
-**Description:** Login for admin users (SUPER_ADMIN, SOCIETY_ADMIN) using email/mobile and password.
+**Description:** Login for admin users (`SUPER_ADMIN`, `SOCIETY_ADMIN`) using **email** and password. Mobile-based password login is disabled. Non-admin users (Residents/Security) are not allowed to use this endpoint.
 
 **Request Body:**
 ```json
 {
-  "email": "admin@example.com",  // OR
-  "mobile": "1234567890",         // Either email or mobile required
+  "email": "admin@example.com",  // Required
   "password": "password123"       // Required
 }
 ```
 
 **Validation Rules:**
-- `password`: Required
-- `email`: Optional, must be valid email format (if provided)
-- `mobile`: Optional, must be exactly 10 digits (if provided)
-- Either `email` OR `mobile` must be provided
+- `password`: Required, minimum 6 characters
+- `email`: Required, must be valid email format
+- Only `SUPER_ADMIN` and `SOCIETY_ADMIN` roles can use this method.
+- `RESIDENT` and `SECURITY` roles will receive a `403 Forbidden` error.
 
 **Success Response (200):**
 ```json
@@ -155,7 +154,7 @@ if (result.success) {
 
 **Endpoint:** `POST /api/v1/auth/otp`
 
-**Description:** Request OTP for mobile-based login. OTP is valid for 10 minutes.
+**Description:** Request OTP for mobile-based login for `RESIDENT` and `SECURITY` roles. OTP login is not available for administrator roles. OTP is valid for 10 minutes.
 
 **Request Body:**
 ```json

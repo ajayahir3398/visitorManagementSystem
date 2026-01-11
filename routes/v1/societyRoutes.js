@@ -78,7 +78,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
+  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN', 'RESIDENT', 'SECURITY'),
   validateSocietyId,
   getSocietyById
 );
@@ -86,7 +86,7 @@ router.get(
 router.put(
   '/:id',
   authenticate,
-  authorize('SUPER_ADMIN'),
+  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
   validateSocietyId,
   validateUpdateSociety,
   updateSociety

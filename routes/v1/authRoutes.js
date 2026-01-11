@@ -8,6 +8,7 @@ import {
   refreshToken,
   logout,
   logoutAll,
+  changePassword,
 } from '../../controllers/v1/authController.js';
 
 const router = express.Router();
@@ -77,6 +78,16 @@ const validateLogout = [
   handleValidationErrors,
 ];
 
+const validateChangePassword = [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword')
+    .notEmpty()
+    .withMessage('New password is required')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters'),
+  handleValidationErrors,
+];
+
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/auth.js
 router.post('/login', validateLogin, login);
@@ -90,6 +101,13 @@ router.post('/refresh-token', validateRefreshToken, refreshToken);
 router.post('/logout', optionalAuthenticate, validateLogout, logout);
 // logout-all: Requires authentication, logs out from all devices
 router.post('/logout-all', authenticate, logoutAll);
+
+router.put(
+  '/change-password',
+  authenticate,
+  validateChangePassword,
+  changePassword
+);
 
 export default router;
 

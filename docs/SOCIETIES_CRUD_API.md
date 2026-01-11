@@ -30,8 +30,8 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 |--------|----------|-------------|---------------|
 | POST | `/societies` | Create a new society | SUPER_ADMIN |
 | GET | `/societies` | Get all societies (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/societies/:id` | Get society by ID | SUPER_ADMIN, SOCIETY_ADMIN |
-| PUT | `/societies/:id` | Update society | SUPER_ADMIN |
+| GET | `/societies/:id` | Get society by ID | SUPER_ADMIN, SOCIETY_ADMIN, RESIDENT, SECURITY |
+| PUT | `/societies/:id` | Update society | SUPER_ADMIN, SOCIETY_ADMIN |
 | DELETE | `/societies/:id` | Delete society | SUPER_ADMIN |
 
 ---
@@ -400,8 +400,8 @@ GET /api/v1/societies/:id
 
 ### Authorization
 
-- **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`
-- **Note**: `SOCIETY_ADMIN` users can only access their own society
+- **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`, `RESIDENT`, `SECURITY`
+- **Note**: Non-`SUPER_ADMIN` users can only access their own society (based on `society_id` in their profile).
 
 ### Path Parameters
 
@@ -446,7 +446,7 @@ GET /api/v1/societies/:id
 }
 ```
 
-**403 Forbidden** - SOCIETY_ADMIN trying to access another society
+**403 Forbidden** - User trying to access another society
 ```json
 {
   "success": false,
@@ -571,7 +571,8 @@ PUT /api/v1/societies/:id
 
 ### Authorization
 
-- **Required Role**: `SUPER_ADMIN` only
+- **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`
+- **Note**: `SOCIETY_ADMIN` can only update their own society.
 
 ### Path Parameters
 
@@ -606,8 +607,8 @@ All fields are optional. Only include fields you want to update.
 | `city` | string | No | City name (use `null` to clear) |
 | `state` | string | No | State name (use `null` to clear) |
 | `pincode` | string | No | Postal code (use `null` to clear) |
-| `subscriptionId` | integer | No | Subscription ID (use `null` to clear) |
-| `status` | string | No | Must be `"active"` or `"expired"` |
+| `subscriptionId` | integer | No | **SUPER_ADMIN only** |
+| `status` | string | No | **SUPER_ADMIN only**. Must be `"active"` or `"expired"` |
 
 ### Success Response (200)
 

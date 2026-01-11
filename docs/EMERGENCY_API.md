@@ -28,7 +28,7 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 | Method | Endpoint | Description | Required Role |
 |--------|----------|-------------|---------------|
-| POST | `/emergencies` | Raise an emergency | RESIDENT, SECURITY |
+| POST | `/emergencies` | Raise an emergency | RESIDENT, SECURITY, SOCIETY_ADMIN |
 | GET | `/emergencies` | Get emergencies (paginated) | RESIDENT, SECURITY, SOCIETY_ADMIN |
 | GET | `/emergencies/:id` | Get emergency timeline/detail | RESIDENT, SECURITY, SOCIETY_ADMIN |
 | POST | `/emergencies/:id/acknowledge` | Acknowledge an emergency | SECURITY, SOCIETY_ADMIN |
@@ -82,7 +82,7 @@ POST /api/v1/emergencies
 
 ### Authorization
 
-- **Required Role**: `RESIDENT`, `SECURITY`
+- **Required Role**: `RESIDENT`, `SECURITY`, `SOCIETY_ADMIN`
 
 ### Request Body
 
@@ -1149,7 +1149,7 @@ export default emergencyService;
 
 | Operation | RESIDENT | SECURITY | SOCIETY_ADMIN | SUPER_ADMIN |
 |-----------|----------|----------|---------------|-------------|
-| Raise Emergency | ✅ | ✅ | ❌ | ❌ |
+| Raise Emergency | ✅ | ✅ | ✅ | ❌ |
 | Get Emergencies | ✅ (own only) | ✅ (society) | ✅ (society) | ❌ |
 | Get Emergency Detail | ✅ (own only) | ✅ (society) | ✅ (society) | ❌ |
 | Acknowledge | ❌ | ✅ | ✅ | ❌ |

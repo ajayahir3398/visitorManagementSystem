@@ -146,8 +146,9 @@ export const getSocietyById = async (req, res) => {
       });
     }
 
-    // If user is SOCIETY_ADMIN, only allow access to their own society
-    if (req.user.role_name === 'SOCIETY_ADMIN' && req.user.society_id !== societyId) {
+    // If user is not SUPER_ADMIN, only allow access to their own society
+    const restrictedRoles = ['SOCIETY_ADMIN', 'RESIDENT', 'SECURITY'];
+    if (restrictedRoles.includes(req.user.role_name) && req.user.society_id !== societyId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only view your own society.',
@@ -188,7 +189,7 @@ export const getSocietyById = async (req, res) => {
 /**
  * Update society
  * PUT /api/v1/societies/:id
- * Access: SUPER_ADMIN only
+ * Access: SUPER_ADMIN, SOCIETY_ADMIN (own society only)
  */
 export const updateSociety = async (req, res) => {
   try {
@@ -200,6 +201,14 @@ export const updateSociety = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid society ID',
+      });
+    }
+
+    // Role-based access control
+    if (req.user.role_name === 'SOCIETY_ADMIN' && req.user.society_id !== societyId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only update your own society.',
       });
     }
 
@@ -215,6 +224,16 @@ export const updateSociety = async (req, res) => {
       });
     }
 
+    // Role-based field restrictions for SOCIETY_ADMIN
+    if (req.user.role_name === 'SOCIETY_ADMIN') {
+      if (subscriptionId !== undefined || status !== undefined) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Only Super Admin can update status and subscription.',
+        });
+      }
+    }
+
     // Validate type if provided
     if (type && !['apartment', 'office'].includes(type.toLowerCase())) {
       return res.status(400).json({
@@ -223,7 +242,7 @@ export const updateSociety = async (req, res) => {
       });
     }
 
-    // Validate status if provided
+    // Validate status if provided (only SUPER_ADMIN can reach here if status is provided)
     if (status && !['active', 'expired'].includes(status.toLowerCase())) {
       return res.status(400).json({
         success: false,
@@ -239,8 +258,12 @@ export const updateSociety = async (req, res) => {
     if (city !== undefined) updateData.city = city;
     if (state !== undefined) updateData.state = state;
     if (pincode !== undefined) updateData.pincode = pincode;
-    if (subscriptionId !== undefined) updateData.subscriptionId = subscriptionId;
-    if (status) updateData.status = status.toLowerCase();
+
+    // Only SUPER_ADMIN can update these
+    if (req.user.role_name === 'SUPER_ADMIN') {
+      if (subscriptionId !== undefined) updateData.subscriptionId = subscriptionId;
+      if (status) updateData.status = status.toLowerCase();
+    }
 
     const society = await prisma.society.update({
       where: { id: societyId },
