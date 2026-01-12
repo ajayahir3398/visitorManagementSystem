@@ -41,11 +41,12 @@ export const createUnit = async (req, res) => {
       });
     }
 
-    // Check if unit with same number already exists for this society
+    // Check if unit with same number AND block already exists for this society
     const existingUnit = await prisma.unit.findFirst({
       where: {
         societyId: parseInt(societyId),
         unitNo: unitNo.trim(),
+        block: block || null,
       },
     });
 
@@ -372,6 +373,7 @@ export const updateUnit = async (req, res) => {
         where: {
           societyId: existingUnit.societyId,
           unitNo: unitNo.trim(),
+          block: block !== undefined ? block : existingUnit.block,
           id: { not: unitId },
         },
       });
@@ -379,7 +381,7 @@ export const updateUnit = async (req, res) => {
       if (duplicateUnit) {
         return res.status(400).json({
           success: false,
-          message: 'Unit with this number already exists for this society',
+          message: 'Unit with this number and block already exists for this society',
         });
       }
     }
@@ -844,7 +846,7 @@ export const bulkUploadUnits = async (req, res) => {
             } catch (err) {
               let reason = err.message;
               if (err.code === 'P2002') {
-                reason = 'Unit already exists';
+                reason = 'Unit with this number and block already exists';
               }
               results.failed.push({
                 unitNo: unit.unitNo,

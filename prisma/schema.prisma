@@ -285,7 +285,7 @@ model Unit {
   maintenanceBills  MaintenanceBill[]
   emergencyRequests EmergencyRequest[]
 
-  @@unique([societyId, unitNo], map: "uq_units_society_unit_no")
+  @@unique([societyId, unitNo, block], map: "uq_units_society_unit_no_block")
   @@index([societyId], map: "idx_units_society_id")
   @@index([unitNo], map: "idx_units_unit_no")
   @@index([status], map: "idx_units_status")
