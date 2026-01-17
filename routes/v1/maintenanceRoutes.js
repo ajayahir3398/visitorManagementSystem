@@ -1,23 +1,65 @@
 import express from 'express';
-import * as maintenanceController from '../../controllers/v1/maintenanceController.js';
+import { body, query, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
+import {
+    payMaintenance,
+    getUpcomingMaintenance,
+    getMyBills,
+    createCustomBill
+} from '../../controllers/v1/maintenanceController.js';
 
 const router = express.Router();
 
-// All maintenance routes require authentication
-router.use(authenticate);
+// Validation error handler
+const handleValidationErrors = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            success: false,
+            message: 'Validation failed',
+            errors: errors.array(),
+        });
+    }
+    next();
+};
 
-// Maintenance Plan Routes
-router.post('/plans', authorize('SOCIETY_ADMIN'), maintenanceController.upsertMaintenancePlan);
-router.get('/plans', authorize('SOCIETY_ADMIN', 'RESIDENT'), maintenanceController.getMaintenancePlans);
+// Validation middleware
+const validatePayMaintenance = [
+    body('tempBillId')
+        .notEmpty().withMessage('tempBillId is required')
+        .isInt().withMessage('tempBillId must be an integer'),
+    body('paymentMode')
+        .notEmpty().withMessage('paymentMode is required')
+        .isIn(['ONLINE', 'UPI', 'CASH', 'CHEQUE']).withMessage('Invalid payment mode'),
+    body('transactionId')
+        .optional()
+        .isString().trim(),
+    handleValidationErrors,
+];
 
-// Maintenance Bill Routes (Admin)
-router.post('/bills/generate', authorize('SOCIETY_ADMIN'), maintenanceController.generateBulkBills);
-router.post('/bills/single', authorize('SOCIETY_ADMIN'), maintenanceController.createSingleMaintenanceBill);
-router.get('/bills/admin', authorize('SOCIETY_ADMIN'), maintenanceController.getAdminBills);
+const validateCreateCustomBill = [
+    body('unitId')
+        .notEmpty().withMessage('unitId is required')
+        .isInt().withMessage('unitId must be an integer'),
+    body('amount')
+        .notEmpty().withMessage('amount is required')
+        .isInt({ min: 1 }).withMessage('amount must be a positive integer'),
+    body('description')
+        .notEmpty().withMessage('description is required')
+        .isString().trim(),
+    body('dueDate')
+        .notEmpty().withMessage('dueDate is required')
+        .isISO8601().withMessage('dueDate must be a valid date'),
+    handleValidationErrors,
+];
 
-// Maintenance Bill Routes (Resident)
-router.get('/bills/my', authorize('RESIDENT'), maintenanceController.getMyBills);
-router.post('/bills/:id/pay', authorize('RESIDENT'), maintenanceController.payBill);
+// Routes
+// Resident routes
+router.get('/upcoming', authenticate, authorize('RESIDENT'), getUpcomingMaintenance);
+router.post('/pay', authenticate, authorize('RESIDENT'), validatePayMaintenance, payMaintenance);
+router.get('/my-bills', authenticate, authorize('RESIDENT'), getMyBills);
+
+// Admin routes
+router.post('/custom-bill', authenticate, authorize('SOCIETY_ADMIN'), validateCreateCustomBill, createCustomBill);
 
 export default router;

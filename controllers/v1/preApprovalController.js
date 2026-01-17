@@ -18,7 +18,7 @@ const generateAccessCode = (prefix = 'GV') => {
  */
 export const createPreApproval = async (req, res) => {
   try {
-    const { guestName, guestMobile, validFrom, validTill, maxUses = 1 } = req.body;
+    const { guestName, guestMobile, validFrom, validTill, maxUses = 1, unitId } = req.body;
 
     // Get resident's units
     const userUnits = await prisma.unitMember.findMany({
@@ -43,10 +43,25 @@ export const createPreApproval = async (req, res) => {
       });
     }
 
-    // Select unit: prioritize primary, otherwise use first one
-    const selectedUnitMember = userUnits.find(um => um.isPrimary) || userUnits[0];
-    const unit = selectedUnitMember.unit;
-    const unitId = unit.id;
+    // Select unit logic
+    let selectedUnit;
+    if (unitId) {
+      // If unitId provided, verify it belongs to user
+      const unitMember = userUnits.find(um => um.unitId === parseInt(unitId));
+      if (!unitMember) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You are not associated with the specified unit.',
+        });
+      }
+      selectedUnit = unitMember.unit;
+    } else {
+      // Prioritize primary, otherwise use first one
+      const selectedUnitMember = userUnits.find(um => um.isPrimary) || userUnits[0];
+      selectedUnit = selectedUnitMember.unit;
+    }
+
+    const finalUnitId = selectedUnit.id;
 
     // Validation
     if (!validFrom || !validTill) {
@@ -73,7 +88,7 @@ export const createPreApproval = async (req, res) => {
       });
     }
 
-    if (unit.societyId !== req.user.society_id) {
+    if (selectedUnit.societyId !== req.user.society_id) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Unit does not belong to your society.',
@@ -110,8 +125,8 @@ export const createPreApproval = async (req, res) => {
     // Create pre-approval
     const preApproval = await prisma.preApprovedGuest.create({
       data: {
-        societyId: unit.societyId,
-        unitId: parseInt(unitId),
+        societyId: selectedUnit.societyId,
+        unitId: parseInt(finalUnitId),
         residentId: req.user.id,
         guestName: guestName || null,
         guestMobile: guestMobile || null,

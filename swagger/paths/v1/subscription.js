@@ -397,6 +397,8 @@ export default {
             },
             example: {
               planId: 2,
+              paymentMode: 'UPI',
+              transactionId: 'TXN-12345678'
             },
           },
         },

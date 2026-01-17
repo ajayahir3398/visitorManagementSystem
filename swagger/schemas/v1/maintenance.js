@@ -1,101 +1,145 @@
 export default {
-    MaintenancePlan: {
-        type: 'object',
-        properties: {
-            id: { type: 'integer', example: 1 },
-            societyId: { type: 'integer', example: 1 },
-            planType: { type: 'string', enum: ['MONTHLY', 'YEARLY'], example: 'MONTHLY' },
-            amount: { type: 'integer', example: 2500 },
-            isActive: { type: 'boolean', example: true },
-            createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' },
-        },
-    },
+    // Maintenance Bill Schema
     MaintenanceBill: {
         type: 'object',
         properties: {
-            id: { type: 'integer', example: 101 },
-            societyId: { type: 'integer', example: 1 },
-            unitId: { type: 'integer', example: 12 },
-            billCycle: { type: 'string', example: 'MONTHLY' },
-            period: { type: 'string', example: '2025-03' },
-            amount: { type: 'integer', example: 2500 },
-            dueDate: { type: 'string', format: 'date', example: '2025-03-10' },
-            status: { type: 'string', enum: ['UNPAID', 'PAID', 'OVERDUE'], example: 'UNPAID' },
-            createdBy: { type: 'integer', example: 2 },
-            createdAt: { type: 'string', format: 'date-time' },
-        },
-    },
-    CreateMaintenancePlanRequest: {
-        type: 'object',
-        properties: {
-            planType: { type: 'string', enum: ['MONTHLY', 'YEARLY'], example: 'MONTHLY' },
-            amount: { type: 'integer', example: 2500 },
-        },
-        required: ['planType', 'amount'],
-    },
-    GenerateBulkBillRequest: {
-        type: 'object',
-        properties: {
-            billCycle: { type: 'string', enum: ['MONTHLY', 'YEARLY'], example: 'MONTHLY' },
-            period: { type: 'string', example: '2025-03' },
-            dueDate: { type: 'string', format: 'date', example: '2025-03-10' },
-        },
-        required: ['billCycle', 'period', 'dueDate'],
-    },
-    GenerateSingleBillRequest: {
-        type: 'object',
-        properties: {
-            unitId: { type: 'integer', example: 12 },
+            id: { type: 'integer', example: 1 },
+            societyId: { type: 'integer', example: 5 },
+            unitId: { type: 'integer', example: 10 },
             billCycle: { type: 'string', enum: ['MONTHLY', 'YEARLY', 'SPECIAL'], example: 'MONTHLY' },
             period: { type: 'string', example: '2025-03' },
             amount: { type: 'integer', example: 2500 },
-            dueDate: { type: 'string', format: 'date', example: '2025-03-10' },
+            dueDate: { type: 'string', format: 'date-time' },
+            status: { type: 'string', enum: ['UNPAID', 'PAID', 'OVERDUE'], example: 'PAID' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+            unit: {
+                type: 'object',
+                properties: {
+                    id: { type: 'integer', example: 10 },
+                    unitNo: { type: 'string', example: 'A-101' },
+                }
+            },
+            payments: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/MaintenancePayment' }
+            }
         },
-        required: ['unitId', 'billCycle', 'period', 'amount', 'dueDate'],
     },
-    PayBillRequest: {
+
+    // Maintenance Payment Schema
+    MaintenancePayment: {
         type: 'object',
         properties: {
+            id: { type: 'integer', example: 1 },
+            billId: { type: 'integer', example: 1 },
+            paidBy: { type: 'integer', example: 20 },
+            amount: { type: 'integer', example: 2500 },
             paymentMode: { type: 'string', enum: ['ONLINE', 'UPI', 'CASH', 'CHEQUE'], example: 'UPI' },
-            transactionId: { type: 'string', example: 'TXN_123456789' },
+            transactionId: { type: 'string', example: 'TXN123456789' },
+            status: { type: 'string', example: 'SUCCESS' },
+            paidAt: { type: 'string', format: 'date-time' },
         },
-        required: ['paymentMode'],
     },
-    MaintenancePlansListResponse: {
+
+    // Temp Maintenance Bill Schema
+    TempMaintenanceBill: {
+        type: 'object',
+        properties: {
+            id: { type: 'integer', example: 1 },
+            societyId: { type: 'integer', example: 5 },
+            unitId: { type: 'integer', example: 10 },
+            billCycle: { type: 'string', enum: ['MONTHLY', 'YEARLY', 'SPECIAL'], example: 'MONTHLY' },
+            period: { type: 'string', example: '2025-04' },
+            amount: { type: 'integer', example: 2500 },
+            dueDate: { type: 'string', format: 'date-time' },
+            description: { type: 'string', example: 'Monthly Maintenance' },
+            unit: {
+                type: 'object',
+                properties: {
+                    id: { type: 'integer', example: 10 },
+                    unitNo: { type: 'string', example: 'A-101' },
+                }
+            }
+        },
+    },
+
+    // Request Schemas
+    PayMaintenanceRequest: {
+        type: 'object',
+        required: ['tempBillId', 'paymentMode'],
+        properties: {
+            tempBillId: {
+                type: 'integer',
+                description: 'ID of the temporary maintenance bill',
+                example: 1,
+            },
+            paymentMode: {
+                type: 'string',
+                enum: ['ONLINE', 'UPI', 'CASH', 'CHEQUE'],
+                example: 'UPI',
+            },
+            transactionId: {
+                type: 'string',
+                description: 'Optional: Transaction ID from the gateway',
+                example: 'TXN_987654321',
+            },
+        },
+    },
+
+    CreateCustomBillRequest: {
+        type: 'object',
+        required: ['unitId', 'amount', 'description', 'dueDate'],
+        properties: {
+            unitId: { type: 'integer', example: 10 },
+            amount: { type: 'integer', example: 1000 },
+            description: { type: 'string', example: 'Penalty for rule violation' },
+            dueDate: { type: 'string', format: 'date-time', example: '2024-04-15T00:00:00Z' }
+        }
+    },
+
+    // Response Schemas
+    UpcomingMaintenanceResponse: {
         type: 'object',
         properties: {
             success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Plans retrieved successfully' },
+            message: { type: 'string', example: 'Upcoming and outstanding maintenance retrieved successfully' },
             data: {
                 type: 'object',
                 properties: {
-                    plans: {
+                    upcoming: {
                         type: 'array',
-                        items: { $ref: '#/components/schemas/MaintenancePlan' },
+                        items: { $ref: '#/components/schemas/TempMaintenanceBill' },
+                    },
+                    outstanding: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/MaintenanceBill' },
                     },
                 },
             },
         },
     },
-    MaintenanceBillResponse: {
+
+    PayMaintenanceResponse: {
         type: 'object',
         properties: {
             success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Bill processed successfully' },
+            message: { type: 'string', example: 'Maintenance paid successfully' },
             data: {
                 type: 'object',
                 properties: {
                     bill: { $ref: '#/components/schemas/MaintenanceBill' },
+                    payment: { $ref: '#/components/schemas/MaintenancePayment' },
                 },
             },
         },
     },
-    MaintenanceBillsListResponse: {
+
+    MyBillsResponse: {
         type: 'object',
         properties: {
             success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Bills retrieved successfully' },
+            message: { type: 'string', example: 'My maintenance bills retrieved successfully' },
             data: {
                 type: 'object',
                 properties: {
@@ -106,21 +150,14 @@ export default {
                     pagination: {
                         type: 'object',
                         properties: {
-                            total: { type: 'integer' },
-                            page: { type: 'integer' },
-                            limit: { type: 'integer' },
-                            pages: { type: 'integer' },
+                            page: { type: 'integer', example: 1 },
+                            limit: { type: 'integer', example: 10 },
+                            total: { type: 'integer', example: 5 },
+                            pages: { type: 'integer', example: 1 },
                         },
                     },
                 },
             },
-        },
-    },
-    StandardResponse: {
-        type: 'object',
-        properties: {
-            success: { type: 'boolean', example: true },
-            message: { type: 'string', example: 'Operation completed successfully' },
         },
     },
 };

@@ -135,6 +135,17 @@ export default {
         example: 2,
         description: 'ID of the subscription plan to purchase',
       },
+      paymentMode: {
+        type: 'string',
+        enum: ['ONLINE', 'UPI', 'CASH', 'CHEQUE', 'OFFLINE'],
+        example: 'UPI',
+        description: 'Payment mode used (default: OFFLINE)',
+      },
+      transactionId: {
+        type: 'string',
+        example: 'TXN-12345678',
+        description: 'Transaction ID from payment gateway',
+      },
     },
   },
 };

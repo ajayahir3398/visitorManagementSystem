@@ -15,9 +15,10 @@ import securityRoutes from './securityRoutes.js';
 import ruleRoutes from './ruleRoutes.js';
 import violationRoutes from './violationRoutes.js';
 import noticeRoutes from './noticeRoutes.js';
-import maintenanceRoutes from './maintenanceRoutes.js';
 import emergencyRoutes from './emergencyRoutes.js';
 import publicRoutes from './publicRoutes.js';
+import maintenancePlanRoutes from './maintenancePlanRoutes.js';
+import maintenanceRoutes from './maintenanceRoutes.js';
 
 const router = express.Router();
 
@@ -42,8 +43,9 @@ router.use('/security', securityRoutes);
 router.use('/rules', ruleRoutes);
 router.use('/violations', violationRoutes);
 router.use('/notices', noticeRoutes);
-router.use('/maintenance', maintenanceRoutes);
 router.use('/emergencies', emergencyRoutes);
+router.use('/maintenance-plans', maintenancePlanRoutes);
+router.use('/maintenance', maintenanceRoutes);
 
 export default router;
 

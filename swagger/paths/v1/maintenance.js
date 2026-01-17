@@ -1,174 +1,133 @@
 export default {
-    '/api/v1/maintenance/plans': {
+    '/maintenance/custom-bill': {
         post: {
-            summary: 'Create or Update Maintenance Plan',
-            tags: ['v1 - Maintenance'],
+            tags: ['Maintenance'],
+            summary: 'Create custom maintenance bill',
+            description: 'Society Admin can create an ad-hoc bill for a unit.',
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/CreateMaintenancePlanRequest' },
-                    },
-                },
-            },
-            responses: {
-                200: {
-                    description: 'Plan updated successfully',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/StandardResponse' },
-                        },
-                    },
-                },
-                400: { description: 'Validation error' },
-                401: { description: 'Unauthorized' },
-                403: { description: 'Forbidden - Only Society Admin' },
-            },
-        },
-        get: {
-            summary: 'Get Maintenance Plans',
-            tags: ['v1 - Maintenance'],
-            security: [{ bearerAuth: [] }],
-            responses: {
-                200: {
-                    description: 'Plans retrieved successfully',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/MaintenancePlansListResponse' },
-                        },
-                    },
-                },
-                401: { description: 'Unauthorized' },
-            },
-        },
-    },
-    '/api/v1/maintenance/bills/generate': {
-        post: {
-            summary: 'Generate Bulk Bills for units',
-            tags: ['v1 - Maintenance'],
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-                required: true,
-                content: {
-                    'application/json': {
-                        schema: { $ref: '#/components/schemas/GenerateBulkBillRequest' },
-                    },
-                },
-            },
-            responses: {
-                200: {
-                    description: 'Bills generated successfully',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/StandardResponse' },
-                        },
-                    },
-                },
-                400: { description: 'Validation error or plan not found' },
-                403: { description: 'Forbidden' },
-            },
-        },
-    },
-    '/api/v1/maintenance/bills/single': {
-        post: {
-            summary: 'Generate a single maintenance bill',
-            tags: ['v1 - Maintenance'],
-            security: [{ bearerAuth: [] }],
-            requestBody: {
-                required: true,
-                content: {
-                    'application/json': {
-                        schema: { $ref: '#/components/schemas/GenerateSingleBillRequest' },
+                        schema: { $ref: '#/components/schemas/CreateCustomBillRequest' },
                     },
                 },
             },
             responses: {
                 201: {
-                    description: 'Bill created successfully',
+                    description: 'Custom bill created successfully',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/MaintenanceBillResponse' },
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    success: { type: 'boolean', example: true },
+                                    message: { type: 'string', example: 'Custom maintenance bill created successfully' },
+                                    data: {
+                                        type: 'object',
+                                        properties: {
+                                            tempBill: { $ref: '#/components/schemas/TempMaintenanceBill' }
+                                        }
+                                    }
+                                }
+                            },
                         },
                     },
                 },
-                400: { description: 'Validation error' },
-                403: { description: 'Forbidden (Locked society)' },
-                404: { description: 'Unit not found' },
-                409: { description: 'Bill already exists for this unit and period' },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                403: { $ref: '#/components/responses/Forbidden' },
+                500: { $ref: '#/components/responses/InternalServer' },
             },
         },
     },
-    '/api/v1/maintenance/bills/admin': {
+    '/maintenance/upcoming': {
         get: {
-            summary: 'Get all bills (Admin view)',
-            tags: ['v1 - Maintenance'],
-            security: [{ bearerAuth: [] }],
-            parameters: [
-                { name: 'status', in: 'query', schema: { type: 'string', enum: ['UNPAID', 'PAID', 'OVERDUE'] } },
-                { name: 'unitId', in: 'query', schema: { type: 'integer' } },
-                { name: 'billCycle', in: 'query', schema: { type: 'string' } },
-                { name: 'period', in: 'query', schema: { type: 'string' } },
-                { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-            ],
-            responses: {
-                200: {
-                    description: 'Bills retrieved successfully',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/MaintenanceBillsListResponse' },
-                        },
-                    },
-                },
-                403: { description: 'Forbidden' },
-            },
-        },
-    },
-    '/api/v1/maintenance/bills/my': {
-        get: {
-            summary: 'Get my unit bills (Resident view)',
-            tags: ['v1 - Maintenance'],
+            tags: ['Maintenance'],
+            summary: 'Get upcoming maintenance (Temp bills)',
+            description: 'Retrieve temporary maintenance bills generated for the resident units.',
             security: [{ bearerAuth: [] }],
             responses: {
                 200: {
-                    description: 'Bills retrieved successfully',
+                    description: 'Upcoming bills retrieved',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/MaintenanceBillsListResponse' },
+                            schema: { $ref: '#/components/schemas/UpcomingMaintenanceResponse' },
                         },
                     },
                 },
-                401: { description: 'Unauthorized' },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                500: { $ref: '#/components/responses/InternalServer' },
             },
         },
     },
-    '/api/v1/maintenance/bills/{id}/pay': {
+    '/maintenance/pay': {
         post: {
-            summary: 'Pay a maintenance bill',
-            tags: ['v1 - Maintenance'],
+            tags: ['Maintenance'],
+            summary: 'Pay maintenance and finalize bill',
+            description: 'Resident payment for an upcoming temporary maintenance bill. Converts temp bill to final bill.',
             security: [{ bearerAuth: [] }],
-            parameters: [
-                { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
-            ],
             requestBody: {
                 required: true,
                 content: {
                     'application/json': {
-                        schema: { $ref: '#/components/schemas/PayBillRequest' },
+                        schema: { $ref: '#/components/schemas/PayMaintenanceRequest' },
                     },
                 },
             },
             responses: {
                 200: {
-                    description: 'Payment recorded successfully',
+                    description: 'Maintenance paid successfully',
                     content: {
                         'application/json': {
-                            schema: { $ref: '#/components/schemas/StandardResponse' },
+                            schema: { $ref: '#/components/schemas/PayMaintenanceResponse' },
                         },
                     },
                 },
-                400: { description: 'Invalid bill or already paid' },
-                403: { description: 'Access denied' },
+                400: { $ref: '#/components/responses/BadRequest' },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                403: { $ref: '#/components/responses/Forbidden' },
+                404: { $ref: '#/components/responses/NotFound' },
+                500: { $ref: '#/components/responses/InternalServer' },
+            },
+        },
+    },
+    '/maintenance/my-bills': {
+        get: {
+            tags: ['Maintenance'],
+            summary: 'Get current user maintenance bills',
+            description: 'Retrieve history of maintenance bills for the units associated with the logged-in resident.',
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'page',
+                    in: 'query',
+                    schema: { type: 'integer', default: 1 },
+                    description: 'Page number',
+                },
+                {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', default: 10 },
+                    description: 'Number of items per page',
+                },
+                {
+                    name: 'status',
+                    in: 'query',
+                    schema: { type: 'string', enum: ['UNPAID', 'PAID', 'OVERDUE'] },
+                    description: 'Filter by bill status',
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Bills retrieved successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MyBillsResponse' },
+                        },
+                    },
+                },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                500: { $ref: '#/components/responses/InternalServer' },
             },
         },
     },

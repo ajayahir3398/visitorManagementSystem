@@ -15,9 +15,10 @@ import securityPaths from './security.js';
 import rulePaths from './rule.js';
 import violationPaths from './violation.js';
 import noticePaths from './notice.js';
-import maintenancePaths from './maintenance.js';
 import emergencyPaths from './emergency.js';
 import publicPaths from './public.js';
+import maintenancePlanPaths from './maintenancePlan.js';
+import maintenancePaths from './maintenance.js';
 
 export default {
   ...healthPaths,
@@ -38,7 +39,8 @@ export default {
   ...rulePaths,
   ...violationPaths,
   ...noticePaths,
-  ...maintenancePaths,
   ...emergencyPaths,
+  ...maintenancePlanPaths,
+  ...maintenancePaths,
 };
 

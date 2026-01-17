@@ -17,8 +17,9 @@ import ruleSchemas from './rule.js';
 import violationSchemas from './violation.js';
 import noticeSchemas from './notice.js';
 import emergencySchemas from './emergency.js';
-import maintenanceSchemas from './maintenance.js';
 import publicSchemas from './public.js';
+import maintenancePlanSchemas from './maintenancePlan.js';
+import maintenanceSchemas from './maintenance.js';
 
 export default {
   ...commonSchemas,
@@ -41,5 +42,6 @@ export default {
   ...violationSchemas,
   ...noticeSchemas,
   ...emergencySchemas,
+  ...maintenancePlanSchemas,
   ...maintenanceSchemas,
 };

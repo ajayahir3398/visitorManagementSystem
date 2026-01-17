@@ -298,7 +298,7 @@ export const getCurrentSubscription = async (req, res) => {
  */
 export const buySubscription = async (req, res) => {
   try {
-    const { planId } = req.body;
+    const { planId, paymentMode, transactionId } = req.body;
     const societyId = req.user.society_id;
 
     if (!societyId) {
@@ -314,6 +314,10 @@ export const buySubscription = async (req, res) => {
         message: 'planId is required',
       });
     }
+
+    // Default to CASH/OFFLINE if no mode provided in MVP
+    const mode = paymentMode || 'OFFLINE';
+    const txId = transactionId || `TXN-REF-${Date.now()}`;
 
     const planIdInt = parseInt(planId);
     if (isNaN(planIdInt)) {
@@ -344,10 +348,39 @@ export const buySubscription = async (req, res) => {
 
     // Calculate dates
     const startDate = new Date();
-    const expiryDate = new Date();
+    let expiryDate = new Date();
     expiryDate.setMonth(expiryDate.getMonth() + plan.durationMonths);
 
-    // Upsert subscription (create or update existing)
+    // Check for existing active subscription to carry over days
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { societyId }
+    });
+
+    let carriedOverDays = 0;
+    if (existingSubscription && existingSubscription.status === 'ACTIVE' && existingSubscription.expiryDate > new Date()) {
+      const remainingTime = existingSubscription.expiryDate.getTime() - new Date().getTime();
+      carriedOverDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
+
+      if (carriedOverDays > 0) {
+        // Add remaining days to the new expiry date
+        expiryDate.setDate(expiryDate.getDate() + carriedOverDays);
+      }
+    }
+
+    // 1. Create Payment Record first
+    const payment = await prisma.payment.create({
+      data: {
+        societyId: societyId,
+        amount: plan.price,
+        gateway: 'MANUAL', // Or logic to detect gateway if integrated
+        paymentMode: mode,
+        transactionId: txId,
+        status: 'SUCCESS', // Assume success for this flow
+        paidAt: new Date()
+      }
+    });
+
+    // 2. Upsert Subscription
     const subscription = await prisma.subscription.upsert({
       where: { societyId },
       update: {
@@ -374,20 +407,31 @@ export const buySubscription = async (req, res) => {
       },
     });
 
+    // 3. Generate Invoice
+    const invoiceNo = `INV-${societyId}-${Date.now()}`;
+    await prisma.invoice.create({
+      data: {
+        societyId: societyId,
+        paymentId: payment.id,
+        invoiceNo: invoiceNo,
+        amount: plan.price
+      }
+    });
+
     // Log subscription purchase
     await logAction({
       user: req.user,
       action: AUDIT_ACTIONS.SUBSCRIPTION_PURCHASED,
       entity: AUDIT_ENTITIES.SUBSCRIPTION,
       entityId: subscription.id,
-      description: `Subscription purchased: ${plan.name} (${plan.code}) for society "${subscription.society.name}". Expires: ${expiryDate.toISOString().split('T')[0]}`,
+      description: `Subscription purchased: ${plan.name} (${plan.code}) for society "${subscription.society.name}". Amount: ${plan.price}, TxId: ${txId}`,
       req,
     });
 
     res.json({
       success: true,
       message: 'Subscription activated successfully',
-      data: { subscription },
+      data: { subscription, payment },
     });
   } catch (error) {
     console.error('Buy subscription error:', error);

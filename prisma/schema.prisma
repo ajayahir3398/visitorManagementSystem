@@ -43,9 +43,12 @@ model Society {
   rules             Rule[]
   ruleViolations    RuleViolation[]
   notices           Notice[]
-  maintenancePlans  SocietyMaintenancePlan[]
-  maintenanceBills  MaintenanceBill[]
   emergencyRequests EmergencyRequest[]
+
+  // Maintenance Module
+  maintenancePlans     SocietyMaintenancePlan[]
+  tempMaintenanceBills TempMaintenanceBill[]
+  maintenanceBills     MaintenanceBill[]
 
   @@index([status], map: "idx_societies_status")
   @@index([type], map: "idx_societies_type")
@@ -77,10 +80,13 @@ model User {
   reportedViolations      RuleViolation[]      @relation("Reporter")
   noticesCreated          Notice[]
   noticeReads             NoticeRead[]
-  maintenanceBillsCreated MaintenanceBill[]
-  maintenancePayments     MaintenancePayment[]
   emergencyRequestsRaised EmergencyRequest[]
   emergencyResponses      EmergencyResponse[]
+
+  // Maintenance Module
+  tempMaintenanceBillsCreated TempMaintenanceBill[]
+  maintenanceBillsCreated     MaintenanceBill[]
+  maintenancePaymentsMade     MaintenancePayment[]
 
   @@index([societyId], map: "idx_users_society_id")
   @@index([roleId], map: "idx_users_role_id")
@@ -282,7 +288,10 @@ model Unit {
   visitorLogs       VisitorLog[]
   preApprovedGuests PreApprovedGuest[]
   ruleViolations    RuleViolation[]
-  maintenanceBills  MaintenanceBill[]
+
+  // Maintenance Module
+  tempMaintenanceBills TempMaintenanceBill[]
+  maintenanceBills     MaintenanceBill[]
   emergencyRequests EmergencyRequest[]
 
   @@unique([societyId, unitNo, block], map: "uq_units_society_unit_no_block")
@@ -455,58 +464,7 @@ model NoticeRead {
   @@map("notice_reads")
 }
 
-model SocietyMaintenancePlan {
-  id        Int      @id @default(autoincrement())
-  societyId Int      @map("society_id")
-  planType  String   @map("plan_type") @db.VarChar(20) // MONTHLY / YEARLY
-  amount    Int // ₹ in whole numbers
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
 
-  society Society @relation(fields: [societyId], references: [id], onDelete: Cascade)
-
-  @@unique([societyId, planType])
-  @@map("society_maintenance_plans")
-}
-
-model MaintenanceBill {
-  id        Int      @id @default(autoincrement())
-  societyId Int      @map("society_id")
-  unitId    Int      @map("unit_id")
-  billCycle String   @map("bill_cycle") @db.VarChar(20) // MONTHLY / YEARLY
-  period    String   @db.VarChar(20) // 2025-03 OR 2025
-  amount    Int
-  dueDate   DateTime @map("due_date") @db.Date
-  status    String   @default("UNPAID") @db.VarChar(20) // UNPAID / PAID / OVERDUE
-  createdBy Int      @map("created_by")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  society  Society              @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  unit     Unit                 @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  admin    User                 @relation(fields: [createdBy], references: [id])
-  payments MaintenancePayment[]
-
-  @@unique([unitId, billCycle, period])
-  @@map("maintenance_bills")
-}
-
-model MaintenancePayment {
-  id            Int      @id @default(autoincrement())
-  billId        Int      @map("bill_id")
-  paidBy        Int      @map("paid_by")
-  amount        Int
-  paymentMode   String   @map("payment_mode") @db.VarChar(20) // ONLINE / UPI / CASH / CHEQUE
-  transactionId String?  @map("transaction_id") @db.VarChar(100)
-  status        String   @default("SUCCESS") @db.VarChar(20) // SUCCESS / FAILED
-  paidAt        DateTime @default(now()) @map("paid_at")
-
-  bill     MaintenanceBill @relation(fields: [billId], references: [id], onDelete: Cascade)
-  resident User            @relation(fields: [paidBy], references: [id])
-
-  @@map("maintenance_payments")
-}
 
 model EmergencyRequest {
   id               Int       @id @default(autoincrement())
@@ -547,4 +505,103 @@ model EmergencyResponse {
 
   @@index([emergencyId], map: "idx_emergency_responses_emergency")
   @@map("emergency_responses")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAINTENANCE MODULE
+// ═══════════════════════════════════════════════════════════════════════════
+
+// 1️⃣ Society Maintenance Plan (Defines MONTHLY / YEARLY amount for a society)
+model SocietyMaintenancePlan {
+  id        Int      @id @default(autoincrement())
+  societyId Int      @map("society_id")
+
+  planType  String   @db.VarChar(20) // MONTHLY / YEARLY
+  amount    Int                      // amount in ₹
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  society   Society  @relation(fields: [societyId], references: [id])
+
+  @@unique([societyId, planType])
+  @@index([societyId])
+  @@map("society_maintenance_plans")
+}
+
+// 2️⃣ Temp Maintenance Bill (Preview before final generation)
+model TempMaintenanceBill {
+  id        Int      @id @default(autoincrement())
+  societyId Int      @map("society_id")
+  unitId    Int      @map("unit_id")
+
+  billCycle String   @db.VarChar(20) // MONTHLY / YEARLY
+  period    String   @db.VarChar(20) // 2025-03 / 2025
+  amount    Int
+  dueDate   DateTime @map("due_date")
+  description String? @db.VarChar(500)
+
+  createdBy Int      @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  society   Society  @relation(fields: [societyId], references: [id])
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  admin     User     @relation(fields: [createdBy], references: [id])
+
+  @@index([societyId])
+  @@index([unitId])
+  @@map("temp_maintenance_bills")
+}
+
+// 3️⃣ Maintenance Bill (FINAL BILL - Official payable bill)
+model MaintenanceBill {
+  id        Int      @id @default(autoincrement())
+  societyId Int      @map("society_id")
+  unitId    Int      @map("unit_id")
+
+  billCycle String   @db.VarChar(20) // MONTHLY / YEARLY / SPECIAL
+  period    String   @db.VarChar(20) // 2025-03 / 2025 / SPECIAL
+  amount    Int
+  dueDate   DateTime @map("due_date")
+  description String? @db.VarChar(500)
+
+  status    String   @default("UNPAID") @db.VarChar(20) // UNPAID / PAID / OVERDUE
+
+  createdBy Int      @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  society   Society  @relation(fields: [societyId], references: [id])
+  unit      Unit     @relation(fields: [unitId], references: [id])
+  admin     User     @relation(fields: [createdBy], references: [id])
+  payments  MaintenancePayment[]
+
+  @@unique([unitId, billCycle, period])
+  @@index([societyId])
+  @@index([unitId])
+  @@index([status])
+  @@map("maintenance_bills")
+}
+
+// 4️⃣ Maintenance Payment (Tracks money received)
+model MaintenancePayment {
+  id            Int      @id @default(autoincrement())
+  billId        Int      @map("bill_id")
+  paidBy        Int      @map("paid_by")
+
+  amount        Int
+  paymentMode   String   @db.VarChar(20) // ONLINE / UPI / CASH / CHEQUE
+
+  transactionId String?  @map("transaction_id")
+  status        String   @db.VarChar(20) // SUCCESS / FAILED
+
+  paidAt        DateTime @default(now()) @map("paid_at")
+
+  bill          MaintenanceBill @relation(fields: [billId], references: [id])
+  resident      User            @relation(fields: [paidBy], references: [id])
+
+  @@index([billId])
+  @@index([paidBy])
+  @@map("maintenance_payments")
 }

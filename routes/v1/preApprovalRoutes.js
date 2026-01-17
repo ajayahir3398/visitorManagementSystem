@@ -26,11 +26,6 @@ const handleValidationErrors = (req, res, next) => {
 
 // Validation middleware
 const validateCreatePreApproval = [
-  body('unitId')
-    .notEmpty()
-    .withMessage('unitId is required')
-    .isInt()
-    .withMessage('unitId must be an integer'),
   body('guestName').optional().isString().trim(),
   body('guestMobile').optional().isString().trim(),
   body('validFrom')
