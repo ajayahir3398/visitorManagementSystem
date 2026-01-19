@@ -1,7 +1,7 @@
 export default {
-    '/maintenance/custom-bill': {
+    '/api/v1/maintenance/custom-bill': {
         post: {
-            tags: ['Maintenance'],
+            tags: ['v1 - Maintenance'],
             summary: 'Create custom maintenance bill',
             description: 'Society Admin can create an ad-hoc bill for a unit.',
             security: [{ bearerAuth: [] }],
@@ -40,9 +40,9 @@ export default {
             },
         },
     },
-    '/maintenance/upcoming': {
+    '/api/v1/maintenance/upcoming': {
         get: {
-            tags: ['Maintenance'],
+            tags: ['v1 - Maintenance'],
             summary: 'Get upcoming maintenance (Temp bills)',
             description: 'Retrieve temporary maintenance bills generated for the resident units.',
             security: [{ bearerAuth: [] }],
@@ -60,9 +60,9 @@ export default {
             },
         },
     },
-    '/maintenance/pay': {
+    '/api/v1/maintenance/pay': {
         post: {
-            tags: ['Maintenance'],
+            tags: ['v1 - Maintenance'],
             summary: 'Pay maintenance and finalize bill',
             description: 'Resident payment for an upcoming temporary maintenance bill. Converts temp bill to final bill.',
             security: [{ bearerAuth: [] }],
@@ -91,9 +91,9 @@ export default {
             },
         },
     },
-    '/maintenance/my-bills': {
+    '/api/v1/maintenance/my-bills': {
         get: {
-            tags: ['Maintenance'],
+            tags: ['v1 - Maintenance'],
             summary: 'Get current user maintenance bills',
             description: 'Retrieve history of maintenance bills for the units associated with the logged-in resident.',
             security: [{ bearerAuth: [] }],
