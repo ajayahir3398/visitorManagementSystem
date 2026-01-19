@@ -166,6 +166,7 @@ model Payment {
   societyId     Int       @map("society_id")
   amount        Decimal   @db.Decimal(10, 2)
   gateway       String?   @db.VarChar(20)
+  paymentMode   String?   @map("payment_mode") @db.VarChar(50)
   transactionId String?   @map("transaction_id") @db.VarChar(100)
   status        String    @db.VarChar(20)
   paidAt        DateTime? @map("paid_at")

@@ -119,21 +119,34 @@ export const getNotices = async (req, res) => {
             where,
             include: {
                 reads: {
-                    where: { userId: req.user.id },
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                // unit: true // Assuming unit relation exists on user if needed, otherwise name is good
+                            }
+                        }
+                    }
                 },
             },
             orderBy: [
-                { priority: 'desc' }, // Need consistent sort logic for High/Medium/Low
+                { priority: 'desc' },
                 { createdAt: 'desc' },
             ],
         });
 
-        // Map to include isRead flag
-        const formattedNotices = notices.map(notice => ({
-            ...notice,
-            isRead: notice.reads.length > 0,
-            reads: undefined, // Don't return the full reads array
-        }));
+        // Map to include isRead flag and read details
+        const formattedNotices = notices.map(notice => {
+            const isRead = notice.reads.some(r => r.userId === req.user.id);
+            return {
+                ...notice,
+                isRead,
+                readCount: notice.reads.length,
+                readByUsers: notice.reads.map(r => r.user), // List of users who read it
+                reads: undefined, // specific reads array can be removed or kept based on preference, cleaning it up
+            };
+        });
 
         res.json({
             success: true,
@@ -175,7 +188,14 @@ export const getNoticeById = async (req, res) => {
             },
             include: {
                 reads: {
-                    where: { userId: req.user.id },
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                            }
+                        }
+                    }
                 },
             },
         });
@@ -187,11 +207,16 @@ export const getNoticeById = async (req, res) => {
             });
         }
 
+        const isRead = notice.reads.some(r => r.userId === req.user.id);
+
         res.json({
             success: true,
             data: {
                 ...notice,
-                isRead: notice.reads.length > 0,
+                isRead,
+                readCount: notice.reads.length,
+                readByUsers: notice.reads.map(r => r.user),
+                reads: undefined,
             },
         });
     } catch (error) {

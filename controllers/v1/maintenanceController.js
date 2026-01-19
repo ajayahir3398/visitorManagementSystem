@@ -335,3 +335,276 @@ export const getMyBills = async (req, res) => {
         });
     }
 };
+
+/**
+ * Get all upcoming and outstanding maintenance bills for the society (Admin)
+ * GET /api/v1/maintenance/bills/admin
+ * Access: SOCIETY_ADMIN only
+ */
+export const getAdminMaintenanceBills = async (req, res) => {
+    try {
+        const societyId = req.user.society_id;
+
+        const [tempBills, outstandingBills] = await Promise.all([
+            prisma.tempMaintenanceBill.findMany({
+                where: {
+                    societyId: societyId
+                },
+                include: {
+                    unit: true
+                },
+                orderBy: { dueDate: 'asc' }
+            }),
+            prisma.maintenanceBill.findMany({
+                where: {
+                    societyId: societyId,
+                    status: { in: ['UNPAID', 'OVERDUE'] }
+                },
+                include: {
+                    unit: true
+                },
+                orderBy: { dueDate: 'asc' }
+            })
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Society maintenance bills retrieved successfully',
+            data: {
+                upcoming: tempBills,
+                outstanding: outstandingBills
+            }
+        });
+
+    } catch (error) {
+        console.error('Get admin maintenance bills error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to retrieve society maintenance bills',
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Mark bill as paid (Society Admin)
+ * POST /api/v1/maintenance/admin/pay
+ * Access: SOCIETY_ADMIN only
+ */
+export const adminMarkBillPaid = async (req, res) => {
+    try {
+        const { billType, billId, paymentMode, transactionId } = req.body;
+        const societyId = req.user.society_id;
+        const adminId = req.user.id;
+
+        // Common payment data
+        const paymentData = {
+            paidBy: adminId, // Admin is recording the payment (technically resident paid, but admin action)
+            // Ideally we should track which resident paid, but for now we track who RECORDED it. 
+            // The bill itself is linked to the unit, so we know who it belongs to.
+            paymentMode: paymentMode || 'CASH',
+            transactionId: transactionId || null,
+            status: 'SUCCESS',
+            paidAt: new Date()
+        };
+
+        // We need the unit's primary member to link the payment to the resident user correctly if possible,
+        // but the schema links payment to a USER (paidBy). 
+        // If we link to admin, it might look like admin paid for it.
+        // Let's try to find the primary owner of the unit to link 'paidBy' to them, 
+        // IF we want "paidBy" to represent the source of funds. 
+        // However, the current requirement is "admin can update bill". 
+        // Simple approach: Link to the Unit's Primary Member if found, else Admin.
+
+        let targetUnitId;
+        let finalBill;
+
+        if (billType === 'TEMP') {
+            // ---------------------------------------------------------
+            // HANDLE TEMP BILL (Duplicate logic from payMaintenance but generic)
+            // ---------------------------------------------------------
+            const tempBill = await prisma.tempMaintenanceBill.findUnique({
+                where: { id: parseInt(billId) },
+                include: { unit: true }
+            });
+
+            if (!tempBill) {
+                return res.status(404).json({ success: false, message: 'Temporary bill not found' });
+            }
+
+            if (tempBill.societyId !== societyId) {
+                return res.status(403).json({ success: false, message: 'Access denied' });
+            }
+
+            targetUnitId = tempBill.unitId;
+
+            // Create Final Bill
+            await fixSequence('maintenance_bills');
+            finalBill = await prisma.maintenanceBill.create({
+                data: {
+                    societyId: tempBill.societyId,
+                    unitId: tempBill.unitId,
+                    billCycle: tempBill.billCycle,
+                    period: tempBill.period,
+                    amount: tempBill.amount,
+                    dueDate: tempBill.dueDate,
+                    description: tempBill.description,
+                    status: 'PAID',
+                    createdBy: tempBill.createdBy // Keep original creator or update to admin? Keep original.
+                }
+            });
+
+            // Cleanup Temp Bills
+            if (tempBill.billCycle === 'YEARLY') {
+                await prisma.tempMaintenanceBill.deleteMany({
+                    where: {
+                        unitId: tempBill.unitId,
+                        period: { startsWith: tempBill.period.split('-')[0] }
+                    }
+                });
+            } else {
+                await prisma.tempMaintenanceBill.delete({ where: { id: tempBill.id } });
+            }
+
+        } else if (billType === 'FINAL') {
+            // ---------------------------------------------------------
+            // HANDLE FINAL BILL
+            // ---------------------------------------------------------
+            finalBill = await prisma.maintenanceBill.findUnique({
+                where: { id: parseInt(billId) },
+                include: { unit: true }
+            });
+
+            if (!finalBill) {
+                return res.status(404).json({ success: false, message: 'Maintenance bill not found' });
+            }
+
+            if (finalBill.societyId !== societyId) {
+                return res.status(403).json({ success: false, message: 'Access denied' });
+            }
+
+            if (finalBill.status === 'PAID') {
+                return res.status(400).json({ success: false, message: 'Bill is already paid' });
+            }
+
+            targetUnitId = finalBill.unitId;
+
+            // Update Status
+            finalBill = await prisma.maintenanceBill.update({
+                where: { id: finalBill.id },
+                data: { status: 'PAID' }
+            });
+
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid bill type' });
+        }
+
+        // ---------------------------------------------------------
+        // RECORD PAYMENT
+        // ---------------------------------------------------------
+
+        // Find a resident to attribute payment to (optional improvement)
+        const unitMember = await prisma.unitMember.findFirst({
+            where: { unitId: targetUnitId, isPrimary: true }
+        });
+        const paidByUserId = unitMember ? unitMember.userId : adminId;
+
+        await fixSequence('maintenance_payments');
+        const payment = await prisma.maintenancePayment.create({
+            data: {
+                billId: finalBill.id,
+                paidBy: paidByUserId,
+                amount: finalBill.amount,
+                paymentMode: paymentMode || 'CASH',
+                transactionId: transactionId || null,
+                status: 'SUCCESS',
+                paidAt: new Date()
+            }
+        });
+
+        // Log Action
+        await logAction({
+            user: req.user,
+            action: 'MAINTENANCE_MARKED_PAID', // Generic string or add to enum
+            entity: AUDIT_ENTITIES.MAINTENANCE_BILL,
+            entityId: finalBill.id,
+            description: `Admin marked bill as paid (${paymentMode}) for unit ${finalBill.unitId}`,
+            req,
+        });
+
+        res.json({
+            success: true,
+            message: 'Bill marked as paid successfully',
+            data: { bill: finalBill, payment }
+        });
+
+    } catch (error) {
+        console.error('Admin mark paid error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to mark bill as paid',
+            error: error.message,
+        });
+    }
+};
+
+/**
+ * Get all bills for the society (History/Paginated)
+ * GET /api/v1/maintenance/society-bills
+ * Access: SOCIETY_ADMIN only
+ */
+export const getSocietyBills = async (req, res) => {
+    try {
+        const societyId = req.user.society_id;
+        const { page = 1, limit = 10, unitId } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const where = {
+            societyId: societyId,
+            status: 'PAID'
+        };
+
+        if (unitId) {
+            where.unitId = parseInt(unitId);
+        }
+
+        const [bills, total] = await Promise.all([
+            prisma.maintenanceBill.findMany({
+                where,
+                skip,
+                take: parseInt(limit),
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    unit: true,
+                    payments: true,
+                    admin: { // Include creator details if needed, or maybe just name
+                        select: { name: true, id: true }
+                    }
+                }
+            }),
+            prisma.maintenanceBill.count({ where })
+        ]);
+
+        res.json({
+            success: true,
+            message: 'Society bills retrieved successfully',
+            data: {
+                bills,
+                pagination: {
+                    page: parseInt(page),
+                    limit: parseInt(limit),
+                    total,
+                    pages: Math.ceil(total / parseInt(limit)),
+                },
+            },
+        });
+
+    } catch (error) {
+        console.error('Get society bills error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to retrieve society bills',
+            error: error.message,
+        });
+    }
+};

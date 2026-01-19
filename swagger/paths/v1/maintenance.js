@@ -40,6 +40,107 @@ export default {
             },
         },
     },
+    '/api/v1/maintenance/bills/admin': {
+        get: {
+            tags: ['v1 - Maintenance'],
+            summary: 'Get society upcoming and outstanding bills',
+            description: 'Retrieve all temporary and outstanding maintenance bills for the society. (Admin only)',
+            security: [{ bearerAuth: [] }],
+            responses: {
+                200: {
+                    description: 'Society bills retrieved',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/UpcomingMaintenanceResponse' },
+                        },
+                    },
+                },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                403: { $ref: '#/components/responses/Forbidden' },
+                500: { $ref: '#/components/responses/InternalServer' },
+            },
+        },
+    },
+    '/api/v1/maintenance/admin/pay': {
+        post: {
+            tags: ['v1 - Maintenance'],
+            summary: 'Mark bill as paid (Admin)',
+            description: 'Society Admin can mark any upcoming (TEMP) or outstanding (FINAL) bill as paid.',
+            security: [{ bearerAuth: [] }],
+            requestBody: {
+                required: true,
+                content: {
+                    'application/json': {
+                        schema: {
+                            type: 'object',
+                            required: ['billType', 'billId', 'paymentMode'],
+                            properties: {
+                                billType: { type: 'string', enum: ['TEMP', 'FINAL'], example: 'TEMP' },
+                                billId: { type: 'integer', example: 1 },
+                                paymentMode: { type: 'string', enum: ['ONLINE', 'UPI', 'CASH', 'CHEQUE'], example: 'CASH' },
+                                transactionId: { type: 'string', example: 'TXN123' }
+                            }
+                        },
+                    },
+                },
+            },
+            responses: {
+                200: {
+                    description: 'Bill marked as paid',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/PayMaintenanceResponse' },
+                        },
+                    },
+                },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                403: { $ref: '#/components/responses/Forbidden' },
+                404: { $ref: '#/components/responses/NotFound' },
+                500: { $ref: '#/components/responses/InternalServer' },
+            },
+        },
+    },
+    '/api/v1/maintenance/society-bills': {
+        get: {
+            tags: ['v1 - Maintenance'],
+            summary: 'Get paid bills history (Society)',
+            description: 'Retrieve paginated list of all PAID maintenance bills in the society. (Admin only)',
+            security: [{ bearerAuth: [] }],
+            parameters: [
+                {
+                    name: 'page',
+                    in: 'query',
+                    schema: { type: 'integer', default: 1 },
+                    description: 'Page number',
+                },
+                {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', default: 10 },
+                    description: 'Number of items per page',
+                },
+                {
+                    name: 'unitId',
+                    in: 'query',
+                    schema: { type: 'integer' },
+                    description: 'Filter by Unit ID',
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Society bills retrieved successfully',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/MyBillsResponse' }, // Reusing MyBillsResponse as structure is identical
+                        },
+                    },
+                },
+                401: { $ref: '#/components/responses/Unauthorized' },
+                403: { $ref: '#/components/responses/Forbidden' },
+                500: { $ref: '#/components/responses/InternalServer' },
+            },
+        },
+    },
     '/api/v1/maintenance/upcoming': {
         get: {
             tags: ['v1 - Maintenance'],

@@ -5,7 +5,10 @@ import {
     payMaintenance,
     getUpcomingMaintenance,
     getMyBills,
-    createCustomBill
+    createCustomBill,
+    getAdminMaintenanceBills,
+    adminMarkBillPaid,
+    getSocietyBills
 } from '../../controllers/v1/maintenanceController.js';
 
 const router = express.Router();
@@ -53,13 +56,29 @@ const validateCreateCustomBill = [
     handleValidationErrors,
 ];
 
+const validateAdminPay = [
+    body('billType')
+        .notEmpty().withMessage('billType is required')
+        .isIn(['TEMP', 'FINAL']).withMessage('billType must be TEMP or FINAL'),
+    body('billId')
+        .notEmpty().withMessage('billId is required')
+        .isInt().withMessage('billId must be an integer'),
+    body('paymentMode')
+        .notEmpty().withMessage('paymentMode is required')
+        .isIn(['ONLINE', 'UPI', 'CASH', 'CHEQUE']).withMessage('Invalid payment mode'),
+    handleValidationErrors,
+];
+
 // Routes
 // Resident routes
-router.get('/upcoming', authenticate, authorize('RESIDENT'), getUpcomingMaintenance);
 router.post('/pay', authenticate, authorize('RESIDENT'), validatePayMaintenance, payMaintenance);
 router.get('/my-bills', authenticate, authorize('RESIDENT'), getMyBills);
+router.get('/upcoming', authenticate, authorize('RESIDENT'), getUpcomingMaintenance);
 
 // Admin routes
 router.post('/custom-bill', authenticate, authorize('SOCIETY_ADMIN'), validateCreateCustomBill, createCustomBill);
+router.get('/bills/admin', authenticate, authorize('SOCIETY_ADMIN'), getAdminMaintenanceBills);
+router.get('/society-bills', authenticate, authorize('SOCIETY_ADMIN'), getSocietyBills);
+router.post('/admin/pay', authenticate, authorize('SOCIETY_ADMIN'), validateAdminPay, adminMarkBillPaid);
 
 export default router;

@@ -221,6 +221,15 @@ export const registerSociety = async (req, res) => {
                 },
             });
 
+            // 1.1 Create Default Main Gate
+            await fixSequence('gates');
+            await tx.gate.create({
+                data: {
+                    societyId: society.id,
+                    name: 'Main Gate',
+                }
+            });
+
             // Fix user sequence
             await fixSequence('users');
 

@@ -30,17 +30,32 @@ export const createSociety = async (req, res) => {
     await fixSequence('societies');
 
     // Create society
-    const society = await prisma.society.create({
-      data: {
-        name,
-        type: type.toLowerCase(),
-        address,
-        city,
-        state,
-        pincode,
-        subscriptionId,
-        status: 'active',
-      },
+    // Create society and default gate
+    const society = await prisma.$transaction(async (tx) => {
+      // Create Society
+      const newSociety = await tx.society.create({
+        data: {
+          name,
+          type: type.toLowerCase(),
+          address,
+          city,
+          state,
+          pincode,
+          subscriptionId,
+          status: 'active',
+        },
+      });
+
+      // Create Default Main Gate
+      await fixSequence('gates');
+      await tx.gate.create({
+        data: {
+          societyId: newSociety.id,
+          name: 'Main Gate',
+        }
+      });
+
+      return newSociety;
     });
 
     // Log society creation
