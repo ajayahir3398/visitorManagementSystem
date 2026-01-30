@@ -20,6 +20,7 @@ import emergencySchemas from './emergency.js';
 import publicSchemas from './public.js';
 import maintenancePlanSchemas from './maintenancePlan.js';
 import maintenanceSchemas from './maintenance.js';
+import notificationSchemas from './notification.js';
 
 export default {
   ...commonSchemas,
@@ -44,4 +45,5 @@ export default {
   ...emergencySchemas,
   ...maintenancePlanSchemas,
   ...maintenanceSchemas,
+  ...notificationSchemas,
 };

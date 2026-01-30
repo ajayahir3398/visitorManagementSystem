@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { sendNotificationToUnitResidents } from '../../utils/notificationHelper.js';
 
 /**
  * Create visitor entry (log)
@@ -154,6 +155,13 @@ export const createVisitorEntry = async (req, res) => {
             name: true,
           },
         },
+        unit: {
+          select: {
+            id: true,
+            unitNo: true,
+            unitType: true,
+          },
+        },
       },
     });
 
@@ -166,6 +174,29 @@ export const createVisitorEntry = async (req, res) => {
       description: `Visitor entry created for ${visitorLog.visitor?.name || 'Unknown'} at gate ${visitorLog.gate?.name || 'Unknown'}`,
       req,
     });
+
+    // Send push notification to unit residents (if unit exists)
+    if (visitorLog.unitId) {
+      try {
+        const visitorName = visitorLog.visitor?.name || 'A visitor';
+        const unitNo = visitorLog.unit?.unitNo || 'your unit';
+        const gateName = visitorLog.gate?.name || 'the gate';
+
+        await sendNotificationToUnitResidents(
+          visitorLog.unitId,
+          'New Visitor Request',
+          `${visitorName} is waiting at ${gateName} for ${unitNo}`,
+          {
+            screen: 'visitor_log_detail',
+            visitorLogId: visitorLog.id.toString(),
+            type: 'visitor_request',
+          }
+        );
+      } catch (notificationError) {
+        // Don't fail the request if notification fails
+        console.error('Error sending notification to residents:', notificationError);
+      }
+    }
 
     res.status(201).json({
       success: true,

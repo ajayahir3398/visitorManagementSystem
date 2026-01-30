@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { sendNotificationToUser } from '../../utils/notificationHelper.js';
 
 /**
  * Approve visitor entry
@@ -195,6 +196,27 @@ export const approveVisitor = async (req, res) => {
       req,
     });
 
+    // Send push notification to security user who created the entry
+    try {
+      const visitorName = updatedLog.visitor?.name || 'Visitor';
+      const unitNo = updatedLog.unit?.unitNo || 'unit';
+      const residentName = req.user.name || 'Resident';
+
+      await sendNotificationToUser(
+        updatedLog.createdBy,
+        'Visitor Approved',
+        `${residentName} approved ${visitorName} for ${unitNo}`,
+        {
+          screen: 'visitor_log_detail',
+          visitorLogId: visitorLogId.toString(),
+          type: 'visitor_approved',
+        }
+      );
+    } catch (notificationError) {
+      // Don't fail the request if notification fails
+      console.error('Error sending notification to security:', notificationError);
+    }
+
     return res.json({
       success: true,
       message: 'Visitor entry approved successfully',
@@ -270,6 +292,12 @@ export const approveVisitor = async (req, res) => {
             decisionTime: 'desc',
           },
         },
+        createdByUser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -282,6 +310,27 @@ export const approveVisitor = async (req, res) => {
       description: `Visitor ${visitorLog.visitor?.name || 'Unknown'} approved for unit ${visitorLog.unit?.unitNo || 'Unknown'}`,
       req,
     });
+
+    // Send push notification to security user who created the entry
+    try {
+      const visitorName = updatedLog.visitor?.name || 'Visitor';
+      const unitNo = updatedLog.unit?.unitNo || 'unit';
+      const residentName = req.user.name || 'Resident';
+
+      await sendNotificationToUser(
+        updatedLog.createdBy,
+        'Visitor Approved',
+        `${residentName} approved ${visitorName} for ${unitNo}`,
+        {
+          screen: 'visitor_log_detail',
+          visitorLogId: visitorLogId.toString(),
+          type: 'visitor_approved',
+        }
+      );
+    } catch (notificationError) {
+      // Don't fail the request if notification fails
+      console.error('Error sending notification to security:', notificationError);
+    }
 
     res.json({
       success: true,
@@ -478,6 +527,12 @@ export const rejectVisitor = async (req, res) => {
               name: true,
             },
           },
+          createdByUser: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
       },
     });
 
@@ -490,6 +545,27 @@ export const rejectVisitor = async (req, res) => {
         description: `Visitor ${visitorLog.visitor?.name || 'Unknown'} rejected for unit ${visitorLog.unit?.unitNo || 'Unknown'}`,
         req,
       });
+
+      // Send push notification to security user who created the entry
+      try {
+        const visitorName = updatedLog.visitor?.name || 'Visitor';
+        const unitNo = updatedLog.unit?.unitNo || 'unit';
+        const residentName = req.user.name || 'Resident';
+
+        await sendNotificationToUser(
+          updatedLog.createdBy,
+          'Visitor Rejected',
+          `${residentName} rejected ${visitorName} for ${unitNo}`,
+          {
+            screen: 'visitor_log_detail',
+            visitorLogId: visitorLogId.toString(),
+            type: 'visitor_rejected',
+          }
+        );
+      } catch (notificationError) {
+        // Don't fail the request if notification fails
+        console.error('Error sending notification to security:', notificationError);
+      }
 
       return res.json({
         success: true,
@@ -563,6 +639,12 @@ export const rejectVisitor = async (req, res) => {
             decisionTime: 'desc',
           },
         },
+        createdByUser: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -575,6 +657,27 @@ export const rejectVisitor = async (req, res) => {
       description: `Visitor ${visitorLog.visitor?.name || 'Unknown'} rejected for unit ${visitorLog.unit?.unitNo || 'Unknown'}`,
       req,
     });
+
+    // Send push notification to security user who created the entry
+    try {
+      const visitorName = updatedLog.visitor?.name || 'Visitor';
+      const unitNo = updatedLog.unit?.unitNo || 'unit';
+      const residentName = req.user.name || 'Resident';
+
+      await sendNotificationToUser(
+        updatedLog.createdBy,
+        'Visitor Rejected',
+        `${residentName} rejected ${visitorName} for ${unitNo}`,
+        {
+          screen: 'visitor_log_detail',
+          visitorLogId: visitorLogId.toString(),
+          type: 'visitor_rejected',
+        }
+      );
+    } catch (notificationError) {
+      // Don't fail the request if notification fails
+      console.error('Error sending notification to security:', notificationError);
+    }
 
     res.json({
       success: true,

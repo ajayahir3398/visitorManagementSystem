@@ -88,6 +88,9 @@ model User {
   maintenanceBillsCreated     MaintenanceBill[]
   maintenancePaymentsMade     MaintenancePayment[]
 
+  // FCM Tokens
+  fcmTokens FcmToken[]
+
   @@index([societyId], map: "idx_users_society_id")
   @@index([roleId], map: "idx_users_role_id")
   @@index([mobile], map: "idx_users_mobile")
@@ -605,4 +608,26 @@ model MaintenancePayment {
   @@index([billId])
   @@index([paidBy])
   @@map("maintenance_payments")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FCM (Firebase Cloud Messaging) TOKENS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model FcmToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  token     String   @unique @db.VarChar(500) // FCM token
+  deviceId  String?  @map("device_id") @db.VarChar(255) // Optional device identifier
+  platform  String?  @db.VarChar(20) // android / ios
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_fcm_tokens_user_id")
+  @@index([token], map: "idx_fcm_tokens_token")
+  @@index([isActive], map: "idx_fcm_tokens_is_active")
+  @@index([platform], map: "idx_fcm_tokens_platform")
+  @@map("fcm_tokens")
 }

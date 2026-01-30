@@ -19,6 +19,7 @@ import emergencyPaths from './emergency.js';
 import publicPaths from './public.js';
 import maintenancePlanPaths from './maintenancePlan.js';
 import maintenancePaths from './maintenance.js';
+import notificationPaths from './notification.js';
 
 export default {
   ...healthPaths,
@@ -42,5 +43,6 @@ export default {
   ...emergencyPaths,
   ...maintenancePlanPaths,
   ...maintenancePaths,
+  ...notificationPaths,
 };
 

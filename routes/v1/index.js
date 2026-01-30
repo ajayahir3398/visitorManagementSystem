@@ -19,6 +19,7 @@ import emergencyRoutes from './emergencyRoutes.js';
 import publicRoutes from './publicRoutes.js';
 import maintenancePlanRoutes from './maintenancePlanRoutes.js';
 import maintenanceRoutes from './maintenanceRoutes.js';
+import notificationRoutes from './notificationRoutes.js';
 
 const router = express.Router();
 
@@ -46,6 +47,7 @@ router.use('/notices', noticeRoutes);
 router.use('/emergencies', emergencyRoutes);
 router.use('/maintenance-plans', maintenancePlanRoutes);
 router.use('/maintenance', maintenanceRoutes);
+router.use('/notifications', notificationRoutes);
 
 export default router;
 
