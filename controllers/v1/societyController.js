@@ -9,7 +9,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const createSociety = async (req, res) => {
   try {
-    const { name, type, address, city, state, pincode, subscriptionId } = req.body;
+    const { name, type, address, city, state, pincode, subscriptionId, razorpayKey } = req.body;
 
     // Validation
     if (!name || !type) {
@@ -41,6 +41,7 @@ export const createSociety = async (req, res) => {
           city,
           state,
           pincode,
+          razorpayKey,
           subscriptionId,
           status: 'active',
         },
@@ -210,7 +211,7 @@ export const updateSociety = async (req, res) => {
   try {
     const { id } = req.params;
     const societyId = parseInt(id);
-    const { name, type, address, city, state, pincode, subscriptionId, status } = req.body;
+    const { name, type, address, city, state, pincode, subscriptionId, status, razorpayKey } = req.body;
 
     if (isNaN(societyId)) {
       return res.status(400).json({
@@ -273,6 +274,7 @@ export const updateSociety = async (req, res) => {
     if (city !== undefined) updateData.city = city;
     if (state !== undefined) updateData.state = state;
     if (pincode !== undefined) updateData.pincode = pincode;
+    if (razorpayKey !== undefined) updateData.razorpayKey = razorpayKey;
 
     // Only SUPER_ADMIN can update these
     if (req.user.role_name === 'SUPER_ADMIN') {
@@ -294,6 +296,7 @@ export const updateSociety = async (req, res) => {
     if (city !== undefined && city !== existingSociety.city) changes.push(`city: "${existingSociety.city || 'N/A'}" → "${city || 'N/A'}"`);
     if (state !== undefined && state !== existingSociety.state) changes.push(`state: "${existingSociety.state || 'N/A'}" → "${state || 'N/A'}"`);
     if (pincode !== undefined && pincode !== existingSociety.pincode) changes.push('pincode updated');
+    if (razorpayKey !== undefined && razorpayKey !== existingSociety.razorpayKey) changes.push('razorpayKey updated');
     if (subscriptionId !== undefined && subscriptionId !== existingSociety.subscriptionId) changes.push(`subscriptionId: ${existingSociety.subscriptionId || 'N/A'} → ${subscriptionId || 'N/A'}`);
 
     const description = changes.length > 0

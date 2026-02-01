@@ -27,6 +27,7 @@ model Society {
   city              String?                  @db.VarChar(100)
   state             String?                  @db.VarChar(100)
   pincode           String?                  @db.VarChar(10)
+  razorpayKey       String?                  @map("razorpay_key") @db.VarChar(255) // Razorpay key for society maintenance account
   subscriptionId    Int?                     @map("subscription_id")
   status            String                   @default("active") @db.VarChar(20) // active / expired
   createdAt         DateTime                 @default(now()) @map("created_at")

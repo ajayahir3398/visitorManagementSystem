@@ -35,6 +35,12 @@ export default {
         nullable: true,
         example: '400001',
       },
+      razorpayKey: {
+        type: 'string',
+        nullable: true,
+        description: 'Razorpay API key for society maintenance account',
+        example: 'rzp_live_xxxxxxxxxxxxx',
+      },
       subscriptionId: {
         type: 'integer',
         nullable: true,
@@ -90,6 +96,12 @@ export default {
         nullable: true,
         example: '400001',
       },
+      razorpayKey: {
+        type: 'string',
+        nullable: true,
+        description: 'Razorpay API key for society maintenance account',
+        example: 'rzp_live_xxxxxxxxxxxxx',
+      },
       subscriptionId: {
         type: 'integer',
         nullable: true,
@@ -128,6 +140,12 @@ export default {
         type: 'string',
         nullable: true,
         example: '400001',
+      },
+      razorpayKey: {
+        type: 'string',
+        nullable: true,
+        description: 'Razorpay API key for society maintenance account',
+        example: 'rzp_live_xxxxxxxxxxxxx',
       },
       subscriptionId: {
         type: 'integer',
