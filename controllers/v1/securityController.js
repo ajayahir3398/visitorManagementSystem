@@ -129,7 +129,7 @@ export const getSecurityDashboard = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         unit: {
@@ -185,7 +185,7 @@ export const getSecurityDashboard = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         unit: {

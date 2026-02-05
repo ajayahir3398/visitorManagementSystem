@@ -59,6 +59,7 @@ POST /api/v1/visitor-logs
   "gateId": 1,
   "unitId": 5,
   "purpose": "Delivery",
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
   "entryTime": "2024-01-01T10:00:00.000Z"
 }
 ```
@@ -72,6 +73,7 @@ POST /api/v1/visitor-logs
 | `unitId` | integer | Conditional | Unit ID (required if `flatNo` not provided) |
 | `flatNo` | string | Conditional | Flat/Unit number (required if `unitId` not provided, for backward compatibility) |
 | `purpose` | string | No | Purpose of visit |
+| `photoBase64` | string | No | Base64 data URI for visitor's photo (updates visitor record) |
 | `entryTime` | string (ISO 8601) | No | Entry time (defaults to current time if not provided) |
 
 **Note**: Either `unitId` or `flatNo` must be provided.
@@ -100,7 +102,7 @@ POST /api/v1/visitor-logs
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg"
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
       },
       "gate": {
         "id": 1,
@@ -536,7 +538,7 @@ All fields are optional.
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg"
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
       },
       "gate": {
         "id": 1,
@@ -727,7 +729,7 @@ GET /api/v1/visitor-logs/active?page=1&limit=10&gateId=1
           "id": 1,
           "name": "John Doe",
           "mobile": "1234567890",
-          "photoUrl": "https://example.com/photo.jpg"
+          "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
         },
         "gate": {
           "id": 1,
@@ -983,7 +985,7 @@ GET /api/v1/visitor-logs?page=1&limit=10&status=approved&date=2024-01-01&search=
           "id": 1,
           "name": "John Doe",
           "mobile": "1234567890",
-          "photoUrl": "https://example.com/photo.jpg"
+          "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
         },
         "gate": {
           "id": 1,
@@ -1206,7 +1208,7 @@ GET /api/v1/visitor-logs/:id
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg"
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
       },
       "gate": {
         "id": 1,
@@ -1337,9 +1339,9 @@ const VisitorLogDetailScreen = ({ route, navigation }) => {
   return (
     <ScrollView style={{ flex: 1, padding: 20 }}>
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
-        {log.visitor.photoUrl && (
+        {log.visitor.photoBase64 && (
           <Image
-            source={{ uri: log.visitor.photoUrl }}
+            source={{ uri: log.visitor.photoBase64 }}
             style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 10 }}
           />
         )}

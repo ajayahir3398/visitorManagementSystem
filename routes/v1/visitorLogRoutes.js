@@ -39,6 +39,7 @@ const validateCreateEntry = [
   body('unitId').optional().isInt().withMessage('unitId must be an integer'),
   body('flatNo').optional().isString().trim(),
   body('purpose').optional().isString().trim(),
+  body('photoBase64').optional().isString().withMessage('photoBase64 must be a string'),
   body('entryTime').optional().isISO8601().withMessage('entryTime must be a valid ISO 8601 date'),
   handleValidationErrors,
 ];

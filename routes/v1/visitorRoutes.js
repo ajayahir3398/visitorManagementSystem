@@ -33,7 +33,7 @@ const validateCreateVisitor = [
     .withMessage('Mobile is required')
     .matches(/^[0-9]{10}$/)
     .withMessage('Mobile must be 10 digits'),
-  body('photoUrl').optional().isString().withMessage('photoUrl must be a string'),
+  body('photoBase64').optional().isString().withMessage('photoBase64 must be a string'),
   handleValidationErrors,
 ];
 
@@ -43,7 +43,7 @@ const validateUpdateVisitor = [
     .optional()
     .matches(/^[0-9]{10}$/)
     .withMessage('Mobile must be 10 digits'),
-  body('photoUrl').optional().isString().withMessage('photoUrl must be a string'),
+  body('photoBase64').optional().isString().withMessage('photoBase64 must be a string'),
   handleValidationErrors,
 ];
 

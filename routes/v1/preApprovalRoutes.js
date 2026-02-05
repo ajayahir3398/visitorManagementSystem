@@ -28,6 +28,7 @@ const handleValidationErrors = (req, res, next) => {
 const validateCreatePreApproval = [
   body('guestName').optional().isString().trim(),
   body('guestMobile').optional().isString().trim(),
+  body('photoBase64').optional().isString().withMessage('photoBase64 must be a string'),
   body('validFrom')
     .notEmpty()
     .withMessage('validFrom is required')

@@ -1,6 +1,9 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { normalizeBase64Image } from '../../utils/image.js';
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 /**
  * Generate a unique 6-digit access code
@@ -18,7 +21,7 @@ const generateAccessCode = (prefix = 'GV') => {
  */
 export const createPreApproval = async (req, res) => {
   try {
-    const { guestName, guestMobile, validFrom, validTill, maxUses = 1, unitId } = req.body;
+    const { guestName, guestMobile, validFrom, validTill, maxUses = 1, unitId, photoBase64 } = req.body;
 
     // Get resident's units
     const userUnits = await prisma.unitMember.findMany({
@@ -95,6 +98,18 @@ export const createPreApproval = async (req, res) => {
       });
     }
 
+    let normalizedPhoto = null;
+    if (photoBase64 !== undefined) {
+      try {
+        normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: error.message || 'Invalid photo data',
+        });
+      }
+    }
+
     // Generate unique access code
     let accessCode;
     let isUnique = false;
@@ -130,6 +145,7 @@ export const createPreApproval = async (req, res) => {
         residentId: req.user.id,
         guestName: guestName || null,
         guestMobile: guestMobile || null,
+        photoBase64: normalizedPhoto,
         accessCode,
         validFrom: validFromDate,
         validTill: validTillDate,
@@ -550,10 +566,18 @@ export const verifyPreApprovalCode = async (req, res) => {
           data: {
             name: preApproval.guestName,
             mobile: preApproval.guestMobile,
+            photoBase64: preApproval.photoBase64 || null,
           },
         });
         finalVisitorId = newVisitor.id;
       }
+    }
+
+    if (finalVisitorId && preApproval.photoBase64) {
+      await prisma.visitor.update({
+        where: { id: finalVisitorId },
+        data: { photoBase64: preApproval.photoBase64 },
+      });
     }
 
     // Fix sequence if out of sync
@@ -578,7 +602,7 @@ export const verifyPreApprovalCode = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         unit: {
@@ -645,5 +669,3 @@ export const verifyPreApprovalCode = async (req, res) => {
     });
   }
 };
-
-

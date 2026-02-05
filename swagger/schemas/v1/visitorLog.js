@@ -67,7 +67,12 @@ export default {
           id: { type: 'integer', example: 1 },
           name: { type: 'string', example: 'John Doe' },
           mobile: { type: 'string', example: '1234567890' },
-          photoUrl: { type: 'string', nullable: true },
+          photoBase64: {
+            type: 'string',
+            nullable: true,
+            example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+            description: 'Base64 data URI for the visitor photo',
+          },
         },
       },
       gate: {
@@ -133,6 +138,12 @@ export default {
         nullable: true,
         example: 'Delivery',
         description: 'Purpose of visit',
+      },
+      photoBase64: {
+        type: 'string',
+        nullable: true,
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the visitor photo (updates visitor record)',
       },
       entryTime: {
         type: 'string',

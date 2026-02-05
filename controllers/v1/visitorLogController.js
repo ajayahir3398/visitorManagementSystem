@@ -2,6 +2,9 @@ import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
 import { sendNotificationToUnitResidents } from '../../utils/notificationHelper.js';
+import { normalizeBase64Image } from '../../utils/image.js';
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 /**
  * Create visitor entry (log)
@@ -10,7 +13,7 @@ import { sendNotificationToUnitResidents } from '../../utils/notificationHelper.
  */
 export const createVisitorEntry = async (req, res) => {
   try {
-    const { visitorId, gateId, unitId, flatNo, purpose } = req.body;
+    const { visitorId, gateId, unitId, flatNo, purpose, photoBase64 } = req.body;
 
     // Validation
     if (!visitorId || !gateId) {
@@ -46,6 +49,22 @@ export const createVisitorEntry = async (req, res) => {
         success: false,
         message: 'Visitor not found',
       });
+    }
+
+    // Update visitor photo if base64 is provided
+    if (photoBase64 !== undefined) {
+      try {
+        const normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+        await prisma.visitor.update({
+          where: { id: parseInt(visitorId) },
+          data: { photoBase64: normalizedPhoto },
+        });
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: error.message || 'Invalid photo data',
+        });
+      }
     }
 
     // Check if gate exists and belongs to security's society
@@ -134,7 +153,7 @@ export const createVisitorEntry = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         gate: {
@@ -296,7 +315,7 @@ export const markVisitorExit = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         gate: {
@@ -498,7 +517,7 @@ export const getVisitorLogs = async (req, res) => {
               id: true,
               name: true,
               mobile: true,
-              photoUrl: true,
+              photoBase64: true,
             },
           },
           gate: {
@@ -582,7 +601,7 @@ export const getVisitorLogById = async (req, res) => {
             id: true,
             name: true,
             mobile: true,
-            photoUrl: true,
+            photoBase64: true,
           },
         },
         gate: {
@@ -764,7 +783,7 @@ export const getActiveEntries = async (req, res) => {
               id: true,
               name: true,
               mobile: true,
-              photoUrl: true,
+              photoBase64: true,
             },
           },
           gate: {
@@ -813,4 +832,3 @@ export const getActiveEntries = async (req, res) => {
     });
   }
 };
-

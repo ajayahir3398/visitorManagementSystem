@@ -121,7 +121,7 @@ None
           "id": 1,
           "name": "Rahul",
           "mobile": "9876543210",
-          "photoUrl": null
+          "photoBase64": null
         },
         "unit": {
           "id": 1,
@@ -143,7 +143,7 @@ None
           "id": 2,
           "name": "Swiggy",
           "mobile": "9876543211",
-          "photoUrl": null
+          "photoBase64": null
         },
         "unit": {
           "id": 2,
@@ -167,7 +167,7 @@ None
           "id": 3,
           "name": "Ramesh",
           "mobile": "9876543212",
-          "photoUrl": null
+          "photoBase64": null
         },
         "unit": {
           "id": 3,
@@ -187,7 +187,7 @@ None
           "id": 4,
           "name": "Amazon",
           "mobile": "9876543213",
-          "photoUrl": null
+          "photoBase64": null
         },
         "unit": {
           "id": 4,
@@ -246,7 +246,7 @@ None
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | integer | Visitor log ID |
-| `visitor` | object | Visitor information (id, name, mobile, photoUrl) |
+| `visitor` | object | Visitor information (id, name, mobile, photoBase64) |
 | `unit` | object \| null | Unit information (id, unitNo, unitType) |
 | `gate` | object | Gate information (id, name) |
 | `waitTime` | integer | Waiting time in minutes |
@@ -259,7 +259,7 @@ None
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | integer | Visitor log ID |
-| `visitor` | object | Visitor information (id, name, mobile, photoUrl) |
+| `visitor` | object | Visitor information (id, name, mobile, photoBase64) |
 | `unit` | object \| null | Unit information (id, unitNo, unitType) |
 | `gate` | object | Gate information (id, name) |
 | `entryTime` | string (ISO 8601) \| null | When the visitor entered |

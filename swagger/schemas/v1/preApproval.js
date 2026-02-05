@@ -28,6 +28,12 @@ export default {
         nullable: true,
         example: '9876543210',
       },
+      photoBase64: {
+        type: 'string',
+        nullable: true,
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the guest photo (optional)',
+      },
       accessCode: {
         type: 'string',
         example: 'GV-483921',
@@ -102,6 +108,12 @@ export default {
         nullable: true,
         example: '9876543210',
         description: 'Mobile number of the guest (optional)',
+      },
+      photoBase64: {
+        type: 'string',
+        nullable: true,
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the guest photo (optional)',
       },
       validFrom: {
         type: 'string',

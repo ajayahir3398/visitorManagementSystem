@@ -1,6 +1,9 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { normalizeBase64Image } from '../../utils/image.js';
+
+const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 
 /**
  * Create a new visitor
@@ -9,7 +12,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const createVisitor = async (req, res) => {
   try {
-    const { name, mobile, photoUrl } = req.body;
+    const { name, mobile, photoBase64 } = req.body;
 
     // Validation
     if (!name || !mobile) {
@@ -25,6 +28,18 @@ export const createVisitor = async (req, res) => {
         success: false,
         message: 'Mobile must be 10 digits',
       });
+    }
+
+    let normalizedPhoto = null;
+    if (photoBase64 !== undefined) {
+      try {
+        normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: error.message || 'Invalid photo data',
+        });
+      }
     }
 
     // Check if visitor with same mobile already exists
@@ -49,7 +64,7 @@ export const createVisitor = async (req, res) => {
       data: {
         name: name.trim(),
         mobile,
-        photoUrl: photoUrl || null,
+        photoBase64: normalizedPhoto,
       },
     });
 
@@ -248,7 +263,7 @@ export const updateVisitor = async (req, res) => {
   try {
     const { id } = req.params;
     const visitorId = parseInt(id);
-    const { name, mobile, photoUrl } = req.body;
+    const { name, mobile, photoBase64 } = req.body;
 
     if (isNaN(visitorId)) {
       return res.status(400).json({
@@ -295,7 +310,16 @@ export const updateVisitor = async (req, res) => {
     const updateData = {};
     if (name) updateData.name = name.trim();
     if (mobile) updateData.mobile = mobile;
-    if (photoUrl !== undefined) updateData.photoUrl = photoUrl;
+    if (photoBase64 !== undefined) {
+      try {
+        updateData.photoBase64 = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+      } catch (error) {
+        return res.status(400).json({
+          success: false,
+          message: error.message || 'Invalid photo data',
+        });
+      }
+    }
 
     const visitor = await prisma.visitor.update({
       where: { id: visitorId },
@@ -306,7 +330,9 @@ export const updateVisitor = async (req, res) => {
     const changes = [];
     if (name && name.trim() !== existingVisitor.name) changes.push(`name: "${existingVisitor.name}" → "${name.trim()}"`);
     if (mobile && mobile !== existingVisitor.mobile) changes.push(`mobile: "${existingVisitor.mobile}" → "${mobile}"`);
-    if (photoUrl !== undefined && photoUrl !== existingVisitor.photoUrl) changes.push('photo updated');
+    if (photoBase64 !== undefined && updateData.photoBase64 !== existingVisitor.photoBase64) {
+      changes.push('photo updated');
+    }
 
     const description = changes.length > 0
       ? `Visitor "${visitor.name}" updated: ${changes.join(', ')}`
@@ -467,7 +493,7 @@ export const searchVisitors = async (req, res) => {
         id: true,
         name: true,
         mobile: true,
-        photoUrl: true,
+        photoBase64: true,
         createdAt: true,
       },
     });

@@ -14,10 +14,11 @@ export default {
         type: 'string',
         example: '1234567890',
       },
-      photoUrl: {
+      photoBase64: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/photo.jpg',
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the visitor photo',
       },
       createdAt: {
         type: 'string',
@@ -40,10 +41,11 @@ export default {
         example: '1234567890',
         description: '10-digit mobile number',
       },
-      photoUrl: {
+      photoBase64: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/photo.jpg',
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the visitor photo',
       },
     },
   },
@@ -59,10 +61,11 @@ export default {
         pattern: '^[0-9]{10}$',
         example: '1234567890',
       },
-      photoUrl: {
+      photoBase64: {
         type: 'string',
         nullable: true,
-        example: 'https://example.com/photo.jpg',
+        example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+        description: 'Base64 data URI for the visitor photo',
       },
     },
   },

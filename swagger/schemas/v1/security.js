@@ -100,10 +100,10 @@ export default {
             type: 'string',
             example: '9876543210',
           },
-          photoUrl: {
+          photoBase64: {
             type: 'string',
             nullable: true,
-            example: 'https://example.com/photo.jpg',
+            example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
           },
         },
       },
@@ -182,10 +182,10 @@ export default {
             type: 'string',
             example: '9876543211',
           },
-          photoUrl: {
+          photoBase64: {
             type: 'string',
             nullable: true,
-            example: 'https://example.com/photo2.jpg',
+            example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
           },
         },
       },

@@ -53,7 +53,7 @@ export default {
                         id: 1,
                         name: 'Rahul',
                         mobile: '9876543210',
-                        photoUrl: null,
+                        photoBase64: null,
                       },
                       unit: {
                         id: 1,
@@ -77,7 +77,7 @@ export default {
                         id: 2,
                         name: 'Ramesh',
                         mobile: '9876543211',
-                        photoUrl: null,
+                        photoBase64: null,
                       },
                       unit: {
                         id: 2,

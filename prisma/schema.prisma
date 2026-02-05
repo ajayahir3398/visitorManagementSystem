@@ -218,7 +218,7 @@ model Visitor {
   id          Int          @id @default(autoincrement())
   name        String       @db.VarChar(255)
   mobile      String       @db.VarChar(20)
-  photoUrl    String?      @map("photo_url") @db.VarChar(500)
+  photoBase64 String?      @map("photo_url") @db.Text
   createdAt   DateTime     @default(now()) @map("created_at")
   visitorLogs VisitorLog[]
 
@@ -331,6 +331,7 @@ model PreApprovedGuest {
   residentId  Int          @map("resident_id")
   guestName   String?      @map("guest_name") @db.VarChar(255)
   guestMobile String?      @map("guest_mobile") @db.VarChar(20)
+  photoBase64 String?      @map("photo_base64") @db.Text
   accessCode  String       @unique @map("access_code") @db.VarChar(20)
   validFrom   DateTime     @map("valid_from")
   validTill   DateTime     @map("valid_till")

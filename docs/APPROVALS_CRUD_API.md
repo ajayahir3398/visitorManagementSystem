@@ -81,7 +81,7 @@ GET /api/v1/approvals/pending
           "id": 1,
           "name": "John Doe",
           "mobile": "1234567890",
-          "photoUrl": "https://example.com/photo.jpg"
+          "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
         },
         "unit": {
           "id": 5,
@@ -118,7 +118,7 @@ GET /api/v1/approvals/pending
 | `visitorLogs` | array | Array of pending visitor log entries |
 | `visitorLogs[].id` | integer | Visitor log ID |
 | `visitorLogs[].status` | string | Status: "pending" |
-| `visitorLogs[].visitor` | object | Visitor information (id, name, mobile, photoUrl) |
+| `visitorLogs[].visitor` | object | Visitor information (id, name, mobile, photoBase64) |
 | `visitorLogs[].unit` | object | Unit information (id, unitNo, unitType) |
 | `visitorLogs[].gate` | object | Gate information (id, name) |
 | `visitorLogs[].purpose` | string | Purpose of visit |
@@ -220,7 +220,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg"
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
       },
       "unit": {
         "id": 5,
@@ -418,7 +418,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg"
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
       },
       "unit": {
         "id": 5,

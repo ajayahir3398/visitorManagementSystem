@@ -14,7 +14,7 @@ export default {
             example: {
               name: 'John Doe',
               mobile: '1234567890',
-              photoUrl: 'https://example.com/photo.jpg',
+              photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
             },
           },
         },

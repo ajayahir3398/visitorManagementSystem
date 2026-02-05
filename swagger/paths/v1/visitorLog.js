@@ -18,6 +18,7 @@ export default {
               unitId: 1,
               flatNo: 'A-101',
               purpose: 'Delivery',
+              photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
               entryTime: '2024-01-01T10:00:00.000Z',
             },
           },

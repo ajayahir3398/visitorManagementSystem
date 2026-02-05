@@ -57,7 +57,7 @@ POST /api/v1/visitors
 {
   "name": "John Doe",
   "mobile": "1234567890",
-  "photoUrl": "https://example.com/photo.jpg"
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
 }
 ```
 
@@ -67,7 +67,7 @@ POST /api/v1/visitors
 |-------|------|----------|-------------|
 | `name` | string | Yes | Visitor's full name |
 | `mobile` | string | Yes | 10-digit mobile number |
-| `photoUrl` | string | No | URL to visitor's photo |
+| `photoBase64` | string | No | Base64 data URI for visitor's photo |
 
 ### Success Response (201) - New Visitor Created
 
@@ -80,7 +80,7 @@ POST /api/v1/visitors
       "id": 1,
       "name": "John Doe",
       "mobile": "1234567890",
-      "photoUrl": "https://example.com/photo.jpg",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
       "createdAt": "2024-01-01T00:00:00.000Z"
     }
   }
@@ -100,7 +100,7 @@ If a visitor with the same mobile number already exists, the API returns the exi
       "id": 1,
       "name": "John Doe",
       "mobile": "1234567890",
-      "photoUrl": "https://example.com/photo.jpg",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
       "createdAt": "2024-01-01T00:00:00.000Z"
     }
   }
@@ -143,7 +143,7 @@ const createVisitor = async (visitorData) => {
     const response = await apiClient.post('/visitors', {
       name: visitorData.name.trim(),
       mobile: visitorData.mobile,
-      photoUrl: visitorData.photoUrl || null,
+      photoBase64: visitorData.photoBase64 || null,
     });
 
     if (response.data.success) {
@@ -179,7 +179,7 @@ const handleCreateVisitor = async () => {
     const visitor = await createVisitor({
       name: 'John Doe',
       mobile: '1234567890',
-      photoUrl: 'https://example.com/photo.jpg',
+      photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
     });
     Alert.alert('Success', 'Visitor processed successfully');
     // Navigate or refresh list
@@ -200,7 +200,7 @@ import * as ImagePicker from 'expo-image-picker';
 const CreateVisitorScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
-  const [photoUrl, setPhotoUrl] = useState(null);
+  const [photoBase64, setPhotoBase64] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -210,13 +210,16 @@ const CreateVisitorScreen = ({ navigation }) => {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
+      base64: true,
     });
 
     if (!result.canceled) {
       setUploading(true);
-      // Upload image to your storage service and get URL
-      // const url = await uploadImage(result.assets[0].uri);
-      // setPhotoUrl(url);
+      const asset = result.assets[0];
+      if (asset?.base64) {
+        const mime = asset.mimeType || 'image/jpeg';
+        setPhotoBase64(`data:${mime};base64,${asset.base64}`);
+      }
       setUploading(false);
     }
   };
@@ -237,7 +240,7 @@ const CreateVisitorScreen = ({ navigation }) => {
       const response = await apiClient.post('/visitors', {
         name: name.trim(),
         mobile,
-        photoUrl,
+        photoBase64,
       });
 
       if (response.data.success) {
@@ -294,9 +297,9 @@ const CreateVisitorScreen = ({ navigation }) => {
         maxLength={10}
         editable={!loading}
       />
-      {photoUrl && (
+      {photoBase64 && (
         <Image
-          source={{ uri: photoUrl }}
+          source={{ uri: photoBase64 }}
           style={{ width: 100, height: 100, marginBottom: 15, borderRadius: 50 }}
         />
       )}
@@ -360,7 +363,7 @@ GET /api/v1/visitors?page=1&limit=10&search=John
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg",
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "_count": {
           "visitorLogs": 5
@@ -370,7 +373,7 @@ GET /api/v1/visitors?page=1&limit=10&search=John
         "id": 2,
         "name": "Jane Smith",
         "mobile": "9876543210",
-        "photoUrl": null,
+        "photoBase64": null,
         "createdAt": "2024-01-02T00:00:00.000Z",
         "_count": {
           "visitorLogs": 3
@@ -483,9 +486,9 @@ const VisitorsListScreen = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={{ padding: 15, borderBottomWidth: 1 }}>
-            {item.photoUrl && (
+            {item.photoBase64 && (
               <Image
-                source={{ uri: item.photoUrl }}
+                source={{ uri: item.photoBase64 }}
                 style={{ width: 50, height: 50, borderRadius: 25, marginBottom: 10 }}
               />
             )}
@@ -604,14 +607,14 @@ GET /api/v1/visitors/search?q=John&limit=10
         "id": 1,
         "name": "John Doe",
         "mobile": "1234567890",
-        "photoUrl": "https://example.com/photo.jpg",
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
         "createdAt": "2024-01-01T00:00:00.000Z"
       },
       {
         "id": 3,
         "name": "Johnny Smith",
         "mobile": "1111111111",
-        "photoUrl": null,
+        "photoBase64": null,
         "createdAt": "2024-01-03T00:00:00.000Z"
       }
     ]
@@ -698,9 +701,9 @@ const VisitorSearchScreen = ({ onSelectVisitor }) => {
             style={{ padding: 15, borderBottomWidth: 1 }}
             onPress={() => onSelectVisitor(item)}
           >
-            {item.photoUrl && (
+            {item.photoBase64 && (
               <Image
-                source={{ uri: item.photoUrl }}
+                source={{ uri: item.photoBase64 }}
                 style={{ width: 40, height: 40, borderRadius: 20, marginBottom: 5 }}
               />
             )}
@@ -785,7 +788,7 @@ GET /api/v1/visitors/:id
       "id": 1,
       "name": "John Doe",
       "mobile": "1234567890",
-      "photoUrl": "https://example.com/photo.jpg",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "_count": {
         "visitorLogs": 5
@@ -877,9 +880,9 @@ const VisitorDetailScreen = ({ route }) => {
 
   return (
     <View style={{ padding: 20 }}>
-      {visitor.photoUrl && (
+      {visitor.photoBase64 && (
         <Image
-          source={{ uri: visitor.photoUrl }}
+          source={{ uri: visitor.photoBase64 }}
           style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 20, alignSelf: 'center' }}
         />
       )}
@@ -964,7 +967,7 @@ All fields are optional. Only include fields you want to update.
 {
   "name": "John Smith",
   "mobile": "9876543210",
-  "photoUrl": "https://example.com/new-photo.jpg"
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
 }
 ```
 
@@ -974,7 +977,7 @@ All fields are optional. Only include fields you want to update.
 |-------|------|----------|-------------|
 | `name` | string | No | Visitor's full name |
 | `mobile` | string | No | 10-digit mobile number (must be unique if changed) |
-| `photoUrl` | string | No | URL to visitor's photo (use `null` to clear) |
+| `photoBase64` | string | No | Base64 data URI for visitor's photo (use `null` to clear) |
 
 ### Success Response (200)
 
@@ -987,7 +990,7 @@ All fields are optional. Only include fields you want to update.
       "id": 1,
       "name": "John Smith",
       "mobile": "9876543210",
-      "photoUrl": "https://example.com/new-photo.jpg",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
       "createdAt": "2024-01-01T00:00:00.000Z"
     }
   }
@@ -1039,7 +1042,7 @@ const updateVisitor = async (visitorId, updateData) => {
     const payload = {};
     if (updateData.name) payload.name = updateData.name.trim();
     if (updateData.mobile) payload.mobile = updateData.mobile;
-    if (updateData.photoUrl !== undefined) payload.photoUrl = updateData.photoUrl;
+    if (updateData.photoBase64 !== undefined) payload.photoBase64 = updateData.photoBase64;
 
     const response = await apiClient.put(`/visitors/${visitorId}`, payload);
 
@@ -1092,7 +1095,7 @@ const VisitorEditScreen = ({ route, navigation }) => {
   const { visitor } = route.params;
   const [name, setName] = useState(visitor.name);
   const [mobile, setMobile] = useState(visitor.mobile);
-  const [photoUrl, setPhotoUrl] = useState(visitor.photoUrl);
+  const [photoBase64, setPhotoBase64] = useState(visitor.photoBase64);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -1111,7 +1114,7 @@ const VisitorEditScreen = ({ route, navigation }) => {
       const response = await apiClient.put(`/visitors/${visitor.id}`, {
         name: name.trim(),
         mobile,
-        photoUrl: photoUrl || null,
+        photoBase64: photoBase64 || null,
       });
 
       if (response.data.success) {
@@ -1171,14 +1174,14 @@ const VisitorEditScreen = ({ route, navigation }) => {
           marginBottom: 15,
           borderRadius: 5,
         }}
-        placeholder="Photo URL"
-        value={photoUrl || ''}
-        onChangeText={setPhotoUrl}
+        placeholder="Photo (Base64)"
+        value={photoBase64 || ''}
+        onChangeText={setPhotoBase64}
         editable={!loading}
       />
-      {photoUrl && (
+      {photoBase64 && (
         <Image
-          source={{ uri: photoUrl }}
+          source={{ uri: photoBase64 }}
           style={{ width: 100, height: 100, marginBottom: 15, borderRadius: 50 }}
         />
       )}
@@ -1321,12 +1324,12 @@ export const visitorService = {
   /**
    * Create a new visitor (or get existing if mobile matches)
    */
-  create: async (name, mobile, photoUrl = null) => {
+  create: async (name, mobile, photoBase64 = null) => {
     try {
       const response = await apiClient.post('/visitors', {
         name: name.trim(),
         mobile,
-        photoUrl,
+        photoBase64,
       });
 
       if (response.data.success) {
@@ -1417,7 +1420,7 @@ export const visitorService = {
       const payload = {};
       if (updateData.name) payload.name = updateData.name.trim();
       if (updateData.mobile) payload.mobile = updateData.mobile;
-      if (updateData.photoUrl !== undefined) payload.photoUrl = updateData.photoUrl;
+      if (updateData.photoBase64 !== undefined) payload.photoBase64 = updateData.photoBase64;
 
       const response = await apiClient.put(`/visitors/${visitorId}`, payload);
 
@@ -1609,12 +1612,12 @@ You must:
 - This count is included in list and detail responses
 - Use this information to determine if a visitor can be safely deleted
 
-### Photo URL
+### Photo (Base64)
 
-- `photoUrl` is optional and can be `null`
-- Store the full URL to the visitor's photo
+- `photoBase64` is optional and can be `null`
+- Store a base64 data URI (e.g., `data:image/jpeg;base64,...`) in `photoBase64`
 - When updating, pass `null` to clear the photo
-- Consider using a cloud storage service (AWS S3, Cloudinary, etc.) for photo storage
+- Keep images small (server enforces size limits)
 
 ### Search vs Get All
 

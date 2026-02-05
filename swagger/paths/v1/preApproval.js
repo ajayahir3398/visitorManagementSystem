@@ -12,6 +12,14 @@ export default {
             schema: {
               $ref: '#/components/schemas/CreatePreApprovalRequest',
             },
+            example: {
+              guestName: 'Rahul',
+              guestMobile: '9876543210',
+              photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
+              validFrom: '2024-01-20T08:00:00.000Z',
+              validTill: '2024-01-20T22:00:00.000Z',
+              maxUses: 1,
+            },
           },
         },
       },

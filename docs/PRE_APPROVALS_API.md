@@ -73,6 +73,7 @@ POST /api/v1/pre-approvals
   "unitId": 5,
   "guestName": "Rahul",
   "guestMobile": "9876543210",
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
   "validFrom": "2024-01-20T08:00:00.000Z",
   "validTill": "2024-01-20T22:00:00.000Z",
   "maxUses": 1
@@ -86,6 +87,7 @@ POST /api/v1/pre-approvals
 | `unitId` | integer | Yes | Unit ID where guest will visit |
 | `guestName` | string | No | Name of the guest (optional) |
 | `guestMobile` | string | No | Mobile number of the guest (optional, helps auto-create visitor) |
+| `photoBase64` | string | No | Base64 data URI for the guest photo (optional) |
 | `validFrom` | string (ISO 8601) | Yes | Code becomes valid from this time |
 | `validTill` | string (ISO 8601) | Yes | Code expires at this time |
 | `maxUses` | integer | No | Maximum number of times this code can be used (default: 1) |
@@ -104,6 +106,7 @@ POST /api/v1/pre-approvals
       "residentId": 10,
       "guestName": "Rahul",
       "guestMobile": "9876543210",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...",
       "accessCode": "GV-483921",
       "validFrom": "2024-01-20T08:00:00.000Z",
       "validTill": "2024-01-20T22:00:00.000Z",
@@ -138,6 +141,7 @@ POST /api/v1/pre-approvals
 | `preApproval.validTill` | string (ISO 8601) | Code expires at this time |
 | `preApproval.maxUses` | integer | Maximum number of uses |
 | `preApproval.usedCount` | integer | Current number of uses |
+| `preApproval.photoBase64` | string | Guest photo in base64 data URI format (optional) |
 | `preApproval.unit` | object | Unit information |
 | `preApproval.resident` | object | Resident information |
 
@@ -499,7 +503,7 @@ POST /api/v1/pre-approvals/verify
         "id": 1,
         "name": "Rahul",
         "mobile": "9876543210",
-        "photoUrl": null
+        "photoBase64": null
       },
       "unit": {
         "id": 5,
@@ -1476,6 +1480,7 @@ const createPreApproval = async () => {
       {
         guestName: 'Rahul',
         guestMobile: '9876543210',
+        photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
         maxUses: 1,
       }
     );
