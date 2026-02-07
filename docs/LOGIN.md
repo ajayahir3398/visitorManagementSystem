@@ -64,7 +64,7 @@ Completes authentication for Residents/Security.
         "id": 1,
         "name": "John Doe",
         "role": "RESIDENT",
-        ...
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
       },
       "accessToken": "ey...",
       "refreshToken": "ey..."

@@ -19,6 +19,7 @@ export default {
               societyId: 1,
               roleId: 2,
               status: 'active',
+              photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
             },
           },
         },

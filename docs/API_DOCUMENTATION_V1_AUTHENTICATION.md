@@ -72,7 +72,8 @@ For authenticated requests, include:
       "mobile": "1234567890",
       "role": "SUPER_ADMIN",
       "society_id": null,
-      "status": "active"
+      "status": "active",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
     },
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -280,7 +281,8 @@ if (result.success) {
       "mobile": "1234567890",
       "role": "RESIDENT",
       "society_id": 1,
-      "status": "active"
+      "status": "active",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
     },
     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
