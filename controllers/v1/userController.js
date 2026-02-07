@@ -13,7 +13,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const createUser = async (req, res) => {
   try {
-    const { name, email, mobile, password, societyId, roleId, status } = req.body;
+    const { name, email, mobile, password, societyId, roleId, status, photoBase64 } = req.body;
 
     // Validation
     if (!name || !mobile) {
@@ -114,6 +114,7 @@ export const createUser = async (req, res) => {
         roleId: role.id,
         societyId: societyId || null,
         status: status || 'active',
+        photoBase64: photoBase64 || null,
       },
       include: {
         role: true,
@@ -214,6 +215,7 @@ export const getUsers = async (req, res) => {
           name: true,
           email: true,
           mobile: true,
+          photoBase64: true,
           roleId: true,
           role: {
             select: {
@@ -285,6 +287,7 @@ export const getUserById = async (req, res) => {
         name: true,
         email: true,
         mobile: true,
+        photoBase64: true,
         roleId: true,
         role: {
           select: {
@@ -325,6 +328,14 @@ export const getUserById = async (req, res) => {
       });
     }
 
+    // If user is RESIDENT or SECURITY, only allow access to their own profile
+    if ((req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') && req.user.id !== user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only view your own profile.',
+      });
+    }
+
     res.json({
       success: true,
       message: 'User retrieved successfully',
@@ -349,7 +360,7 @@ export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = parseInt(id);
-    const { name, email, mobile, password, societyId, roleId, status } = req.body;
+    const { name, email, mobile, password, societyId, roleId, status, photoBase64 } = req.body;
 
     if (isNaN(userId)) {
       return res.status(400).json({
@@ -376,6 +387,24 @@ export const updateUser = async (req, res) => {
         success: false,
         message: 'Access denied. You can only update users from your society.',
       });
+    }
+
+    // If user is RESIDENT or SECURITY, only allow updating their own profile
+    if ((req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') && req.user.id !== existingUser.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. You can only update your own profile.',
+      });
+    }
+
+    // Restrict sensitive fields for non-admin users
+    if (req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') {
+      if (roleId || societyId || status) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You cannot update role, society, or status.',
+        });
+      }
     }
 
     // Validate mobile if provided
@@ -454,6 +483,7 @@ export const updateUser = async (req, res) => {
     if (password) updateData.passwordHash = passwordHash;
     if (societyId !== undefined) updateData.societyId = societyId;
     if (roleId) updateData.roleId = roleId;
+    if (photoBase64 !== undefined) updateData.photoBase64 = photoBase64;
     if (status) updateData.status = status;
 
     const user = await prisma.user.update({
@@ -464,6 +494,7 @@ export const updateUser = async (req, res) => {
         name: true,
         email: true,
         mobile: true,
+        photoBase64: true,
         roleId: true,
         role: {
           select: {

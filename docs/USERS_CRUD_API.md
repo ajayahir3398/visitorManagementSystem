@@ -61,7 +61,8 @@ POST /api/v1/users
   "password": "password123",
   "societyId": 1,
   "roleId": 2,
-  "status": "active"
+  "status": "active",
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
 }
 ```
 
@@ -76,6 +77,7 @@ POST /api/v1/users
 | `societyId` | integer | No | Society ID to assign user to |
 | `roleId` | integer | No | Role ID (defaults to SOCIETY_ADMIN if not provided) |
 | `status` | string | No | User status: `"active"` or `"blocked"` (default: `"active"`) |
+| `photoBase64` | string | No | Base64 encoded user profile photo (data URI format) |
 
 ### Role IDs Reference
 
@@ -97,6 +99,7 @@ Common role IDs (may vary based on your database):
       "name": "John Doe",
       "email": "john@example.com",
       "mobile": "1234567890",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
       "roleId": 2,
       "role": {
         "id": 2,
@@ -270,6 +273,7 @@ GET /api/v1/users?page=1&limit=10&status=active&roleId=2&societyId=1&search=john
         "name": "John Doe",
         "email": "john@example.com",
         "mobile": "1234567890",
+        "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
         "roleId": 2,
         "role": {
           "id": 2,
@@ -478,6 +482,7 @@ GET /api/v1/users/:id
       "name": "John Doe",
       "email": "john@example.com",
       "mobile": "1234567890",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
       "roleId": 2,
       "role": {
         "id": 2,
@@ -665,7 +670,8 @@ All fields are optional. Only include fields you want to update.
   "password": "newpassword123",
   "societyId": 2,
   "roleId": 3,
-  "status": "blocked"
+  "status": "blocked",
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
 }
 ```
 
@@ -680,6 +686,7 @@ All fields are optional. Only include fields you want to update.
 | `societyId` | integer | No | Society ID (use `null` to remove from society) |
 | `roleId` | integer | No | Role ID |
 | `status` | string | No | User status: `"active"` or `"blocked"` |
+| `photoBase64` | string | No | Base64 encoded user profile photo (use `null` to clear) |
 
 ### Success Response (200)
 
@@ -693,6 +700,7 @@ All fields are optional. Only include fields you want to update.
       "name": "John Doe Updated",
       "email": "john.updated@example.com",
       "mobile": "9876543210",
+      "photoBase64": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
       "roleId": 3,
       "role": {
         "id": 3,

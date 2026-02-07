@@ -44,6 +44,7 @@ export default {
       societyId: { type: 'integer', example: 1 },
       roleId: { type: 'integer', example: 2 },
       status: { type: 'string', enum: ['active', 'inactive'], example: 'active' },
+      photoBase64: { type: 'string', description: 'Base64 encoded user photo', nullable: true },
     },
   },
   UpdateUserRequest: {
@@ -55,6 +56,7 @@ export default {
       password: { type: 'string' },
       status: { type: 'string', enum: ['active', 'inactive', 'blocked'] },
       roleId: { type: 'integer' },
+      photoBase64: { type: 'string', description: 'Base64 encoded user photo', nullable: true },
     },
   },
   UserResponse: {
@@ -64,6 +66,7 @@ export default {
       name: { type: 'string', example: 'John Doe' },
       email: { type: 'string', example: 'john@example.com' },
       mobile: { type: 'string', example: '1234567890' },
+      photoBase64: { type: 'string', description: 'Base64 encoded user photo', nullable: true },
       societyId: { type: 'integer', example: 1 },
       roleId: { type: 'integer', example: 2 },
       status: { type: 'string', example: 'active' },

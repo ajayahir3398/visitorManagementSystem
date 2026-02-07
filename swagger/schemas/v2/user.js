@@ -33,6 +33,11 @@ export default {
         enum: ['active', 'blocked'],
         example: 'active',
       },
+      photoBase64: {
+        type: 'string',
+        description: 'Base64 encoded user photo',
+        nullable: true,
+      },
     },
   },
 };

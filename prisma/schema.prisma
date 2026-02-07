@@ -66,6 +66,7 @@ model User {
   passwordHash            String?              @map("password_hash") @db.VarChar(255)
   roleId                  Int                  @map("role_id")
   status                  String               @default("active") @db.VarChar(20)
+  photoBase64             String?              @map("photo_base64") @db.Text
   createdAt               DateTime             @default(now()) @map("created_at")
   updatedAt               DateTime             @updatedAt @map("updated_at")
   role                    Role                 @relation(fields: [roleId], references: [id])
