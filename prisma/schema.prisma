@@ -285,7 +285,7 @@ model Unit {
   unitNo            String             @map("unit_no") @db.VarChar(20) // A-302 / 201 / HR-01
   unitType          String?            @map("unit_type") @db.VarChar(20) // FLAT / OFFICE / SHOP
   floor             Int?
-  block             String?            @db.VarChar(20)
+  block             String             @db.VarChar(20)
   status            String             @default("ACTIVE") @db.VarChar(20) // ACTIVE / INACTIVE
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")

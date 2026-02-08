@@ -80,7 +80,7 @@ router.post(
 router.get(
   '/',
   authenticate,
-  authorize('RESIDENT'),
+  authorize('RESIDENT', 'SOCIETY_ADMIN', 'SECURITY'),
   getPreApprovals
 );
 
@@ -88,7 +88,7 @@ router.get(
 router.get(
   '/:id',
   authenticate,
-  authorize('RESIDENT'),
+  authorize('RESIDENT', 'SOCIETY_ADMIN', 'SECURITY'),
   validatePreApprovalId,
   getPreApprovalById
 );

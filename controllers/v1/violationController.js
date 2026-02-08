@@ -88,9 +88,18 @@ export const getViolations = async (req, res) => {
             societyId: parseInt(societyId),
         };
 
-        // If resident, only show own violations
+        // If resident, only show own violations (direct or unit-based)
         if (role === 'RESIDENT') {
-            where.violatorUserId = userId;
+            const unitMemberships = await prisma.unitMember.findMany({
+                where: { userId },
+                select: { unitId: true }
+            });
+            const unitIds = unitMemberships.map(um => um.unitId);
+
+            where.OR = [
+                { violatorUserId: userId },
+                { violatorUnitId: { in: unitIds } }
+            ];
         }
 
         if (status) {

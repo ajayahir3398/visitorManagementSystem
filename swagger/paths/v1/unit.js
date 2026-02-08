@@ -14,6 +14,7 @@ export default {
             example: {
               unitNo: 'A-302',
               societyId: 1,
+              block: 'A',
               unitType: 'FLAT',
               status: 'ACTIVE',
             },

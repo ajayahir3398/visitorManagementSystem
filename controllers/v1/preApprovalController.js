@@ -210,8 +210,13 @@ export const getPreApprovals = async (req, res) => {
 
     // Build where clause
     const where = {
-      residentId: req.user.id,
+      societyId: req.user.society_id,
     };
+
+    // If resident, only show own pre-approvals
+    if (req.user.role_name === 'RESIDENT') {
+      where.residentId = req.user.id;
+    }
 
     if (status) {
       where.status = status;
@@ -307,12 +312,23 @@ export const getPreApprovalById = async (req, res) => {
       });
     }
 
-    // Check if resident owns this pre-approval
-    if (preApproval.residentId !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You can only view your own pre-approvals.',
-      });
+    // Check permissions
+    if (req.user.role_name === 'RESIDENT') {
+      // Resident can only view their own
+      if (preApproval.residentId !== req.user.id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. You can only view your own pre-approvals.',
+        });
+      }
+    } else {
+      // Admin/Security can view any in their society
+      if (preApproval.societyId !== req.user.society_id) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Pre-approval does not belong to your society.',
+        });
+      }
     }
 
     res.json({

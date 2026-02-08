@@ -170,6 +170,14 @@ GET /api/v1/notices
   2. Notice `audience` (e.g., Security guards won't see 'Residents' notices)
   3. Notice `startDate` & `endDate` (must be currently active)
 
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `noticeType` | string | Filter by type (`General`, `Maintenance`, etc.) |
+| `priority` | string | Filter by priority (`High`, `Medium`, `Low`) |
+| `isRead` | boolean | Filter by read status (`true` for already read, `false` for unread) |
+
 ### Success Response (200)
 
 ```json

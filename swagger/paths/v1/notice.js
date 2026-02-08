@@ -17,6 +17,12 @@ export default {
                     schema: { type: 'string' },
                     description: 'Filter by priority',
                 },
+                {
+                    name: 'isRead',
+                    in: 'query',
+                    schema: { type: 'boolean' },
+                    description: 'Filter by read status (true/false)',
+                },
             ],
             responses: {
                 200: {

@@ -14,10 +14,10 @@ export const createUnit = async (req, res) => {
     const { unitNo, unitType, societyId, status, floor, block } = req.body;
 
     // Validation
-    if (!unitNo || !societyId) {
+    if (!unitNo || !societyId || !block) {
       return res.status(400).json({
         success: false,
-        message: 'unitNo and societyId are required',
+        message: 'unitNo, societyId, and block are required',
       });
     }
 
@@ -119,7 +119,7 @@ export const createUnit = async (req, res) => {
             unitType: req.body.unitType || null,
             societyId: parseInt(req.body.societyId),
             floor: req.body.floor ? parseInt(req.body.floor) : null,
-            block: req.body.block || null,
+            block: req.body.block,
             status: req.body.status || 'ACTIVE',
           },
           include: {
@@ -789,17 +789,17 @@ export const bulkUploadUnits = async (req, res) => {
           // Or keys might be case-sensitive depending on csv-parser config. Default is case-sensitive headers.
           // Let's assume headers are as specified: 'unit_no', 'unit_type', 'floor', 'block'
 
-          if (!row.unit_no) {
-            errors.push({ row, error: 'unit_no is required' });
+          if (!row.unit_no || !row.block) {
+            errors.push({ row, error: 'unit_no and block are required' });
             return;
           }
 
           units.push({
             societyId: req.user.society_id,
             unitNo: row.unit_no.trim(),
+            block: row.block.trim(),
             unitType: row.unit_type?.toUpperCase() || 'FLAT',
             floor: row.floor ? parseInt(row.floor) : null,
-            block: row.block?.trim() || null,
             status: 'ACTIVE',
           });
         })

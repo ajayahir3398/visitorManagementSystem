@@ -81,6 +81,8 @@ export const getNotices = async (req, res) => {
     try {
         const societyId = req.user.society_id;
         const role = req.user.role_name;
+        const userId = req.user.id;
+        const { isRead } = req.query;
         const now = new Date();
 
         if (!societyId) {
@@ -95,40 +97,62 @@ export const getNotices = async (req, res) => {
             isActive: true,
             startDate: { lte: now },
             endDate: { gte: now },
-            OR: [
-                { audience: 'All' },
-                { audience: role === 'SECURITY' ? 'Security' : 'Residents' },
-            ],
         };
 
-        // Owners and Tenants are both Residents in the audience context usually
+        // Audience filtering
         if (role === 'SOCIETY_ADMIN') {
-            // Admin can see everything for their society, regardless of audience filter or date (maybe they want to see scheduled?)
-            // But the prompt says "Active" notices. Let's stick to active for now.
-            delete where.OR; // Allow admin to see all audiences
+            // Admin can see everything
+        } else if (role === 'SECURITY') {
+            where.OR = [
+                { audience: 'All' },
+                { audience: 'Security' },
+            ];
         } else if (role === 'RESIDENT') {
-            // We could refine Resident into Owner/Tenant if audience supports it
+            // Get user's unit member role to refine audience
+            const unitMember = await prisma.unitMember.findFirst({
+                where: { userId },
+                select: { role: true }
+            });
+
+            const specificAudience = unitMember?.role === 'OWNER' ? 'Owners' :
+                unitMember?.role === 'TENANT' ? 'Tenants' : null;
+
             where.OR = [
                 { audience: 'All' },
                 { audience: 'Residents' },
-                // Add owner/tenant specific if needed
             ];
+
+            if (specificAudience) {
+                where.OR.push({ audience: specificAudience });
+            }
+        }
+
+        // Filter by Read Status
+        if (isRead !== undefined) {
+            const readStatus = isRead === 'true';
+            if (readStatus) {
+                where.reads = { some: { userId } };
+            } else {
+                where.reads = { none: { userId } };
+            }
         }
 
         const notices = await prisma.notice.findMany({
             where,
             include: {
+                _count: {
+                    select: { reads: true }
+                },
                 reads: {
                     include: {
                         user: {
                             select: {
                                 id: true,
                                 name: true,
-                                // unit: true // Assuming unit relation exists on user if needed, otherwise name is good
                             }
                         }
                     }
-                },
+                }
             },
             orderBy: [
                 { priority: 'desc' },
@@ -136,15 +160,18 @@ export const getNotices = async (req, res) => {
             ],
         });
 
-        // Map to include isRead flag and read details
+        // Map to standard response format
         const formattedNotices = notices.map(notice => {
-            const isRead = notice.reads.some(r => r.userId === req.user.id);
+            const isRead = notice.reads.some(r => r.userId === userId);
+            const otherReads = notice.reads.filter(r => r.userId !== userId);
+
             return {
                 ...notice,
                 isRead,
-                readCount: notice.reads.length,
-                readByUsers: notice.reads.map(r => r.user), // List of users who read it
-                reads: undefined, // specific reads array can be removed or kept based on preference, cleaning it up
+                readCount: otherReads.length,
+                readByUser: otherReads.map(r => r.user),
+                _count: undefined,
+                reads: undefined,
             };
         });
 
@@ -173,6 +200,7 @@ export const getNoticeById = async (req, res) => {
         const { id } = req.params;
         const noticeId = parseInt(id);
         const societyId = req.user.society_id;
+        const userId = req.user.id;
 
         if (!societyId) {
             return res.status(400).json({
@@ -187,6 +215,9 @@ export const getNoticeById = async (req, res) => {
                 societyId: parseInt(societyId),
             },
             include: {
+                _count: {
+                    select: { reads: true }
+                },
                 reads: {
                     include: {
                         user: {
@@ -196,7 +227,7 @@ export const getNoticeById = async (req, res) => {
                             }
                         }
                     }
-                },
+                }
             },
         });
 
@@ -207,15 +238,17 @@ export const getNoticeById = async (req, res) => {
             });
         }
 
-        const isRead = notice.reads.some(r => r.userId === req.user.id);
+        const isRead = notice.reads.some(r => r.userId === userId);
+        const otherReads = notice.reads.filter(r => r.userId !== userId);
 
         res.json({
             success: true,
             data: {
                 ...notice,
                 isRead,
-                readCount: notice.reads.length,
-                readByUsers: notice.reads.map(r => r.user),
+                readCount: otherReads.length,
+                readByUser: otherReads.map(r => r.user),
+                _count: undefined,
                 reads: undefined,
             },
         });

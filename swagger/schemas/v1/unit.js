@@ -27,7 +27,6 @@ export default {
       },
       block: {
         type: 'string',
-        nullable: true,
         example: 'B',
       },
       status: {
@@ -104,7 +103,7 @@ export default {
   },
   CreateUnitRequest: {
     type: 'object',
-    required: ['unitNo', 'societyId'],
+    required: ['unitNo', 'societyId', 'block'],
     properties: {
       unitNo: {
         type: 'string',
@@ -130,7 +129,6 @@ export default {
       },
       block: {
         type: 'string',
-        nullable: true,
         example: 'B',
         description: 'Block identifier',
         maxLength: 20,
@@ -161,7 +159,6 @@ export default {
       },
       block: {
         type: 'string',
-        nullable: true,
       },
       status: {
         type: 'string',
