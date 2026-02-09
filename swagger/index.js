@@ -20,12 +20,12 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 1111}`,
-        description: 'Development server',
+        url: 'https://visitormanagementsystem-10pj.onrender.com',
+        description: 'Production server',
       },
       {
-        url: 'https://api.example.com',
-        description: 'Production server',
+        url: `http://localhost:${process.env.PORT || 1111}`,
+        description: 'Development server',
       },
     ],
     components: {
