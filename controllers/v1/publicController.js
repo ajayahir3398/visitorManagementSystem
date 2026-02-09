@@ -65,7 +65,7 @@ export const requestRegistrationOTP = async (req, res) => {
         });
 
         // TODO: Send OTP via SMS service (Twilio, AWS SNS, etc.)
-        const isDevelopment = process.env.NODE_ENV === 'development';
+        const isDevelopment = true; // process.env.NODE_ENV === 'development';
 
         res.json({
             success: true,

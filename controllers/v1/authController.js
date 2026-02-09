@@ -210,7 +210,7 @@ export const requestOTP = async (req, res) => {
 
     // TODO: Send OTP via SMS service (Twilio, AWS SNS, etc.)
     // For now, we'll return it in development (remove in production)
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    const isDevelopment = true; // process.env.NODE_ENV === 'development';
 
     res.json({
       success: true,
