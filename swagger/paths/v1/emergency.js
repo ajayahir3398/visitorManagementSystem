@@ -2,7 +2,7 @@ export default {
     '/api/v1/emergencies': {
         post: {
             summary: 'Raise an Emergency (Residents, Security, or Society Admin)',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             requestBody: {
                 required: true,
@@ -27,7 +27,7 @@ export default {
         },
         get: {
             summary: 'Get Emergencies',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'status', in: 'query', schema: { type: 'string', enum: ['OPEN', 'ACKNOWLEDGED', 'RESOLVED'] } },
@@ -50,7 +50,7 @@ export default {
     '/api/v1/emergencies/{id}': {
         get: {
             summary: 'Get Emergency Timeline/Detail',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
@@ -72,7 +72,7 @@ export default {
     '/api/v1/emergencies/{id}/acknowledge': {
         post: {
             summary: 'Acknowledge an Emergency',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
@@ -95,7 +95,7 @@ export default {
     '/api/v1/emergencies/{id}/respond': {
         post: {
             summary: 'Add an Emergency Response Action',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },
@@ -125,7 +125,7 @@ export default {
     '/api/v1/emergencies/{id}/resolve': {
         post: {
             summary: 'Resolve/Close an Emergency',
-            tags: ['v1 - Emergency'],
+            tags: ['v1 - Emergencies'],
             security: [{ bearerAuth: [] }],
             parameters: [
                 { name: 'id', in: 'path', required: true, schema: { type: 'integer' } },

@@ -11,6 +11,7 @@ export default {
             amount: { type: 'integer', example: 2500 },
             dueDate: { type: 'string', format: 'date-time' },
             status: { type: 'string', enum: ['UNPAID', 'PAID', 'OVERDUE'], example: 'PAID' },
+            description: { type: 'string', example: 'Monthly Maintenance for March' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
             unit: {

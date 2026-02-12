@@ -45,7 +45,13 @@ export default {
         type: 'string',
         format: 'date-time',
         nullable: true,
-        example: '2024-01-01T12:00:00.000Z',
+        example: null,
+      },
+      preApprovalId: {
+        type: 'integer',
+        nullable: true,
+        example: 1,
+        description: 'ID of the pre-approval if used',
       },
       status: {
         type: 'string',
@@ -109,14 +115,14 @@ export default {
   },
   CreateVisitorEntryRequest: {
     type: 'object',
-    required: ['visitorId', 'gateId'],
+    required: ['visitorId', 'entryGateId', 'purpose'],
     properties: {
       visitorId: {
         type: 'integer',
         example: 1,
         description: 'Visitor ID',
       },
-      gateId: {
+      entryGateId: {
         type: 'integer',
         example: 1,
         description: 'Gate ID',
@@ -144,6 +150,11 @@ export default {
         nullable: true,
         example: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...',
         description: 'Base64 data URI for the visitor photo (updates visitor record)',
+      },
+      preApprovalId: {
+        type: 'integer',
+        example: 1,
+        description: 'Pre-approval ID (optional)',
       },
       entryTime: {
         type: 'string',
@@ -221,4 +232,3 @@ export default {
     },
   },
 };
-
