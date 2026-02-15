@@ -401,4 +401,107 @@ export default {
       },
     },
   },
+  Notification: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'integer',
+        example: 1,
+      },
+      userId: {
+        type: 'integer',
+        example: 1,
+      },
+      title: {
+        type: 'string',
+        example: 'New Visitor',
+      },
+      body: {
+        type: 'string',
+        example: 'You have a new visitor at the gate',
+      },
+      data: {
+        type: 'object',
+        example: {
+          screen: 'visitor_logs',
+          visitorLogId: '123',
+        },
+      },
+      isRead: {
+        type: 'boolean',
+        example: false,
+      },
+      type: {
+        type: 'string',
+        example: 'SYSTEM',
+      },
+      createdAt: {
+        type: 'string',
+        format: 'date-time',
+      },
+    },
+  },
+  NotificationListResponse: {
+    type: 'object',
+    properties: {
+      success: {
+        type: 'boolean',
+        example: true,
+      },
+      data: {
+        type: 'object',
+        properties: {
+          notifications: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Notification',
+            },
+          },
+          pagination: {
+            type: 'object',
+            properties: {
+              total: {
+                type: 'integer',
+                example: 10,
+              },
+              page: {
+                type: 'integer',
+                example: 1,
+              },
+              limit: {
+                type: 'integer',
+                example: 20,
+              },
+              totalPages: {
+                type: 'integer',
+                example: 1,
+              },
+            },
+          },
+          unreadCount: {
+            type: 'integer',
+            example: 5,
+          },
+        },
+      },
+    },
+  },
+  UnreadCountResponse: {
+    type: 'object',
+    properties: {
+      success: {
+        type: 'boolean',
+        example: true,
+      },
+      data: {
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+            example: 5,
+          },
+        },
+      },
+    },
+  },
 };

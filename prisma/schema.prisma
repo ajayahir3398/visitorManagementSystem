@@ -92,6 +92,7 @@ model User {
 
   // FCM Tokens
   fcmTokens FcmToken[]
+  notifications Notification[]
 
   @@index([societyId], map: "idx_users_society_id")
   @@index([roleId], map: "idx_users_role_id")
@@ -633,4 +634,21 @@ model FcmToken {
   @@index([isActive], map: "idx_fcm_tokens_is_active")
   @@index([platform], map: "idx_fcm_tokens_platform")
   @@map("fcm_tokens")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  type      String?  @db.VarChar(50) // e.g., VISITOR, SYSTEM, EMERGENCY
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_notifications_user_id")
+  @@index([isRead], map: "idx_notifications_is_read")
+  @@map("notifications")
 }

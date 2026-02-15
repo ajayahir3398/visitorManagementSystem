@@ -9,6 +9,10 @@ import {
   sendNotificationByRole,
   sendNotificationBySociety,
   getUserTokens,
+  getNotifications,
+  markAsRead,
+  markAllAsRead,
+  getUnreadCount,
 } from '../../controllers/v1/notificationController.js';
 
 const router = express.Router();
@@ -111,5 +115,17 @@ router.post('/send-by-role', authenticate, validateNotificationByRole, sendNotif
 
 // Send notification by society (Admin only)
 router.post('/send-by-society', authenticate, validateNotificationBySociety, sendNotificationBySociety);
+
+// Get user's notifications
+router.get('/', authenticate, getNotifications);
+
+// Get unread count
+router.get('/unread-count', authenticate, getUnreadCount);
+
+// Mark all notifications as read
+router.put('/read-all', authenticate, markAllAsRead);
+
+// Mark notification as read
+router.put('/:id/read', authenticate, markAsRead);
 
 export default router;

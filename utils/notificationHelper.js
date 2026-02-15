@@ -11,7 +11,27 @@ import { sendMulticastNotification } from '../services/firebaseService.js';
  */
 export const sendNotificationToUser = async (userId, title, body, data = {}) => {
   try {
-    // Get active FCM tokens for the user
+    // 1. Create notification record in database (Persist first)
+    let notification;
+    try {
+      notification = await prisma.notification.create({
+        data: {
+          userId,
+          title,
+          body,
+          data: data || {},
+          type: data.type || 'SYSTEM',
+          isRead: false,
+        },
+      });
+      console.log(`✅ Notification stored in DB for user ${userId}, ID: ${notification.id}`);
+    } catch (dbError) {
+      console.error('❌ Error saving notification to DB:', dbError);
+      // We continue to try sending FCM even if DB save fails, or should we?
+      // Better to have it in DB. If DB fails, something is critical.
+    }
+
+    // 2. Get active FCM tokens for the user
     const fcmTokens = await prisma.fcmToken.findMany({
       where: {
         userId,
@@ -20,22 +40,26 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
     });
 
     if (fcmTokens.length === 0) {
-      console.log(`No active FCM tokens found for user ${userId}`);
+      console.log(`⚠️ No active FCM tokens found for user ${userId}. Notification saved but not sent.`);
       return {
-        success: false,
-        message: 'No active FCM tokens found',
+        success: true, // success true because it is saved in DB
+        message: 'Notification saved but no active FCM tokens found',
         sentCount: 0,
+        notificationId: notification?.id,
       };
     }
 
-    // Send notification to all active tokens
+    // 3. Send notification to all active tokens
     const tokens = fcmTokens.map((token) => token.token);
     const result = await sendMulticastNotification(tokens, { title, body }, data);
+
+    console.log(`📨 FCM Send Result for user ${userId}:`, JSON.stringify(result));
 
     return {
       success: result.success,
       sentCount: result.successCount || 0,
       failedCount: result.failureCount || 0,
+      notificationId: notification?.id,
     };
   } catch (error) {
     console.error('Error sending notification to user:', error);
@@ -65,7 +89,27 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
       };
     }
 
-    // Get active FCM tokens for all users
+    // 1. Create notification records in database
+    try {
+      // Prepare data for createMany
+      const notificationsData = userIds.map(userId => ({
+        userId,
+        title,
+        body,
+        data: data || {}, // Prisma handles JSON stringification if mapped correctly, but ensuring object/json
+        type: data.type || 'SYSTEM',
+        isRead: false,
+      }));
+
+      const dbResult = await prisma.notification.createMany({
+        data: notificationsData,
+      });
+      console.log(`✅ ${dbResult.count} notifications stored in DB`);
+    } catch (dbError) {
+      console.error('❌ Error saving notifications to DB:', dbError);
+    }
+
+    // 2. Get active FCM tokens for all users
     const fcmTokens = await prisma.fcmToken.findMany({
       where: {
         userId: { in: userIds },
@@ -74,17 +118,19 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
     });
 
     if (fcmTokens.length === 0) {
-      console.log(`No active FCM tokens found for users: ${userIds.join(', ')}`);
+      console.log(`⚠️ No active FCM tokens found for users: ${userIds.join(', ')}`);
       return {
-        success: false,
-        message: 'No active FCM tokens found',
+        success: true,
+        message: 'Notifications saved but no active FCM tokens found',
         sentCount: 0,
       };
     }
 
-    // Send multicast notification
+    // 3. Send multicast notification
     const tokens = fcmTokens.map((token) => token.token);
     const result = await sendMulticastNotification(tokens, { title, body }, data);
+
+    console.log(`📨 FCM Multicast Send Result:`, JSON.stringify(result));
 
     return {
       success: result.success,

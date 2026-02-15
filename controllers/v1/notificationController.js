@@ -174,13 +174,28 @@ export const sendNotificationToUser = async (req, res) => {
     });
 
     if (fcmTokens.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No active FCM tokens found for this user',
-      });
+      // Even if no tokens, we should specific create a notification record for the user
+      // so they see it when they log in.
+      // But preserving original behavior for 404 might be desired? 
+      // The requirement says "get notifications ... if not available". 
+      // So saving to DB is crucial even if no FCM tokens.
+      // However, the original code returns 404. I will change this to proceed to save to DB.
     }
 
+    // Save notification to database
+    const notification = await prisma.notification.create({
+      data: {
+        userId: targetUserId,
+        title,
+        body,
+        data: data || {},
+        type: data?.type || 'SYSTEM',
+        isRead: false,
+      },
+    });
+
     // Send notification to all active tokens
+
     const results = [];
     for (const fcmToken of fcmTokens) {
       const result = await sendNotification(fcmToken.token, { title, body }, data || {});
@@ -274,13 +289,25 @@ export const sendBulkNotification = async (req, res) => {
     const allTokens = users.flatMap((user) => user.fcmTokens.map((token) => token.token));
 
     if (allTokens.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No active FCM tokens found for the specified users',
-      });
+      // Proceed to save to DB even if no tokens
     }
 
+    // Save notifications to database for all users
+    const notificationsData = userIds.map((userId) => ({
+      userId,
+      title,
+      body,
+      data: data || {},
+      type: data?.type || 'SYSTEM',
+      isRead: false,
+    }));
+
+    await prisma.notification.createMany({
+      data: notificationsData,
+    });
+
     // Send multicast notification
+
     const result = await sendMulticastNotification(allTokens, { title, body }, data || {});
 
     await logAction({
@@ -378,13 +405,27 @@ export const sendNotificationByRole = async (req, res) => {
     const allTokens = users.flatMap((user) => user.fcmTokens.map((token) => token.token));
 
     if (allTokens.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: `No active FCM tokens found for users with role: ${role}`,
+      // Proceed to save to DB
+    }
+
+    // Save notifications to database for all users
+    const notificationsData = users.map((user) => ({
+      userId: user.id,
+      title,
+      body,
+      data: data || {},
+      type: data?.type || 'SYSTEM',
+      isRead: false,
+    }));
+
+    if (notificationsData.length > 0) {
+      await prisma.notification.createMany({
+        data: notificationsData,
       });
     }
 
     // Send multicast notification
+
     const result = await sendMulticastNotification(allTokens, { title, body }, data || {});
 
     await logAction({
@@ -468,13 +509,27 @@ export const sendNotificationBySociety = async (req, res) => {
     const allTokens = users.flatMap((user) => user.fcmTokens.map((token) => token.token));
 
     if (allTokens.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No active FCM tokens found for users in this society',
+      // Proceed
+    }
+
+    // Save notifications to database for all users
+    const notificationsData = users.map((user) => ({
+      userId: user.id,
+      title,
+      body,
+      data: data || {},
+      type: data?.type || 'SYSTEM',
+      isRead: false,
+    }));
+
+    if (notificationsData.length > 0) {
+      await prisma.notification.createMany({
+        data: notificationsData,
       });
     }
 
     // Send multicast notification
+
     const result = await sendMulticastNotification(allTokens, { title, body }, data || {});
 
     await logAction({
@@ -557,6 +612,164 @@ export const getUserTokens = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to get user tokens',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get user's notifications
+ * GET /api/v1/notifications
+ * Access: Authenticated users
+ */
+export const getNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    const [notifications, total] = await Promise.all([
+      prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.notification.count({ where: { userId } }),
+    ]);
+
+    const unreadCount = await prisma.notification.count({
+      where: {
+        userId,
+        isRead: false,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        notifications,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+        unreadCount,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting notifications:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get notifications',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Mark notification as read
+ * PUT /api/v1/notifications/:id/read
+ * Access: Authenticated users
+ */
+export const markAsRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id: parseInt(id),
+        userId,
+      },
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Notification not found',
+      });
+    }
+
+    await prisma.notification.update({
+      where: { id: notification.id },
+      data: { isRead: true },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Notification marked as read',
+    });
+  } catch (error) {
+    console.error('Error marking notification as read:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to mark notification as read',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Mark all notifications as read
+ * PUT /api/v1/notifications/read-all
+ * Access: Authenticated users
+ */
+export const markAllAsRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await prisma.notification.updateMany({
+      where: {
+        userId,
+        isRead: false,
+      },
+      data: { isRead: true },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'All notifications marked as read',
+    });
+  } catch (error) {
+    console.error('Error marking all notifications as read:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to mark all notifications as read',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Get unread notification count
+ * GET /api/v1/notifications/unread-count
+ * Access: Authenticated users
+ */
+export const getUnreadCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const count = await prisma.notification.count({
+      where: {
+        userId,
+        isRead: false,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        count,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to get unread count',
       error: error.message,
     });
   }

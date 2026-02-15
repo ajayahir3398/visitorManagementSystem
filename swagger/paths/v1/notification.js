@@ -421,4 +421,125 @@ export default {
       },
     },
   },
+  '/api/v1/notifications': {
+    get: {
+      summary: 'Get user notifications',
+      description: 'Get paginated list of notifications for the authenticated user',
+      tags: ['v1 - Notifications'],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: 'page',
+          in: 'query',
+          description: 'Page number',
+          schema: { type: 'integer', default: 1 },
+        },
+        {
+          name: 'limit',
+          in: 'query',
+          description: 'Items per page',
+          schema: { type: 'integer', default: 20 },
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Notifications retrieved successfully',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/NotificationListResponse' },
+            },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/Error' } },
+          },
+        },
+      },
+    },
+  },
+  '/api/v1/notifications/unread-count': {
+    get: {
+      summary: 'Get unread notification count',
+      description: 'Get the count of unread notifications for the authenticated user',
+      tags: ['v1 - Notifications'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Unread count retrieved successfully',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/UnreadCountResponse' },
+            },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/Error' } },
+          },
+        },
+      },
+    },
+  },
+  '/api/v1/notifications/read-all': {
+    put: {
+      summary: 'Mark all notifications as read',
+      description: 'Mark all notifications as read for the authenticated user',
+      tags: ['v1 - Notifications'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'All notifications marked as read',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/SuccessResponse' } },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/Error' } },
+          },
+        },
+      },
+    },
+  },
+  '/api/v1/notifications/{id}/read': {
+    put: {
+      summary: 'Mark notification as read',
+      description: 'Mark a specific notification as read',
+      tags: ['v1 - Notifications'],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: 'id',
+          in: 'path',
+          required: true,
+          description: 'Notification ID',
+          schema: { type: 'integer' },
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Notification marked as read',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/SuccessResponse' } },
+          },
+        },
+        404: {
+          description: 'Notification not found',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/Error' } },
+          },
+        },
+        500: {
+          description: 'Internal server error',
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/Error' } },
+          },
+        },
+      },
+    },
+  },
 };
