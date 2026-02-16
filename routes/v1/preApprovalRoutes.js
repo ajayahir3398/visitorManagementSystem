@@ -7,6 +7,7 @@ import {
   getPreApprovalById,
   revokePreApproval,
   verifyPreApprovalCode,
+  getPreApprovalByCode,
 } from '../../controllers/v1/preApprovalController.js';
 
 const router = express.Router();
@@ -82,6 +83,14 @@ router.get(
   authenticate,
   authorize('RESIDENT', 'SOCIETY_ADMIN', 'SECURITY'),
   getPreApprovals
+);
+
+// Get pre-approval details by access code (must be before /:id to avoid conflicts)
+router.get(
+  '/access-code/:code',
+  authenticate,
+  authorize('SECURITY'),
+  getPreApprovalByCode
 );
 
 // Get pre-approval by ID

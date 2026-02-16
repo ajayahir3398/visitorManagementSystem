@@ -685,3 +685,79 @@ export const verifyPreApprovalCode = async (req, res) => {
     });
   }
 };
+/**
+ * Get pre-approval by access code
+ * GET /api/v1/pre-approvals/access-code/:code
+ * Access: SECURITY only
+ */
+export const getPreApprovalByCode = async (req, res) => {
+  try {
+    const { code } = req.params;
+
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        message: 'Access code is required',
+      });
+    }
+
+    // Security guard must have a society
+    if (!req.user.society_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Security guard must be associated with a society',
+      });
+    }
+
+    const preApproval = await prisma.preApprovedGuest.findUnique({
+      where: { accessCode: code },
+      include: {
+        unit: {
+          select: {
+            id: true,
+            unitNo: true,
+            unitType: true,
+            floor: true,
+            block: true,
+            societyId: true,
+          },
+        },
+        resident: {
+          select: {
+            id: true,
+            name: true,
+            mobile: true,
+          },
+        },
+      },
+    });
+
+    if (!preApproval) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pre-approval not found for this code',
+      });
+    }
+
+    // Security must be in the same society
+    if (preApproval.societyId !== req.user.society_id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. This pre-approval does not belong to your society.',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Pre-approval details retrieved successfully',
+      data: { preApproval },
+    });
+  } catch (error) {
+    console.error('Get pre-approval by code error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve pre-approval details',
+      error: error.message,
+    });
+  }
+};

@@ -197,6 +197,65 @@ export default {
       },
     },
   },
+  '/api/v1/pre-approvals/access-code/{code}': {
+    get: {
+      summary: 'Get pre-approval by access code',
+      description: 'Security guard retrieves details of a pre-approval using its 6-digit access code. Read-only — does not consume the code or create a visitor entry.',
+      tags: ['v1 - Pre-Approvals'],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: 'code',
+          in: 'path',
+          required: true,
+          schema: { type: 'string' },
+          description: '6-digit access code (e.g., GV-123456)',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Pre-approval details retrieved successfully',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/PreApprovalResponse',
+              },
+            },
+          },
+        },
+        404: {
+          description: 'Pre-approval not found',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        403: {
+          description: 'Forbidden - Code does not belong to your society, or if resident, not your code',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   '/api/v1/pre-approvals/{id}/revoke': {
     post: {
       summary: 'Revoke pre-approval',
