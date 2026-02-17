@@ -157,7 +157,7 @@ export const approveVisitor = async (req, res) => {
       // Update visitor log status and set entry time (if not already set)
       const updatedLog = await prisma.visitorLog.update({
         where: { id: visitorLogId },
-        data: { 
+        data: {
           status: 'approved',
           entryTime: visitorLog.entryTime || new Date(), // Set entry time if not already set
         },
@@ -183,48 +183,51 @@ export const approveVisitor = async (req, res) => {
               name: true,
             },
           },
-      },
-    });
+        },
+      });
 
-    // Log visitor approval action
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.VISITOR_APPROVED,
-      entity: AUDIT_ENTITIES.VISITOR_LOG,
-      entityId: visitorLogId,
-      description: `Visitor ${visitorLog.visitor?.name || 'Unknown'} approved for unit ${visitorLog.unit?.unitNo || 'Unknown'}`,
-      req,
-    });
+      // Log visitor approval action
+      await logAction({
+        user: req.user,
+        action: AUDIT_ACTIONS.VISITOR_APPROVED,
+        entity: AUDIT_ENTITIES.VISITOR_LOG,
+        entityId: visitorLogId,
+        description: `Visitor ${visitorLog.visitor?.name || 'Unknown'} approved for unit ${visitorLog.unit?.unitNo || 'Unknown'}`,
+        req,
+      });
 
-    // Send push notification to security user who created the entry
-    try {
-      const visitorName = updatedLog.visitor?.name || 'Visitor';
-      const unitNo = updatedLog.unit?.unitNo || 'unit';
-      const residentName = req.user.name || 'Resident';
+      // Send push notification to security user who created the entry
+      try {
+        const visitorName = updatedLog.visitor?.name || 'Visitor';
+        const unitNo = updatedLog.unit?.unitNo || 'unit';
+        const residentName = req.user.name || 'Resident';
+        const securityUserId = updatedLog.createdBy;
 
-      await sendNotificationToUser(
-        updatedLog.createdBy,
-        'Visitor Approved',
-        `${residentName} approved ${visitorName} for ${unitNo}`,
-        {
-          screen: 'visitor_log_detail',
-          visitorLogId: visitorLogId.toString(),
-          type: 'visitor_approved',
-        }
-      );
-    } catch (notificationError) {
-      // Don't fail the request if notification fails
-      console.error('Error sending notification to security:', notificationError);
-    }
+        console.log(`🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+        const notifResult = await sendNotificationToUser(
+          securityUserId,
+          'Visitor Approved',
+          `${residentName} approved ${visitorName} for ${unitNo}`,
+          {
+            screen: 'visitor_log_detail',
+            visitorLogId: visitorLogId.toString(),
+            type: 'visitor_approved',
+          }
+        );
+        console.log(`📨 [Approval] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
+      } catch (notificationError) {
+        // Don't fail the request if notification fails
+        console.error('❌ [Approval] Error sending notification to security:', notificationError);
+      }
 
-    return res.json({
-      success: true,
-      message: 'Visitor entry approved successfully',
-      data: {
-        visitorLog: updatedLog,
-        approval,
-      },
-    });
+      return res.json({
+        success: true,
+        message: 'Visitor entry approved successfully',
+        data: {
+          visitorLog: updatedLog,
+          approval,
+        },
+      });
     }
 
     // Fix sequence if out of sync
@@ -252,7 +255,7 @@ export const approveVisitor = async (req, res) => {
     // Update visitor log status and set entry time
     const updatedLog = await prisma.visitorLog.update({
       where: { id: visitorLogId },
-      data: { 
+      data: {
         status: 'approved',
         entryTime: new Date(), // Set entry time when approved
       },
@@ -316,9 +319,11 @@ export const approveVisitor = async (req, res) => {
       const visitorName = updatedLog.visitor?.name || 'Visitor';
       const unitNo = updatedLog.unit?.unitNo || 'unit';
       const residentName = req.user.name || 'Resident';
+      const securityUserId = updatedLog.createdBy;
 
-      await sendNotificationToUser(
-        updatedLog.createdBy,
+      console.log(`🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+      const notifResult = await sendNotificationToUser(
+        securityUserId,
         'Visitor Approved',
         `${residentName} approved ${visitorName} for ${unitNo}`,
         {
@@ -327,9 +332,10 @@ export const approveVisitor = async (req, res) => {
           type: 'visitor_approved',
         }
       );
+      console.log(`📨 [Approval] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
     } catch (notificationError) {
       // Don't fail the request if notification fails
-      console.error('Error sending notification to security:', notificationError);
+      console.error('❌ [Approval] Error sending notification to security:', notificationError);
     }
 
     res.json({
@@ -533,8 +539,8 @@ export const rejectVisitor = async (req, res) => {
               name: true,
             },
           },
-      },
-    });
+        },
+      });
 
       // Log visitor rejection action
       await logAction({
@@ -551,9 +557,11 @@ export const rejectVisitor = async (req, res) => {
         const visitorName = updatedLog.visitor?.name || 'Visitor';
         const unitNo = updatedLog.unit?.unitNo || 'unit';
         const residentName = req.user.name || 'Resident';
+        const securityUserId = updatedLog.createdBy;
 
-        await sendNotificationToUser(
-          updatedLog.createdBy,
+        console.log(`🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+        const notifResult = await sendNotificationToUser(
+          securityUserId,
           'Visitor Rejected',
           `${residentName} rejected ${visitorName} for ${unitNo}`,
           {
@@ -562,9 +570,10 @@ export const rejectVisitor = async (req, res) => {
             type: 'visitor_rejected',
           }
         );
+        console.log(`📨 [Rejection] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
       } catch (notificationError) {
         // Don't fail the request if notification fails
-        console.error('Error sending notification to security:', notificationError);
+        console.error('❌ [Rejection] Error sending notification to security:', notificationError);
       }
 
       return res.json({
@@ -663,9 +672,11 @@ export const rejectVisitor = async (req, res) => {
       const visitorName = updatedLog.visitor?.name || 'Visitor';
       const unitNo = updatedLog.unit?.unitNo || 'unit';
       const residentName = req.user.name || 'Resident';
+      const securityUserId = updatedLog.createdBy;
 
-      await sendNotificationToUser(
-        updatedLog.createdBy,
+      console.log(`🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+      const notifResult = await sendNotificationToUser(
+        securityUserId,
         'Visitor Rejected',
         `${residentName} rejected ${visitorName} for ${unitNo}`,
         {
@@ -674,9 +685,10 @@ export const rejectVisitor = async (req, res) => {
           type: 'visitor_rejected',
         }
       );
+      console.log(`📨 [Rejection] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
     } catch (notificationError) {
       // Don't fail the request if notification fails
-      console.error('Error sending notification to security:', notificationError);
+      console.error('❌ [Rejection] Error sending notification to security:', notificationError);
     }
 
     res.json({

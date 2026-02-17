@@ -158,7 +158,7 @@ export const sendNotificationToUser = async (req, res) => {
 
     // Check permissions: Admins can send to anyone, users can only send to themselves
     const targetUserId = userId || senderId;
-    if (targetUserId !== senderId && !['SUPER_ADMIN', 'SOCIETY_ADMIN'].includes(senderRole)) {
+    if (targetUserId !== senderId && !['SUPER_ADMIN', 'SOCIETY_ADMIN', 'SECURITY'].includes(senderRole)) {
       return res.status(403).json({
         success: false,
         message: 'You do not have permission to send notifications to other users',

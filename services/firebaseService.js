@@ -65,14 +65,10 @@ export const sendNotification = async (token, notification, data = {}) => {
         title: notification.title || 'Notification',
         body: notification.body || '',
       },
-      data: {
-        ...data,
-        // Convert all data values to strings (FCM requirement)
-        ...Object.keys(data).reduce((acc, key) => {
-          acc[key] = String(data[key]);
-          return acc;
-        }, {}),
-      },
+      data: Object.keys(data).reduce((acc, key) => {
+        acc[key] = String(data[key]);
+        return acc;
+      }, {}),
       android: {
         priority: 'high',
         notification: {
@@ -145,13 +141,10 @@ export const sendMulticastNotification = async (tokens, notification, data = {})
           title: notification.title || 'Notification',
           body: notification.body || '',
         },
-        data: {
-          ...data,
-          ...Object.keys(data).reduce((acc, key) => {
-            acc[key] = String(data[key]);
-            return acc;
-          }, {}),
-        },
+        data: Object.keys(data).reduce((acc, key) => {
+          acc[key] = String(data[key]);
+          return acc;
+        }, {}),
         android: {
           priority: 'high',
           notification: {

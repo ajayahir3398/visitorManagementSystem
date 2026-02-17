@@ -1,7 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
-import { sendNotificationToUnitResidents } from '../../utils/notificationHelper.js';
+import { sendNotificationToUnitResidents, sendNotificationToUnitResidentsByFlatNo } from '../../utils/notificationHelper.js';
 import { normalizeBase64Image } from '../../utils/image.js';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
@@ -194,27 +194,42 @@ export const createVisitorEntry = async (req, res) => {
       req,
     });
 
-    // Send push notification to unit residents (if unit exists)
-    if (visitorLog.unitId) {
-      try {
-        const visitorName = visitorLog.visitor?.name || 'A visitor';
-        const unitNo = visitorLog.unit?.unitNo || 'your unit';
-        const gateName = visitorLog.gate?.name || 'the gate';
+    // Send push notification to unit residents
+    try {
+      const visitorName = visitorLog.visitor?.name || 'A visitor';
+      const unitNo = visitorLog.unit?.unitNo || visitorLog.flatNo || 'your unit';
+      const gateName = visitorLog.gate?.name || 'the gate';
+      const notifData = {
+        screen: 'visitor_log_detail',
+        visitorLogId: visitorLog.id.toString(),
+        type: 'visitor_request',
+      };
 
+      if (visitorLog.unitId) {
+        // Primary path: send by unitId
+        console.log(`🔔 Sending visitor request notification to unit ${visitorLog.unitId}`);
         await sendNotificationToUnitResidents(
           visitorLog.unitId,
           'New Visitor Request',
           `${visitorName} is waiting at ${gateName} for ${unitNo}`,
-          {
-            screen: 'visitor_log_detail',
-            visitorLogId: visitorLog.id.toString(),
-            type: 'visitor_request',
-          }
+          notifData
         );
-      } catch (notificationError) {
-        // Don't fail the request if notification fails
-        console.error('Error sending notification to residents:', notificationError);
+      } else if (visitorLog.flatNo) {
+        // Fallback path: resolve flatNo → unitId, then send
+        console.log(`🔔 Sending visitor request notification via flatNo "${visitorLog.flatNo}"`);
+        await sendNotificationToUnitResidentsByFlatNo(
+          visitorLog.societyId,
+          visitorLog.flatNo,
+          'New Visitor Request',
+          `${visitorName} is waiting at ${gateName} for ${unitNo}`,
+          notifData
+        );
+      } else {
+        console.log('⚠️ Visitor entry has no unitId or flatNo — skipping resident notification');
       }
+    } catch (notificationError) {
+      // Don't fail the request if notification fails
+      console.error('Error sending notification to residents:', notificationError);
     }
 
     res.status(201).json({
