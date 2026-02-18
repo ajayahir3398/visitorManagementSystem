@@ -315,3 +315,96 @@ export const extendSubscriptionBySociety = async (societyId, additionalDays) => 
   }
 };
 
+/**
+ * Check for expiring/expired subscriptions and notify Society Admins
+ * Should be called daily via cron
+ */
+export const checkSubscriptionExpiryAndNotify = async () => {
+  console.log('--- Starting Subscription Expiry Check ---');
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get all active subscriptions (including GRACE/TRIAL)
+    const subscriptions = await prisma.subscription.findMany({
+      where: {
+        status: { in: ['ACTIVE', 'TRIAL', 'GRACE'] },
+        expiryDate: { not: null }
+      },
+      include: {
+        society: true
+      }
+    });
+
+    for (const subscription of subscriptions) {
+      if (!subscription.expiryDate) continue;
+
+      const expiryDate = new Date(subscription.expiryDate);
+      expiryDate.setHours(0, 0, 0, 0);
+
+      const timeDiff = expiryDate.getTime() - today.getTime();
+      const daysUntilExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Can be negative if expired
+
+      let notificationTitle = null;
+      let notificationBody = null;
+
+      // 1. Check for upcoming expiry (7, 3, 1 days)
+      if (daysUntilExpiry === 7 || daysUntilExpiry === 3 || daysUntilExpiry === 1) {
+        notificationTitle = 'Subscription Expiring Soon';
+        notificationBody = `Your society's subscription will expire in ${daysUntilExpiry} days. Please renew to avoid service interruption.`;
+      }
+      // 2. Check for just expired (0 days or -1 days for "yesterday")
+      // Note: Status update job runs separately, so status might change to LOCKED/GRACE.
+      // We want to alert on day 0 (expiry day) and maybe day -1 (first day expired)
+      else if (daysUntilExpiry === 0) {
+        notificationTitle = 'Subscription Expires Today';
+        notificationBody = `Your society's subscription expires today. Please renew immediately.`;
+      }
+      else if (daysUntilExpiry === -1) {
+        notificationTitle = 'Subscription Expired';
+        notificationBody = `Your society's subscription has expired. You may be in a grace period. Please renew now.`;
+      }
+
+      if (notificationTitle && notificationBody) {
+        // Find Society Admins
+        // We need to import sendNotificationToUsers dynamically or move it to a service to avoid circular deps if any
+        // Since we are in a service, we can import notificationHelper.js
+        const { sendNotificationToUsers } = await import('../utils/notificationHelper.js');
+
+        const admins = await prisma.user.findMany({
+          where: {
+            societyId: subscription.societyId,
+            role: { name: 'SOCIETY_ADMIN' },
+            status: 'active'
+          },
+          select: { id: true }
+        });
+
+        const adminIds = admins.map(a => a.id);
+
+        if (adminIds.length > 0) {
+          console.log(`🔔 Sending subscription alert to ${adminIds.length} admins of society ${subscription.society.name} (Days: ${daysUntilExpiry})`);
+          try {
+            await sendNotificationToUsers(
+              adminIds,
+              notificationTitle,
+              notificationBody,
+              {
+                type: 'subscription_alert',
+                subscriptionId: subscription.id.toString(),
+                daysRemaining: daysUntilExpiry.toString()
+              }
+            );
+          } catch (notifError) {
+            console.error(`Failed to send subscription alert for society ${subscription.societyId}:`, notifError);
+          }
+        }
+      }
+    }
+    console.log('--- Subscription Expiry Check Completed ---');
+
+  } catch (error) {
+    console.error('Error in checkSubscriptionExpiryAndNotify:', error);
+  }
+};
+

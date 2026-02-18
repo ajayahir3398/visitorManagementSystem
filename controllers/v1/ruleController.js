@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { sendNotificationToUsers } from '../../utils/notificationHelper.js';
 
 /**
  * Create a new rule
@@ -45,6 +46,39 @@ export const createRule = async (req, res) => {
             description: `Rule "${rule.title}" created`,
             req,
         });
+
+        // Send Push Notification
+        try {
+            // Send to all residents and security in the society
+            const users = await prisma.user.findMany({
+                where: {
+                    societyId: parseInt(societyId),
+                    status: 'active',
+                    role: {
+                        name: { in: ['RESIDENT', 'SECURITY'] }
+                    }
+                },
+                select: { id: true }
+            });
+
+            const userIds = users.map(u => u.id);
+
+            if (userIds.length > 0) {
+                console.log(`🔔 Sending rule notification to ${userIds.length} users`);
+                sendNotificationToUsers(
+                    userIds,
+                    `New Society Rule: ${title}`,
+                    description.length > 50 ? description.substring(0, 47) + '...' : description,
+                    {
+                        type: 'rule',
+                        id: rule.id.toString(),
+                        screen: 'rule_detail'
+                    }
+                ); // Async
+            }
+        } catch (notifError) {
+            console.error('Error sending rule notifications:', notifError);
+        }
 
         res.status(201).json({
             success: true,

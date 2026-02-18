@@ -1,4 +1,4 @@
-import { updateAllSubscriptionStatuses } from '../services/subscriptionService.js';
+import { updateAllSubscriptionStatuses, checkSubscriptionExpiryAndNotify } from '../services/subscriptionService.js';
 import cron from 'node-cron';
 
 /**
@@ -27,6 +27,10 @@ export const runSubscriptionStatusUpdate = async () => {
     console.log('Starting subscription status update...');
     const result = await updateAllSubscriptionStatuses();
     console.log(`✅ Subscription status update completed: ${result.updated}/${result.total} updated`);
+
+    // Also check for expiry verification and notifications
+    await checkSubscriptionExpiryAndNotify();
+
     return result;
   } catch (error) {
     // Handle database connection errors gracefully
@@ -34,7 +38,7 @@ export const runSubscriptionStatusUpdate = async () => {
       console.warn('⚠️  Database not available for subscription status update. Will retry on next scheduled run.');
       return { total: 0, updated: 0 };
     }
-    
+
     // Log other errors but don't throw
     console.error('❌ Error in subscription status update:', error.message);
     return { total: 0, updated: 0 };
@@ -53,7 +57,7 @@ export const scheduleSubscriptionUpdates = () => {
     });
 
     console.log('✅ Subscription status update scheduler started (daily at midnight)');
-    
+
     // Also run on server start to update any expired subscriptions immediately
     // Use setTimeout to delay initial run, giving database time to connect
     setTimeout(async () => {

@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma.js';
 import { fixSequence } from '../utils/sequenceFix.js';
+import { sendNotificationToUnitResidents } from '../utils/notificationHelper.js';
 
 /**
  * Service to handle automated maintenance billing logic
@@ -117,7 +118,7 @@ export const maintenanceBillingService = {
 
                         if (!existingTempMonthly) {
                             await fixSequence('temp_maintenance_bills');
-                            await prisma.tempMaintenanceBill.create({
+                            const monthlyBill = await prisma.tempMaintenanceBill.create({
                                 data: {
                                     societyId: society.id,
                                     unitId: unit.id,
@@ -128,6 +129,22 @@ export const maintenanceBillingService = {
                                     createdBy: createdBy
                                 }
                             });
+
+                            // Send Notification
+                            try {
+                                sendNotificationToUnitResidents(
+                                    unit.id,
+                                    'Maintenance Bill Generated',
+                                    `Your monthly maintenance bill of ₹${monthlyPlan.amount} is generated for ${monthlyPeriod}.`,
+                                    {
+                                        type: 'maintenance_bill',
+                                        id: monthlyBill.id.toString(),
+                                        screen: 'maintenance_bill_detail'
+                                    }
+                                );
+                            } catch (e) {
+                                console.error(`Failed to send notification for unit ${unit.id}:`, e.message);
+                            }
                         }
                     }
 
@@ -143,7 +160,7 @@ export const maintenanceBillingService = {
 
                         if (!existingTempYearly) {
                             await fixSequence('temp_maintenance_bills');
-                            await prisma.tempMaintenanceBill.create({
+                            const yearlyBill = await prisma.tempMaintenanceBill.create({
                                 data: {
                                     societyId: society.id,
                                     unitId: unit.id,
@@ -154,6 +171,22 @@ export const maintenanceBillingService = {
                                     createdBy: createdBy
                                 }
                             });
+
+                            // Send Notification
+                            try {
+                                sendNotificationToUnitResidents(
+                                    unit.id,
+                                    'yearly Maintenance Bill Generated',
+                                    `Your yearly maintenance bill of ₹${yearlyPlan.amount} is generated for ${financialYear}.`,
+                                    {
+                                        type: 'maintenance_bill',
+                                        id: yearlyBill.id.toString(),
+                                        screen: 'maintenance_bill_detail'
+                                    }
+                                );
+                            } catch (e) {
+                                console.error(`Failed to send notification for unit ${unit.id}:`, e.message);
+                            }
                         }
                     }
                 }

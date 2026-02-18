@@ -1,6 +1,7 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { sendNotificationToUnitResidents } from '../../utils/notificationHelper.js';
 
 /**
  * Pay maintenance and create final bill
@@ -246,6 +247,23 @@ export const createCustomBill = async (req, res) => {
             description: `Custom bill generated for unit ${unit.unitNo}: ₹${amount}`,
             req,
         });
+
+        // Send Push Notification
+        try {
+            console.log(`🔔 Sending maintenance notification to unit ${unit.id}`);
+            sendNotificationToUnitResidents(
+                unit.id,
+                'New Maintenance Bill',
+                `A new custom maintenance bill of ₹${amount} has been generated.`,
+                {
+                    type: 'maintenance_bill',
+                    id: tempBill.id.toString(),
+                    screen: 'maintenance_bill_detail'
+                }
+            ); // Async
+        } catch (notifError) {
+            console.error('Error sending maintenance notifications:', notifError);
+        }
 
         res.status(201).json({
             success: true,
