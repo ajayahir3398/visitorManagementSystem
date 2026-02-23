@@ -21,6 +21,7 @@ import publicSchemas from './public.js';
 import maintenancePlanSchemas from './maintenancePlan.js';
 import maintenanceSchemas from './maintenance.js';
 import notificationSchemas from './notification.js';
+import superAdminSchemas from './superAdmin.js';
 
 export default {
   ...commonSchemas,
@@ -46,4 +47,5 @@ export default {
   ...maintenancePlanSchemas,
   ...maintenanceSchemas,
   ...notificationSchemas,
+  ...superAdminSchemas,
 };

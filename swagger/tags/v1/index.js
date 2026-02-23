@@ -91,4 +91,16 @@ export default [
     name: 'v1 - Health',
     description: 'API v1 - System health check endpoints',
   },
+  {
+    name: 'v1 - Super Admin Dashboard',
+    description: 'API v1 - Super Admin dashboard metrics (summary, revenue, subscriptions, users, visitors, notifications)',
+  },
+  {
+    name: 'v1 - Super Admin Charts',
+    description: 'API v1 - Super Admin chart data (society status, revenue trend, visitor trend, plan distribution, conversion, cities)',
+  },
+  {
+    name: 'v1 - Super Admin Actions',
+    description: 'API v1 - Super Admin quick actions (lock/unlock society, extend trial)',
+  },
 ];

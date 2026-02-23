@@ -20,10 +20,18 @@ import publicRoutes from './publicRoutes.js';
 import maintenancePlanRoutes from './maintenancePlanRoutes.js';
 import maintenanceRoutes from './maintenanceRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
+import superAdminDashboardRoutes from './superAdminDashboardRoutes.js';
+import superAdminChartRoutes from './superAdminChartRoutes.js';
+import superAdminActionRoutes from './superAdminActionRoutes.js';
 
 const router = express.Router();
 
 // Mount all v1 routes
+// Super Admin Dashboard (SUPER_ADMIN only)
+router.use('/super-admin/dashboard', superAdminDashboardRoutes);
+router.use('/super-admin/charts', superAdminChartRoutes);
+router.use('/super-admin/society', superAdminActionRoutes);
+
 // Public routes (no authentication required)
 router.use('/public', publicRoutes);
 
