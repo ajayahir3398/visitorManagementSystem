@@ -22,6 +22,7 @@ import maintenancePlanSchemas from './maintenancePlan.js';
 import maintenanceSchemas from './maintenance.js';
 import notificationSchemas from './notification.js';
 import superAdminSchemas from './superAdmin.js';
+import societyAdminSchemas from './societyAdmin.js';
 
 export default {
   ...commonSchemas,
@@ -48,4 +49,5 @@ export default {
   ...maintenanceSchemas,
   ...notificationSchemas,
   ...superAdminSchemas,
+  ...societyAdminSchemas,
 };

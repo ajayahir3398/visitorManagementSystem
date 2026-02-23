@@ -23,6 +23,8 @@ import notificationRoutes from './notificationRoutes.js';
 import superAdminDashboardRoutes from './superAdminDashboardRoutes.js';
 import superAdminChartRoutes from './superAdminChartRoutes.js';
 import superAdminActionRoutes from './superAdminActionRoutes.js';
+import societyAdminDashboardRoutes from './societyAdminDashboardRoutes.js';
+import societyAdminChartRoutes from './societyAdminChartRoutes.js';
 
 const router = express.Router();
 
@@ -31,6 +33,10 @@ const router = express.Router();
 router.use('/super-admin/dashboard', superAdminDashboardRoutes);
 router.use('/super-admin/charts', superAdminChartRoutes);
 router.use('/super-admin/society', superAdminActionRoutes);
+
+// Society Admin Dashboard (SOCIETY_ADMIN only)
+router.use('/admin/dashboard', societyAdminDashboardRoutes);
+router.use('/admin/charts', societyAdminChartRoutes);
 
 // Public routes (no authentication required)
 router.use('/public', publicRoutes);

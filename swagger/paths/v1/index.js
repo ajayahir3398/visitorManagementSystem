@@ -21,6 +21,7 @@ import maintenancePlanPaths from './maintenancePlan.js';
 import maintenancePaths from './maintenance.js';
 import notificationPaths from './notification.js';
 import superAdminPaths from './superAdmin.js';
+import societyAdminPaths from './societyAdmin.js';
 
 export default {
   ...healthPaths,
@@ -46,5 +47,6 @@ export default {
   ...maintenancePaths,
   ...notificationPaths,
   ...superAdminPaths,
+  ...societyAdminPaths,
 };
 

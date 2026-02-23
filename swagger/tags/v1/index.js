@@ -103,4 +103,12 @@ export default [
     name: 'v1 - Super Admin Actions',
     description: 'API v1 - Super Admin quick actions (lock/unlock society, extend trial)',
   },
+  {
+    name: 'v1 - Society Admin Dashboard',
+    description: 'API v1 - Society Admin dashboard metrics (overview, maintenance, visitors, emergencies, notices, activity)',
+  },
+  {
+    name: 'v1 - Society Admin Charts',
+    description: 'API v1 - Society Admin chart data (maintenance collection, visitor trend, emergency types, bill status)',
+  },
 ];
