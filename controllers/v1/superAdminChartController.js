@@ -196,10 +196,10 @@ export const getTopCitiesChart = async (req, res) => {
   try {
     const cities = await prisma.society.groupBy({
       by: ['city'],
-      _count: { _all: true },
+      _count: { city: true },
       orderBy: {
         _count: {
-          _all: 'desc',
+          city: 'desc',
         },
       },
       take: 10,
@@ -210,7 +210,7 @@ export const getTopCitiesChart = async (req, res) => {
 
     const chartData = cities.map((item) => ({
       city: item.city || 'Unknown',
-      count: item._count._all,
+      count: item._count.city,
     }));
 
     res.json({
