@@ -98,9 +98,9 @@ export const lockSociety = (societyId: number) =>
 export const unlockSociety = (societyId: number) =>
   api.post(`/super-admin/society/${societyId}/unlock`);
 
-/** Extend trial period */
-export const extendTrial = (societyId: number, days: number) =>
-  api.post(`/super-admin/society/${societyId}/extend-trial`, { days });
+/** Extend subscription period */
+export const extendSubscription = (societyId: number, days: number) =>
+  api.post(`/super-admin/society/${societyId}/extend-subscription`, { days });
 ```
 
 ---
@@ -176,7 +176,7 @@ export interface ActionResult {
   status: string;
 }
 
-export interface ExtendTrialResult {
+export interface ExtendSubscriptionResult {
   societyId: number;
   subscriptionId: number;
   newExpiryDate: string;
@@ -311,7 +311,7 @@ export default SuperAdminDashboard;
 import {
   lockSociety,
   unlockSociety,
-  extendTrial,
+  extendSubscription,
 } from "../services/superAdminService";
 
 // Lock
@@ -326,9 +326,9 @@ const handleUnlock = async (societyId: number) => {
   console.log(res.data.message);
 };
 
-// Extend Trial by 7 days
+// Extend Subscription by 7 days
 const handleExtend = async (societyId: number) => {
-  const res = await extendTrial(societyId, 7);
+  const res = await extendSubscription(societyId, 7);
   console.log("New expiry:", res.data.data.newExpiryDate);
 };
 ```
@@ -362,7 +362,7 @@ const handleExtend = async (societyId: number) => {
 | ------ | --------------------------------------- | ------------------ | -------------- |
 | POST   | `/super-admin/society/:id/lock`         | —                  | Lock society   |
 | POST   | `/super-admin/society/:id/unlock`       | —                  | Unlock society |
-| POST   | `/super-admin/society/:id/extend-trial` | `{ days: number }` | Extend trial   |
+| POST   | `/super-admin/society/:id/extend-subscription` | `{ days: number }` | Extend subscription   |
 
 ---
 

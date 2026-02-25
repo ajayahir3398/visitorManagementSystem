@@ -207,7 +207,7 @@ export default {
     },
   },
 
-  SuperAdminExtendTrialRequest: {
+  SuperAdminExtendSubscriptionRequest: {
     type: 'object',
     required: ['days'],
     properties: {
@@ -221,7 +221,7 @@ export default {
     },
   },
 
-  SuperAdminExtendTrialResponse: {
+  SuperAdminExtendSubscriptionResponse: {
     type: 'object',
     properties: {
       success: { type: 'boolean', example: true },

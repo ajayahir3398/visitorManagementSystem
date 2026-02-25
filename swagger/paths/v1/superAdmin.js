@@ -383,9 +383,9 @@ export default {
     },
   },
 
-  '/api/v1/super-admin/society/{id}/extend-trial': {
+  '/api/v1/super-admin/society/{id}/extend-subscription': {
     post: {
-      summary: 'Extend trial period',
+      summary: 'Extend subscription period',
       description: 'Extends the subscription expiry by a specified number of days. Reactivates locked societies. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Actions'],
       security: [{ bearerAuth: [] }],
@@ -403,7 +403,7 @@ export default {
         content: {
           'application/json': {
             schema: {
-              $ref: '#/components/schemas/SuperAdminExtendTrialRequest',
+              $ref: '#/components/schemas/SuperAdminExtendSubscriptionRequest',
             },
             example: {
               days: 7,
@@ -417,7 +417,7 @@ export default {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/SuperAdminExtendTrialResponse',
+                $ref: '#/components/schemas/SuperAdminExtendSubscriptionResponse',
               },
             },
           },

@@ -92,7 +92,11 @@ export const unlockSociety = async (req, res) => {
     // Check if society exists
     const society = await prisma.society.findUnique({
       where: { id: societyId },
-      include: { subscriptions: true },
+      include: {
+        subscriptions: {
+          include: { plan: true }
+        }
+      },
     });
 
     if (!society) {
@@ -100,6 +104,14 @@ export const unlockSociety = async (req, res) => {
         success: false,
         message: 'Society not found',
       });
+    }
+
+    let newStatus = 'ACTIVE';
+    if (society.subscriptions.length > 0) {
+      const currentPlan = society.subscriptions[0].plan;
+      if (currentPlan && currentPlan.code === 'TRIAL') {
+        newStatus = 'TRIAL';
+      }
     }
 
     // Update society status and subscription status in a transaction
@@ -113,7 +125,7 @@ export const unlockSociety = async (req, res) => {
       if (society.subscriptions.length > 0) {
         await tx.subscription.updateMany({
           where: { societyId },
-          data: { status: 'ACTIVE' },
+          data: { status: newStatus },
         });
       }
     });
@@ -131,7 +143,7 @@ export const unlockSociety = async (req, res) => {
     res.json({
       success: true,
       message: `Society "${society.name}" has been unlocked successfully`,
-      data: { societyId, status: 'ACTIVE' },
+      data: { societyId, status: newStatus },
     });
   } catch (error) {
     console.error('Unlock society error:', error);
@@ -144,12 +156,12 @@ export const unlockSociety = async (req, res) => {
 };
 
 /**
- * Extend Trial Period
- * POST /api/v1/super-admin/society/:id/extend-trial
+ * Extend Subscription
+ * POST /api/v1/super-admin/society/:id/extend-subscription
  * Body: { days: number }
  * Access: SUPER_ADMIN only
  */
-export const extendTrial = async (req, res) => {
+export const extendSubscription = async (req, res) => {
   try {
     const { id } = req.params;
     const societyId = parseInt(id);
@@ -172,7 +184,10 @@ export const extendTrial = async (req, res) => {
     // Find the subscription for this society
     const subscription = await prisma.subscription.findFirst({
       where: { societyId },
-      include: { society: true },
+      include: {
+        society: true,
+        plan: true
+      },
     });
 
     if (!subscription) {
@@ -188,34 +203,43 @@ export const extendTrial = async (req, res) => {
     const newExpiry = new Date(baseDate);
     newExpiry.setDate(newExpiry.getDate() + parseInt(days));
 
+    // Determine new status based on current plan
+    const newStatus = subscription.plan?.code === 'TRIAL' ? 'TRIAL' : 'ACTIVE';
+
     // Update subscription
     const updated = await prisma.subscription.update({
       where: { id: subscription.id },
       data: {
         expiryDate: newExpiry,
-        status: subscription.status === 'LOCKED' ? 'TRIAL' : subscription.status,
+        status: newStatus,
       },
     });
 
     // Also reactivate society if it was expired
-    await prisma.society.update({
-      where: { id: societyId },
-      data: { status: 'active' },
-    });
+    if (subscription.society.status !== 'active') {
+      await prisma.society.update({
+        where: { id: societyId },
+        data: { status: 'active' },
+      });
+    }
 
     // Audit log
+    const actionDesc = subscription.plan?.code === 'TRIAL'
+      ? `Trial extended by ${days} days`
+      : `Subscription extended by ${days} days`;
+
     await logAction({
       user: req.user,
       action: AUDIT_ACTIONS.SUBSCRIPTION_RENEWED,
       entity: AUDIT_ENTITIES.SUBSCRIPTION,
       entityId: subscription.id,
-      description: `Trial extended by ${days} days for society "${subscription.society.name}". New expiry: ${newExpiry.toISOString().split('T')[0]}`,
+      description: `${actionDesc} for society "${subscription.society.name}". New expiry: ${newExpiry.toISOString().split('T')[0]}`,
       req,
     });
 
     res.json({
       success: true,
-      message: `Trial extended by ${days} days successfully`,
+      message: `${actionDesc} successfully`,
       data: {
         societyId,
         subscriptionId: updated.id,
@@ -224,10 +248,10 @@ export const extendTrial = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Extend trial error:', error);
+    console.error('Extend subscription error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to extend trial',
+      message: 'Failed to extend subscription',
       error: error.message,
     });
   }

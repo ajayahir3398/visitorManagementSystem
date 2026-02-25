@@ -4,7 +4,7 @@ import { authenticate, authorize } from '../../middleware/auth.js';
 import {
   lockSociety,
   unlockSociety,
-  extendTrial,
+  extendSubscription,
 } from '../../controllers/v1/superAdminActionController.js';
 
 const router = express.Router();
@@ -31,7 +31,7 @@ const validateSocietyId = [
   handleValidationErrors,
 ];
 
-const validateExtendTrial = [
+const validateExtendSubscription = [
   param('id').isInt().withMessage('Invalid society ID'),
   body('days')
     .isInt({ min: 1, max: 365 })
@@ -42,6 +42,6 @@ const validateExtendTrial = [
 // Quick action routes
 router.post('/:id/lock', validateSocietyId, lockSociety);
 router.post('/:id/unlock', validateSocietyId, unlockSociety);
-router.post('/:id/extend-trial', validateExtendTrial, extendTrial);
+router.post('/:id/extend-subscription', validateExtendSubscription, extendSubscription);
 
 export default router;
