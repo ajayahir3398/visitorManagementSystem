@@ -15,8 +15,7 @@ export default {
           activeSocieties: { type: 'integer', example: 96 },
           trialSocieties: { type: 'integer', example: 18 },
           lockedSocieties: { type: 'integer', example: 14 },
-          totalUsers: { type: 'integer', example: 8420 },
-          totalVisitors: { type: 'integer', example: 125430 },
+          totalSocietyAdmins: { type: 'integer', example: 128 },
         },
       },
     },
@@ -57,37 +56,6 @@ export default {
     },
   },
 
-  SuperAdminUsersResponse: {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean', example: true },
-      message: { type: 'string', example: 'User counts retrieved successfully' },
-      data: {
-        type: 'object',
-        properties: {
-          societyAdmins: { type: 'integer', example: 128 },
-          securityGuards: { type: 'integer', example: 612 },
-          residents: { type: 'integer', example: 7680 },
-        },
-      },
-    },
-  },
-
-  SuperAdminVisitorsResponse: {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean', example: true },
-      message: { type: 'string', example: 'Visitor volume retrieved successfully' },
-      data: {
-        type: 'object',
-        properties: {
-          today: { type: 'integer', example: 1420 },
-          thisMonth: { type: 'integer', example: 41250 },
-          lastMonth: { type: 'integer', example: 38600 },
-        },
-      },
-    },
-  },
 
   SuperAdminNotificationsResponse: {
     type: 'object',
@@ -154,29 +122,6 @@ export default {
           { month: 'Jan', amount: 22000 },
           { month: 'Feb', amount: 31000 },
           { month: 'Mar', amount: 45200 },
-        ],
-      },
-    },
-  },
-
-  SuperAdminVisitorTrendChartResponse: {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean', example: true },
-      message: { type: 'string', example: 'Visitor trend chart data retrieved successfully' },
-      data: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            month: { type: 'string', example: 'Jan' },
-            count: { type: 'integer', example: 11200 },
-          },
-        },
-        example: [
-          { month: 'Jan', count: 11200 },
-          { month: 'Feb', count: 12800 },
-          { month: 'Mar', count: 14250 },
         ],
       },
     },

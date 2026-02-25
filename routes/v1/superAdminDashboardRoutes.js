@@ -4,8 +4,6 @@ import {
   getSummary,
   getRevenue,
   getSubscriptions,
-  getUsers,
-  getVisitors,
   getNotifications,
 } from '../../controllers/v1/superAdminDashboardController.js';
 
@@ -18,8 +16,7 @@ router.use(authenticate, authorize('SUPER_ADMIN'));
 router.get('/summary', getSummary);
 router.get('/revenue', getRevenue);
 router.get('/subscriptions', getSubscriptions);
-router.get('/users', getUsers);
-router.get('/visitors', getVisitors);
 router.get('/notifications', getNotifications);
 
 export default router;
+

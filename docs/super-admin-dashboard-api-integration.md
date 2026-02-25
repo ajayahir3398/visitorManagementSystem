@@ -56,12 +56,6 @@ export const getRevenueSummary = () =>
 export const getSubscriptionBreakdown = () =>
   api.get("/super-admin/dashboard/subscriptions");
 
-/** User counts by role */
-export const getUserCounts = () => api.get("/super-admin/dashboard/users");
-
-/** Visitor volume (today/this month/last month) */
-export const getVisitorVolume = () =>
-  api.get("/super-admin/dashboard/visitors");
 
 /** Notification stats */
 export const getNotificationStats = () =>
@@ -79,9 +73,6 @@ export const getSocietyStatusChart = () =>
 export const getMonthlyRevenueChart = (year?: number) =>
   api.get("/super-admin/charts/revenue", { params: { year } });
 
-/** Visitor trend by month (Bar chart) */
-export const getVisitorTrendChart = (year?: number) =>
-  api.get("/super-admin/charts/visitors", { params: { year } });
 
 /** Plan distribution (Donut chart) */
 export const getPlanDistributionChart = () =>
@@ -125,8 +116,7 @@ export interface DashboardSummary {
   activeSocieties: number;
   trialSocieties: number;
   lockedSocieties: number;
-  totalUsers: number;
-  totalVisitors: number;
+  totalSocietyAdmins: number;
 }
 
 // ── Revenue ──
@@ -146,19 +136,6 @@ export interface SubscriptionBreakdown {
   expiringIn7Days: number;
 }
 
-// ── User Counts ──
-export interface UserCounts {
-  societyAdmins: number;
-  securityGuards: number;
-  residents: number;
-}
-
-// ── Visitor Volume ──
-export interface VisitorVolume {
-  today: number;
-  thisMonth: number;
-  lastMonth: number;
-}
 
 // ── Notification Stats ──
 export interface NotificationStats {
@@ -177,10 +154,6 @@ export interface MonthlyChartItem {
   amount: number;
 }
 
-export interface VisitorTrendItem {
-  month: string;
-  count: number;
-}
 
 export interface PlanDistributionItem {
   plan: string;
@@ -371,8 +344,6 @@ const handleExtend = async (societyId: number) => {
 | GET    | `/super-admin/dashboard/summary`       | KPI cards data         |
 | GET    | `/super-admin/dashboard/revenue`       | Revenue metrics        |
 | GET    | `/super-admin/dashboard/subscriptions` | Subscription breakdown |
-| GET    | `/super-admin/dashboard/users`         | User counts by role    |
-| GET    | `/super-admin/dashboard/visitors`      | Visitor volume         |
 | GET    | `/super-admin/dashboard/notifications` | Notification stats     |
 
 ### Charts
@@ -381,7 +352,6 @@ const handleExtend = async (societyId: number) => {
 | ------ | --------------------------------------- | ------------ | ---------- |
 | GET    | `/super-admin/charts/society-status`    | —            | Pie        |
 | GET    | `/super-admin/charts/revenue`           | `year`       | Line       |
-| GET    | `/super-admin/charts/visitors`          | `year`       | Bar        |
 | GET    | `/super-admin/charts/plan-distribution` | —            | Donut      |
 | GET    | `/super-admin/charts/conversion`        | —            | Funnel     |
 | GET    | `/super-admin/charts/top-cities`        | —            | Bar        |

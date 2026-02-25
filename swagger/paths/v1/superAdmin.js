@@ -6,7 +6,7 @@ export default {
   '/api/v1/super-admin/dashboard/summary': {
     get: {
       summary: 'Get platform overview summary',
-      description: 'Returns total/active/trial/locked societies, total users, and total visitors. SUPER_ADMIN only.',
+      description: 'Returns total/active/trial/locked societies and total society admins. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -90,63 +90,6 @@ export default {
     },
   },
 
-  '/api/v1/super-admin/dashboard/users': {
-    get: {
-      summary: 'Get user counts by role',
-      description: 'Returns counts of Society Admins, Security Guards, and Residents. SUPER_ADMIN only.',
-      tags: ['v1 - Super Admin Dashboard'],
-      security: [{ bearerAuth: [] }],
-      responses: {
-        200: {
-          description: 'User counts retrieved successfully',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/SuperAdminUsersResponse',
-              },
-            },
-          },
-        },
-        401: {
-          description: 'Unauthorized',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-        403: {
-          description: 'Forbidden - SUPER_ADMIN only',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-      },
-    },
-  },
-
-  '/api/v1/super-admin/dashboard/visitors': {
-    get: {
-      summary: 'Get aggregated visitor volume',
-      description: 'Returns visitor counts for today, this month, and last month. SUPER_ADMIN only.',
-      tags: ['v1 - Super Admin Dashboard'],
-      security: [{ bearerAuth: [] }],
-      responses: {
-        200: {
-          description: 'Visitor volume retrieved successfully',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/SuperAdminVisitorsResponse',
-              },
-            },
-          },
-        },
-        401: {
-          description: 'Unauthorized',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-        403: {
-          description: 'Forbidden - SUPER_ADMIN only',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-      },
-    },
-  },
 
   '/api/v1/super-admin/dashboard/notifications': {
     get: {
@@ -231,43 +174,6 @@ export default {
             'application/json': {
               schema: {
                 $ref: '#/components/schemas/SuperAdminMonthlyChartResponse',
-              },
-            },
-          },
-        },
-        401: {
-          description: 'Unauthorized',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-        403: {
-          description: 'Forbidden - SUPER_ADMIN only',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
-        },
-      },
-    },
-  },
-
-  '/api/v1/super-admin/charts/visitors': {
-    get: {
-      summary: 'Visitor trend by month (Bar Chart)',
-      description: 'Returns month-wise visitor count for the given year. SUPER_ADMIN only.',
-      tags: ['v1 - Super Admin Charts'],
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        {
-          name: 'year',
-          in: 'query',
-          schema: { type: 'integer', default: 2025 },
-          description: 'Year to filter (defaults to current year)',
-        },
-      ],
-      responses: {
-        200: {
-          description: 'Visitor trend chart data retrieved successfully',
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/SuperAdminVisitorTrendChartResponse',
               },
             },
           },
