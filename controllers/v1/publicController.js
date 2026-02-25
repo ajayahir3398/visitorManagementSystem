@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken } from '../../utils/jwt.js';
 import { generateOTP, storeOTP, verifyOTP } from '../../utils/otp.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
+import { sendNotificationToUsers } from '../../utils/notificationHelper.js';
 
 /**
  * Request OTP for society registration
@@ -310,6 +311,27 @@ export const registerSociety = async (req, res) => {
             description: `Society "${result.society.name}" self-registered by ${adminName} (${mobile}). Trial expires: ${result.subscription.expiryDate.toISOString().split('T')[0]}`,
             req,
         });
+
+        // Send push notification to all Super Admins about new registration
+        try {
+            const superAdmins = await prisma.user.findMany({
+                where: { role: { name: 'SUPER_ADMIN' }, isActive: true },
+                select: { id: true },
+            });
+
+            if (superAdmins.length > 0) {
+                const superAdminIds = superAdmins.map((admin) => admin.id);
+                const title = '🏢 New Society Registered';
+                const body = `"${result.society.name}" has just registered and started their 14-day trial. Admin: ${adminName}.`;
+
+                await sendNotificationToUsers(superAdminIds, title, body, {
+                    type: 'NEW_SOCIETY_REGISTRATION',
+                    societyId: result.society.id.toString(),
+                });
+            }
+        } catch (notifError) {
+            console.error('Failed to send registration notification to Super Admins:', notifError);
+        }
 
         res.status(201).json({
             success: true,

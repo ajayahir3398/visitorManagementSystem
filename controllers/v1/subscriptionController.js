@@ -6,6 +6,7 @@ import {
   updateSubscriptionStatus,
 } from '../../services/subscriptionService.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
+import { sendNotificationToUsers } from '../../utils/notificationHelper.js';
 
 /**
  * Get subscription for a society
@@ -427,6 +428,28 @@ export const buySubscription = async (req, res) => {
       description: `Subscription purchased: ${plan.name} (${plan.code}) for society "${subscription.society.name}". Amount: ${plan.price}, TxId: ${txId}`,
       req,
     });
+
+    // Send push notification to all Super Admins
+    try {
+      const superAdmins = await prisma.user.findMany({
+        where: { role: { name: 'SUPER_ADMIN' }, isActive: true },
+        select: { id: true },
+      });
+
+      if (superAdmins.length > 0) {
+        const superAdminIds = superAdmins.map((admin) => admin.id);
+        const title = existingSubscription ? '💳 Plan Upgraded' : '🎉 New Subscription Purchased';
+        const body = `Society "${subscription.society.name}" has just purchased the ${plan.name} (${plan.code}) plan for ₹${plan.price}.`;
+
+        await sendNotificationToUsers(superAdminIds, title, body, {
+          type: 'SUBSCRIPTION_UPDATE',
+          societyId: societyId.toString(),
+          planId: plan.id.toString(),
+        });
+      }
+    } catch (notifError) {
+      console.error('Failed to send notification to Super Admins:', notifError);
+    }
 
     res.json({
       success: true,
