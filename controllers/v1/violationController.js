@@ -9,7 +9,7 @@ import { fixSequence } from '../../utils/sequenceFix.js';
  */
 export const reportViolation = async (req, res) => {
     try {
-        const { ruleId, violatorUserId, violatorUnitId, description, proofImage, penaltyAmount } = req.body;
+        const { ruleId, violatorUserId, violatorUnitId, description, photoBase64, penaltyAmount } = req.body;
         const societyId = req.user.society_id;
 
         if (!societyId) {
@@ -42,7 +42,7 @@ export const reportViolation = async (req, res) => {
                 violatorUnitId: violatorUnitId ? parseInt(violatorUnitId) : null,
                 reportedByUserId: req.user.id,
                 description,
-                proofImage,
+                photoBase64,
                 penaltyAmount: penaltyAmount ? parseFloat(penaltyAmount) : null,
                 status: 'PENDING',
             },

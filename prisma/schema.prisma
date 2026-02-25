@@ -411,7 +411,7 @@ model RuleViolation {
   violatorUnitId   Int?     @map("violator_unit_id")
   reportedByUserId Int      @map("reported_by_user_id")
   description      String?
-  proofImage       String?  @map("proof_image")
+  photoBase64      String?  @map("photo_base64") @db.Text
   status           String   @default("PENDING")
   penaltyAmount    Decimal? @map("penalty_amount") @db.Decimal(10, 2)
   createdAt        DateTime @default(now()) @map("created_at")

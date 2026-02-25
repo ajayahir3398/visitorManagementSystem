@@ -63,9 +63,9 @@ POST /api/v1/violations
 {
   "ruleId": 5,
   "violatorUserId": 10,
-  "violatorUnitId": 12,
-  "description": "Parked in No Parking zone",
-  "proofImage": "https://example.com/violation.jpg",
+  "violatorUnitId": 2,
+  "description": "Playing loud music after allowed hours",
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQ...",
   "penaltyAmount": 500.00
 }
 ```
@@ -76,10 +76,10 @@ POST /api/v1/violations
 |-------|------|----------|-------------|
 | `ruleId` | integer | Yes | ID of the rule violated |
 | `violatorUserId` | integer | No | User ID of the violator (if known) |
-| `violatorUnitId` | integer | Yes | Unit ID associated with the violation |
-| `description` | string | No | Details about the incident |
-| `proofImage` | string | No | URL of evidence image |
-| `penaltyAmount` | number | No | Override penalty amount (defaults to rule penalty) |
+| `violatorUnitId` | number | No* | Unit ID of violator |
+| `description` | string | No | Details of violation |
+| `photoBase64` | string | No | Base64 encoded proof image |
+| `penaltyAmount` | number | No | Proposed penalty amount |(defaults to rule penalty) |
 
 ### Success Response (201)
 
@@ -306,9 +306,9 @@ interface Violation {
   violatorUnitId: number;
   violatorUserId?: number;
   description?: string;
+  photoBase64?: string;
   status: 'PENDING' | 'RESOLVED' | 'DISMISSED' | 'PAID';
   penaltyAmount: number;
-  proofImage?: string;
   createdAt: string;
 }
 
@@ -317,7 +317,7 @@ interface ReportViolationData {
   violatorUnitId: number;
   violatorUserId?: number;
   description?: string;
-  proofImage?: string;
+  photoBase64?: string;
   penaltyAmount?: number;
 }
 
