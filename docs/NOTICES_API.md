@@ -84,7 +84,7 @@ POST /api/v1/notices
   "audience": "Residents",
   "startDate": "2024-03-01T10:00:00.000Z",
   "endDate": "2024-03-01T18:00:00.000Z",
-  "attachmentUrl": "https://example.com/files/schedule.pdf"
+  "photoBase64": "data:image/jpeg;base64,/9j/4AAQ..."
 }
 ```
 
@@ -99,7 +99,7 @@ POST /api/v1/notices
 | `audience` | string | Yes | `All`, `Residents`, `Owners`, `Tenants`, `Security` |
 | `startDate` | iso8601 | Yes | Start date/time of the notice |
 | `endDate` | iso8601 | Yes | End date/time (notice is hidden after this) |
-| `attachmentUrl` | string | No | URL to an image or document |
+| `photoBase64` | string | No | Base64 encoded notice image |
 
 ### Success Response (201)
 
@@ -260,7 +260,7 @@ GET /api/v1/notices/:id
     "id": 1,
     "title": "Water Tank Cleaning",
     "description": "Full description here...",
-    "attachmentUrl": "https://example.com/file.jpg",
+    "photoBase64": "data:image/jpeg;base64,/9j/4AAQ...",
     "isRead": true,
     "reads": [] // Full read history usually not sent to non-admins
   }

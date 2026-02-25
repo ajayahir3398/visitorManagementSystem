@@ -435,7 +435,7 @@ model Notice {
 
   title         String
   description   String?
-  attachmentUrl String? @map("attachment_url")
+  photoBase64   String? @map("photo_base64") @db.Text
 
   noticeType String @map("notice_type") // General / Maintenance / Emergency / Event
   priority   String @default("Medium") // High / Medium / Low

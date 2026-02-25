@@ -18,7 +18,7 @@ export const createNotice = async (req, res) => {
             audience,
             startDate,
             endDate,
-            attachmentUrl
+            photoBase64
         } = req.body;
 
         const societyId = req.user.society_id;
@@ -44,7 +44,7 @@ export const createNotice = async (req, res) => {
                 audience,
                 startDate: new Date(startDate),
                 endDate: new Date(endDate),
-                attachmentUrl,
+                photoBase64,
                 isActive: true,
             },
         });
