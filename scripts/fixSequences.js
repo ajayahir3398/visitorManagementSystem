@@ -52,9 +52,7 @@ async function fixSequences() {
         }
 
         // Get the current maximum ID from the table
-        const result = await pool.query(
-          `SELECT COALESCE(MAX(id), 0) as max_id FROM "${table}"`
-        );
+        const result = await pool.query(`SELECT COALESCE(MAX(id), 0) as max_id FROM "${table}"`);
 
         const maxId = parseInt(result.rows[0]?.max_id || 0);
         const nextId = maxId + 1;
@@ -78,12 +76,12 @@ async function fixSequences() {
         await pool.query(`SELECT setval('${sequence}', $1, false)`, [nextId]);
 
         // Verify the sequence value
-        const seqResult = await pool.query(
-          `SELECT last_value, is_called FROM ${sequence}`
-        );
+        const seqResult = await pool.query(`SELECT last_value, is_called FROM ${sequence}`);
 
         console.log(`✅ ${table}: Reset sequence to ${nextId} (max_id: ${maxId})`);
-        console.log(`   Sequence state: last_value=${seqResult.rows[0].last_value}, is_called=${seqResult.rows[0].is_called}\n`);
+        console.log(
+          `   Sequence state: last_value=${seqResult.rows[0].last_value}, is_called=${seqResult.rows[0].is_called}\n`
+        );
       } catch (error) {
         console.error(`❌ ${table}: Error - ${error.message}\n`);
       }
@@ -99,4 +97,3 @@ async function fixSequences() {
 }
 
 fixSequences();
-

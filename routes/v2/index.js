@@ -1,7 +1,6 @@
 import express from 'express';
 import authRoutes from './authRoutes.js';
 
-
 const router = express.Router();
 // Mount all v1 routes
 router.use('/auth', authRoutes);
@@ -11,4 +10,3 @@ router.use('/auth', authRoutes);
 // router.use('/societies', societyRoutes);
 
 export default router;
-

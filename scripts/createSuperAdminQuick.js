@@ -32,10 +32,7 @@ async function createSuperAdminQuick() {
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: defaultAdmin.email },
-          { mobile: defaultAdmin.mobile },
-        ],
+        OR: [{ email: defaultAdmin.email }, { mobile: defaultAdmin.mobile }],
       },
     });
 
@@ -99,4 +96,3 @@ async function createSuperAdminQuick() {
 }
 
 createSuperAdminQuick();
-

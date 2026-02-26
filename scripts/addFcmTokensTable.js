@@ -18,19 +18,19 @@ async function runMigration() {
 
   try {
     console.log('🔄 Connecting to database...');
-    
+
     // Read SQL file
     const sqlPath = join(__dirname, '../prisma/migrations/manual_add_fcm_tokens.sql');
     const sql = readFileSync(sqlPath, 'utf8');
-    
+
     console.log('📝 Running migration: Creating FCM tokens table...');
-    
+
     // Execute SQL
     await pool.query(sql);
-    
+
     console.log('✅ Migration completed successfully!');
     console.log('✅ FCM tokens table created with all indexes.');
-    
+
     // Verify table exists
     const result = await pool.query(`
       SELECT table_name 
@@ -38,11 +38,10 @@ async function runMigration() {
       WHERE table_schema = 'public' 
       AND table_name = 'fcm_tokens'
     `);
-    
+
     if (result.rows.length > 0) {
       console.log('✅ Verification: fcm_tokens table exists in database.');
     }
-    
   } catch (error) {
     console.error('❌ Migration failed:', error.message);
     if (error.code === '42P07') {

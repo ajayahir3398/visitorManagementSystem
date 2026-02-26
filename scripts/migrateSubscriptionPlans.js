@@ -1,7 +1,7 @@
 /**
  * Migration script to update existing subscription_plans table
  * Adds code and billingCycle to existing plans
- * 
+ *
  * Run: node scripts/migrateSubscriptionPlans.js
  */
 import 'dotenv/config';
@@ -13,9 +13,7 @@ async function migratePlans() {
 
     // Get all plans and filter those that need updating
     const allPlans = await prisma.subscriptionPlan.findMany();
-    const plansToUpdate = allPlans.filter(
-      (plan) => !plan.code || !plan.billingCycle
-    );
+    const plansToUpdate = allPlans.filter((plan) => !plan.code || !plan.billingCycle);
 
     console.log(`Found ${plansToUpdate.length} plan(s) to update`);
 
@@ -53,7 +51,9 @@ async function migratePlans() {
         },
       });
 
-      console.log(`✅ Updated plan ${plan.id} (${plan.name}): code=${code}, billingCycle=${billingCycle}`);
+      console.log(
+        `✅ Updated plan ${plan.id} (${plan.name}): code=${code}, billingCycle=${billingCycle}`
+      );
     }
 
     console.log('✅ Migration completed successfully!');
@@ -65,9 +65,7 @@ async function migratePlans() {
   }
 }
 
-migratePlans()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
-
+migratePlans().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
