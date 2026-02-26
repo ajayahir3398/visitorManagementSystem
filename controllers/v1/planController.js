@@ -104,7 +104,8 @@ export const getPlanById = async (req, res) => {
  */
 export const createPlan = async (req, res) => {
   try {
-    const { code, name, price, durationMonths, billingCycle, visitorLimit, features, isActive } = req.body;
+    const { code, name, price, durationMonths, billingCycle, visitorLimit, features, isActive } =
+      req.body;
 
     // Validation
     if (!code || !name || price === undefined || !durationMonths || !billingCycle) {
@@ -176,7 +177,8 @@ export const createPlan = async (req, res) => {
 export const updatePlan = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, durationMonths, billingCycle, visitorLimit, features, isActive } = req.body;
+    const { name, price, durationMonths, billingCycle, visitorLimit, features, isActive } =
+      req.body;
 
     const planId = parseInt(id);
     if (isNaN(planId)) {
@@ -204,7 +206,8 @@ export const updatePlan = async (req, res) => {
     if (price !== undefined) updateData.price = parseInt(price);
     if (durationMonths !== undefined) updateData.durationMonths = parseInt(durationMonths);
     if (billingCycle !== undefined) updateData.billingCycle = billingCycle;
-    if (visitorLimit !== undefined) updateData.visitorLimit = visitorLimit ? parseInt(visitorLimit) : null;
+    if (visitorLimit !== undefined)
+      updateData.visitorLimit = visitorLimit ? parseInt(visitorLimit) : null;
     if (features !== undefined) updateData.features = features;
     if (isActive !== undefined) updateData.isActive = isActive;
 
@@ -403,4 +406,3 @@ export const deletePlan = async (req, res) => {
     });
   }
 };
-

@@ -21,7 +21,15 @@ const generateAccessCode = (prefix = 'GV') => {
  */
 export const createPreApproval = async (req, res) => {
   try {
-    const { guestName, guestMobile, validFrom, validTill, maxUses = 1, unitId, photoBase64 } = req.body;
+    const {
+      guestName,
+      guestMobile,
+      validFrom,
+      validTill,
+      maxUses = 1,
+      unitId,
+      photoBase64,
+    } = req.body;
 
     // Get resident's units
     const userUnits = await prisma.unitMember.findMany({
@@ -34,9 +42,9 @@ export const createPreApproval = async (req, res) => {
             id: true,
             societyId: true,
             unitNo: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (userUnits.length === 0) {
@@ -50,7 +58,7 @@ export const createPreApproval = async (req, res) => {
     let selectedUnit;
     if (unitId) {
       // If unitId provided, verify it belongs to user
-      const unitMember = userUnits.find(um => um.unitId === parseInt(unitId));
+      const unitMember = userUnits.find((um) => um.unitId === parseInt(unitId));
       if (!unitMember) {
         return res.status(403).json({
           success: false,
@@ -60,7 +68,7 @@ export const createPreApproval = async (req, res) => {
       selectedUnit = unitMember.unit;
     } else {
       // Prioritize primary, otherwise use first one
-      const selectedUnitMember = userUnits.find(um => um.isPrimary) || userUnits[0];
+      const selectedUnitMember = userUnits.find((um) => um.isPrimary) || userUnits[0];
       selectedUnit = selectedUnitMember.unit;
     }
 
@@ -101,7 +109,10 @@ export const createPreApproval = async (req, res) => {
     let normalizedPhoto = null;
     if (photoBase64 !== undefined) {
       try {
-        normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+        normalizedPhoto =
+          photoBase64 === null
+            ? null
+            : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
       } catch (error) {
         return res.status(400).json({
           success: false,

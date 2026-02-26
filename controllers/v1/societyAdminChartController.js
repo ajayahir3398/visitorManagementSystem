@@ -29,7 +29,9 @@ export const getMaintenanceCollectionChart = async (req, res) => {
     });
   } catch (error) {
     console.error('Society chart maintenance-collection error:', error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve maintenance collection chart data' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to retrieve maintenance collection chart data' });
   }
 };
 
@@ -61,7 +63,9 @@ export const getVisitorTrendChart = async (req, res) => {
     });
   } catch (error) {
     console.error('Society chart visitor-trend error:', error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve visitor trend chart data' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to retrieve visitor trend chart data' });
   }
 };
 
@@ -90,7 +94,9 @@ export const getEmergencyTypesChart = async (req, res) => {
     });
   } catch (error) {
     console.error('Society chart emergency-types error:', error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve emergency types chart data' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to retrieve emergency types chart data' });
   }
 };
 
@@ -119,6 +125,8 @@ export const getMaintenanceStatusChart = async (req, res) => {
     });
   } catch (error) {
     console.error('Society chart maintenance-status error:', error);
-    res.status(500).json({ success: false, message: 'Failed to retrieve maintenance status chart data' });
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to retrieve maintenance status chart data' });
   }
 };

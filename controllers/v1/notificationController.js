@@ -47,7 +47,9 @@ export const registerToken = async (req, res) => {
 
     const isCreated = fcmToken.createdAt.getTime() === fcmToken.updatedAt.getTime();
     const statusCode = isCreated ? 201 : 200;
-    const message = isCreated ? 'FCM token registered successfully' : 'FCM token updated successfully';
+    const message = isCreated
+      ? 'FCM token registered successfully'
+      : 'FCM token updated successfully';
     const action = isCreated ? AUDIT_ACTIONS.CREATED : AUDIT_ACTIONS.UPDATED;
 
     await logAction({
@@ -158,7 +160,10 @@ export const sendNotificationToUser = async (req, res) => {
 
     // Check permissions: Admins can send to anyone, users can only send to themselves
     const targetUserId = userId || senderId;
-    if (targetUserId !== senderId && !['SUPER_ADMIN', 'SOCIETY_ADMIN', 'SECURITY'].includes(senderRole)) {
+    if (
+      targetUserId !== senderId &&
+      !['SUPER_ADMIN', 'SOCIETY_ADMIN', 'SECURITY'].includes(senderRole)
+    ) {
       return res.status(403).json({
         success: false,
         message: 'You do not have permission to send notifications to other users',
@@ -176,8 +181,8 @@ export const sendNotificationToUser = async (req, res) => {
     if (fcmTokens.length === 0) {
       // Even if no tokens, we should specific create a notification record for the user
       // so they see it when they log in.
-      // But preserving original behavior for 404 might be desired? 
-      // The requirement says "get notifications ... if not available". 
+      // But preserving original behavior for 404 might be desired?
+      // The requirement says "get notifications ... if not available".
       // So saving to DB is crucial even if no FCM tokens.
       // However, the original code returns 404. I will change this to proceed to save to DB.
     }
