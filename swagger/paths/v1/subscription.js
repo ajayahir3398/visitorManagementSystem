@@ -215,7 +215,8 @@ export default {
   '/api/v1/subscriptions/society/{societyId}/extend': {
     post: {
       summary: 'Extend subscription period by society ID',
-      description: 'Extends the latest subscription for a society. Useful for extending trial periods.',
+      description:
+        'Extends the latest subscription for a society. Useful for extending trial periods.',
       tags: ['v1 - Subscriptions'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -297,7 +298,8 @@ export default {
   '/api/v1/subscriptions/current': {
     get: {
       summary: 'Get current subscription for logged-in society',
-      description: 'Society Admin only. Get the current subscription details for the logged-in society admin\'s society.',
+      description:
+        "Society Admin only. Get the current subscription details for the logged-in society admin's society.",
       tags: ['v1 - Subscriptions'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -385,7 +387,8 @@ export default {
   '/api/v1/subscriptions/buy': {
     post: {
       summary: 'Buy/Activate a subscription plan',
-      description: 'Society Admin only. Purchase and activate a subscription plan for the logged-in society admin\'s society. This is the MVP version without payment gateway integration. Payment gateway (Razorpay) can be integrated later.',
+      description:
+        "Society Admin only. Purchase and activate a subscription plan for the logged-in society admin's society. This is the MVP version without payment gateway integration. Payment gateway (Razorpay) can be integrated later.",
       tags: ['v1 - Subscriptions'],
       security: [{ bearerAuth: [] }],
       requestBody: {
@@ -398,7 +401,7 @@ export default {
             example: {
               planId: 2,
               paymentMode: 'UPI',
-              transactionId: 'TXN-12345678'
+              transactionId: 'TXN-12345678',
             },
           },
         },
@@ -506,4 +509,3 @@ export default {
     },
   },
 };
-

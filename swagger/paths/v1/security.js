@@ -2,7 +2,8 @@ export default {
   '/api/v1/security/dashboard': {
     get: {
       summary: 'Get security dashboard data',
-      description: 'Retrieve comprehensive dashboard data for security guards including system status, society info, gates, statistics, pending approvals, and active visitors.',
+      description:
+        'Retrieve comprehensive dashboard data for security guards including system status, society info, gates, statistics, pending approvals, and active visitors.',
       tags: ['v1 - Security'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -108,7 +109,8 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - SECURITY role required, or security guard must be associated with a society',
+          description:
+            'Forbidden - SECURITY role required, or security guard must be associated with a society',
           content: {
             'application/json': {
               schema: {
@@ -145,4 +147,3 @@ export default {
     },
   },
 };
-

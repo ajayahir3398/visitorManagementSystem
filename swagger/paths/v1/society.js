@@ -183,7 +183,8 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - You can only view your own society (applies to non-SUPER_ADMINs)',
+          description:
+            'Forbidden - You can only view your own society (applies to non-SUPER_ADMINs)',
           content: {
             'application/json': {
               schema: {
@@ -259,7 +260,8 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - SOCIETY_ADMIN can only update their own society and cannot update status/subscription',
+          description:
+            'Forbidden - SOCIETY_ADMIN can only update their own society and cannot update status/subscription',
           content: {
             'application/json': {
               schema: {
@@ -342,4 +344,3 @@ export default {
     },
   },
 };
-

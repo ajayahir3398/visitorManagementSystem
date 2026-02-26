@@ -6,7 +6,8 @@ export default {
   '/api/v1/super-admin/dashboard/summary': {
     get: {
       summary: 'Get platform overview summary',
-      description: 'Returns total/active/trial/locked societies and total society admins. SUPER_ADMIN only.',
+      description:
+        'Returns total/active/trial/locked societies and total society admins. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -35,7 +36,8 @@ export default {
   '/api/v1/super-admin/dashboard/revenue': {
     get: {
       summary: 'Get revenue summary',
-      description: 'Returns MRR, this month revenue, last month revenue, and total revenue. SUPER_ADMIN only.',
+      description:
+        'Returns MRR, this month revenue, last month revenue, and total revenue. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -64,7 +66,8 @@ export default {
   '/api/v1/super-admin/dashboard/subscriptions': {
     get: {
       summary: 'Get subscription breakdown',
-      description: 'Returns active/trial/grace/locked counts and subscriptions expiring within 7 days. SUPER_ADMIN only.',
+      description:
+        'Returns active/trial/grace/locked counts and subscriptions expiring within 7 days. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -89,7 +92,6 @@ export default {
       },
     },
   },
-
 
   '/api/v1/super-admin/dashboard/notifications': {
     get: {
@@ -222,7 +224,8 @@ export default {
   '/api/v1/super-admin/charts/conversion': {
     get: {
       summary: 'Trial → Paid conversion (Funnel Chart)',
-      description: 'Returns trial and paid subscription counts for conversion funnel. SUPER_ADMIN only.',
+      description:
+        'Returns trial and paid subscription counts for conversion funnel. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Charts'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -284,7 +287,8 @@ export default {
   '/api/v1/super-admin/society/{id}/lock': {
     post: {
       summary: 'Lock a society',
-      description: 'Locks a society by setting subscription to LOCKED and society status to expired. SUPER_ADMIN only.',
+      description:
+        'Locks a society by setting subscription to LOCKED and society status to expired. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Actions'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -335,7 +339,8 @@ export default {
   '/api/v1/super-admin/society/{id}/unlock': {
     post: {
       summary: 'Unlock a society',
-      description: 'Unlocks a society by setting subscription to ACTIVE and society status to active. SUPER_ADMIN only.',
+      description:
+        'Unlocks a society by setting subscription to ACTIVE and society status to active. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Actions'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -386,7 +391,8 @@ export default {
   '/api/v1/super-admin/society/{id}/extend-subscription': {
     post: {
       summary: 'Extend subscription period',
-      description: 'Extends the subscription expiry by a specified number of days. Reactivates locked societies. SUPER_ADMIN only.',
+      description:
+        'Extends the subscription expiry by a specified number of days. Reactivates locked societies. SUPER_ADMIN only.',
       tags: ['v1 - Super Admin Actions'],
       security: [{ bearerAuth: [] }],
       parameters: [

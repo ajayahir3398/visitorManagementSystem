@@ -6,7 +6,8 @@ export default {
   '/api/v1/admin/dashboard/overview': {
     get: {
       summary: 'Get society overview (KPI cards)',
-      description: 'Returns total units, residents, security staff, open emergencies, and pending violations for the logged-in admin\'s society.',
+      description:
+        "Returns total units, residents, security staff, open emergencies, and pending violations for the logged-in admin's society.",
       tags: ['v1 - Society Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -18,8 +19,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -27,7 +34,8 @@ export default {
   '/api/v1/admin/dashboard/maintenance': {
     get: {
       summary: 'Get maintenance & financial overview',
-      description: 'Returns upcoming bills, unpaid bills, overdue bills, collected this month, and overdue amount.',
+      description:
+        'Returns upcoming bills, unpaid bills, overdue bills, collected this month, and overdue amount.',
       tags: ['v1 - Society Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -39,8 +47,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -48,7 +62,8 @@ export default {
   '/api/v1/admin/dashboard/visitors': {
     get: {
       summary: 'Get visitor activity summary',
-      description: 'Returns today\'s visitors, pending approvals, visitors inside premises, and pre-approved guests.',
+      description:
+        "Returns today's visitors, pending approvals, visitors inside premises, and pre-approved guests.",
       tags: ['v1 - Society Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -60,8 +75,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -69,7 +90,8 @@ export default {
   '/api/v1/admin/dashboard/emergencies': {
     get: {
       summary: 'Get emergency snapshot',
-      description: 'Returns open emergencies, resolved this month, and average response time in minutes.',
+      description:
+        'Returns open emergencies, resolved this month, and average response time in minutes.',
       tags: ['v1 - Society Admin Dashboard'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -81,8 +103,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -102,8 +130,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -123,8 +157,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -148,8 +188,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -169,8 +215,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -190,8 +242,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
@@ -211,8 +269,14 @@ export default {
             },
           },
         },
-        401: { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-        403: { description: 'Forbidden - SOCIETY_ADMIN only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        401: {
+          description: 'Unauthorized',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
+        403: {
+          description: 'Forbidden - SOCIETY_ADMIN only',
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+        },
       },
     },
   },
