@@ -2,7 +2,8 @@ export default {
   '/api/v1/plans': {
     get: {
       summary: 'Get all available subscription plans',
-      description: 'Public endpoint to retrieve all active subscription plans. No authentication required.',
+      description:
+        'Public endpoint to retrieve all active subscription plans. No authentication required.',
       tags: ['v1 - Plans'],
       responses: {
         200: {
@@ -75,7 +76,8 @@ export default {
     },
     post: {
       summary: 'Create a new subscription plan',
-      description: 'Super Admin only. Create a new subscription plan with code, name, price, duration, and billing cycle.',
+      description:
+        'Super Admin only. Create a new subscription plan with code, name, price, duration, and billing cycle.',
       tags: ['v1 - Plans'],
       security: [{ bearerAuth: [] }],
       requestBody: {
@@ -285,7 +287,8 @@ export default {
     },
     delete: {
       summary: 'Delete a subscription plan',
-      description: 'Super Admin only. Delete a subscription plan. Cannot delete plans that are currently in use.',
+      description:
+        'Super Admin only. Delete a subscription plan. Cannot delete plans that are currently in use.',
       tags: ['v1 - Plans'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -461,4 +464,3 @@ export default {
     },
   },
 };
-

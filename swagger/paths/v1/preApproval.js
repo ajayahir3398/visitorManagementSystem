@@ -2,7 +2,8 @@ export default {
   '/api/v1/pre-approvals': {
     post: {
       summary: 'Create pre-approved guest',
-      description: 'Resident creates a pre-approval with a 6-digit access code. The unit is automatically identified from the token (primary unit or first available unit). Guest can use this code at the gate for instant entry.',
+      description:
+        'Resident creates a pre-approval with a 6-digit access code. The unit is automatically identified from the token (primary unit or first available unit). Guest can use this code at the gate for instant entry.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       requestBody: {
@@ -78,7 +79,8 @@ export default {
     },
     get: {
       summary: 'Get all pre-approvals for resident',
-      description: 'Get list of all pre-approvals created by the resident. Supports pagination and status filtering.',
+      description:
+        'Get list of all pre-approvals created by the resident. Supports pagination and status filtering.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -141,7 +143,8 @@ export default {
   '/api/v1/pre-approvals/{id}': {
     get: {
       summary: 'Get pre-approval by ID',
-      description: 'Get details of a specific pre-approval by ID. Resident can only view their own pre-approvals.',
+      description:
+        'Get details of a specific pre-approval by ID. Resident can only view their own pre-approvals.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -200,7 +203,8 @@ export default {
   '/api/v1/pre-approvals/access-code/{code}': {
     get: {
       summary: 'Get pre-approval by access code',
-      description: 'Security guard retrieves details of a pre-approval using its 6-digit access code. Read-only — does not consume the code or create a visitor entry.',
+      description:
+        'Security guard retrieves details of a pre-approval using its 6-digit access code. Read-only — does not consume the code or create a visitor entry.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -234,7 +238,8 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - Code does not belong to your society, or if resident, not your code',
+          description:
+            'Forbidden - Code does not belong to your society, or if resident, not your code',
           content: {
             'application/json': {
               schema: {
@@ -259,7 +264,8 @@ export default {
   '/api/v1/pre-approvals/{id}/revoke': {
     post: {
       summary: 'Revoke pre-approval',
-      description: 'Resident revokes a pre-approval, making the access code invalid. Cannot revoke already used or revoked codes.',
+      description:
+        'Resident revokes a pre-approval, making the access code invalid. Cannot revoke already used or revoked codes.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -328,7 +334,8 @@ export default {
   '/api/v1/pre-approvals/verify': {
     post: {
       summary: 'Verify access code and create visitor entry',
-      description: 'Security guard verifies the 6-digit access code and creates an auto-approved visitor entry. Code must be active, within validity period, and not exceeded max uses.',
+      description:
+        'Security guard verifies the 6-digit access code and creates an auto-approved visitor entry. Code must be active, within validity period, and not exceeded max uses.',
       tags: ['v1 - Pre-Approvals'],
       security: [{ bearerAuth: [] }],
       requestBody: {
@@ -373,7 +380,8 @@ export default {
           },
         },
         403: {
-          description: 'Forbidden - SECURITY role only, or code/gate does not belong to your society',
+          description:
+            'Forbidden - SECURITY role only, or code/gate does not belong to your society',
           content: {
             'application/json': {
               schema: {
@@ -396,5 +404,3 @@ export default {
     },
   },
 };
-
-

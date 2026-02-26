@@ -151,7 +151,8 @@ export default {
                 file: {
                   type: 'string',
                   format: 'binary',
-                  description: 'CSV file containing units (columns: unit_no, unit_type, floor, block)',
+                  description:
+                    'CSV file containing units (columns: unit_no, unit_type, floor, block)',
                 },
               },
               required: ['file'],
@@ -594,4 +595,3 @@ export default {
     },
   },
 };
-

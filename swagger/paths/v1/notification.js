@@ -158,7 +158,8 @@ export default {
   '/api/v1/notifications/send': {
     post: {
       summary: 'Send notification to a user',
-      description: 'Send a push notification to a single user. Users can send to themselves, admins can send to anyone.',
+      description:
+        'Send a push notification to a single user. Users can send to themselves, admins can send to anyone.',
       tags: ['v1 - Notifications'],
       security: [{ bearerAuth: [] }],
       requestBody: {
