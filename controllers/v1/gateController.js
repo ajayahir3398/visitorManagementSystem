@@ -111,19 +111,20 @@ export const getGates = async (req, res) => {
 
     // Build where clause
     const where = {};
-    
+
     if (societyId) {
       where.societyId = parseInt(societyId);
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ name: { contains: search, mode: 'insensitive' } }];
     }
 
     // If user is SOCIETY_ADMIN or SECURITY, only show gates from their society
-    if ((req.user.role_name === 'SOCIETY_ADMIN' || req.user.role_name === 'SECURITY') && req.user.society_id) {
+    if (
+      (req.user.role_name === 'SOCIETY_ADMIN' || req.user.role_name === 'SECURITY') &&
+      req.user.society_id
+    ) {
       where.societyId = req.user.society_id;
     }
 
@@ -213,7 +214,10 @@ export const getGateById = async (req, res) => {
     }
 
     // If user is SOCIETY_ADMIN or SECURITY, only allow access to gates from their society
-    if ((req.user.role_name === 'SOCIETY_ADMIN' || req.user.role_name === 'SECURITY') && req.user.society_id !== gate.societyId) {
+    if (
+      (req.user.role_name === 'SOCIETY_ADMIN' || req.user.role_name === 'SECURITY') &&
+      req.user.society_id !== gate.societyId
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only view gates from your own society.',
@@ -315,9 +319,10 @@ export const updateGate = async (req, res) => {
       changes.push(`name: "${existingGate.name}" → "${name.trim()}"`);
     }
 
-    const description = changes.length > 0
-      ? `Gate "${gate.name}" updated: ${changes.join(', ')}`
-      : `Gate "${gate.name}" updated`;
+    const description =
+      changes.length > 0
+        ? `Gate "${gate.name}" updated: ${changes.join(', ')}`
+        : `Gate "${gate.name}" updated`;
 
     // Log gate update
     await logAction({
@@ -422,4 +427,3 @@ export const deleteGate = async (req, res) => {
     });
   }
 };
-
