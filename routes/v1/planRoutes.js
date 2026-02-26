@@ -27,10 +27,7 @@ const handleValidationErrors = (req, res, next) => {
 };
 
 // Validation middleware
-const validatePlanId = [
-  param('id').isInt().withMessage('Invalid plan ID'),
-  handleValidationErrors,
-];
+const validatePlanId = [param('id').isInt().withMessage('Invalid plan ID'), handleValidationErrors];
 
 const validateCreatePlan = [
   body('code')
@@ -70,33 +67,16 @@ router.get('/', getPlans);
 
 // Super Admin route for getting all plans (including inactive)
 // Must be defined before /:id to avoid route conflict
-router.get(
-  '/all',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  getAllPlans
-);
+router.get('/all', authenticate, authorize('SUPER_ADMIN'), getAllPlans);
 
 // Public route for getting a specific plan by ID
 router.get('/:id', validatePlanId, getPlanById);
 
 // Super Admin route for creating a new plan
-router.post(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  validateCreatePlan,
-  createPlan
-);
+router.post('/', authenticate, authorize('SUPER_ADMIN'), validateCreatePlan, createPlan);
 
 // Super Admin route for updating a plan
-router.put(
-  '/:id',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  validatePlanId,
-  updatePlan
-);
+router.put('/:id', authenticate, authorize('SUPER_ADMIN'), validatePlanId, updatePlan);
 
 // Super Admin route for toggling a plan's status
 router.post(
@@ -108,13 +88,6 @@ router.post(
 );
 
 // Super Admin route for deleting a plan
-router.delete(
-  '/:id',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  validatePlanId,
-  deletePlan
-);
+router.delete('/:id', authenticate, authorize('SUPER_ADMIN'), validatePlanId, deletePlan);
 
 export default router;
-

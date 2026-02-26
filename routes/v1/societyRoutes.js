@@ -60,20 +60,9 @@ const validateSocietyId = [
 
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/society.js
-router.post(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  validateCreateSociety,
-  createSociety
-);
+router.post('/', authenticate, authorize('SUPER_ADMIN'), validateCreateSociety, createSociety);
 
-router.get(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  getSocieties
-);
+router.get('/', authenticate, authorize('SUPER_ADMIN'), getSocieties);
 
 router.get(
   '/:id',
@@ -92,13 +81,6 @@ router.put(
   updateSociety
 );
 
-router.delete(
-  '/:id',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  validateSocietyId,
-  deleteSociety
-);
+router.delete('/:id', authenticate, authorize('SUPER_ADMIN'), validateSocietyId, deleteSociety);
 
 export default router;
-

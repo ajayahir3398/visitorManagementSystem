@@ -45,11 +45,7 @@ const validateCreatePreApproval = [
 ];
 
 const validateVerifyCode = [
-  body('accessCode')
-    .notEmpty()
-    .withMessage('accessCode is required')
-    .isString()
-    .trim(),
+  body('accessCode').notEmpty().withMessage('accessCode is required').isString().trim(),
   body('gateId')
     .notEmpty()
     .withMessage('gateId is required')
@@ -69,29 +65,13 @@ const validatePreApprovalId = [
 
 // RESIDENT routes
 // Create pre-approval
-router.post(
-  '/',
-  authenticate,
-  authorize('RESIDENT'),
-  validateCreatePreApproval,
-  createPreApproval
-);
+router.post('/', authenticate, authorize('RESIDENT'), validateCreatePreApproval, createPreApproval);
 
 // Get all pre-approvals
-router.get(
-  '/',
-  authenticate,
-  authorize('RESIDENT', 'SOCIETY_ADMIN', 'SECURITY'),
-  getPreApprovals
-);
+router.get('/', authenticate, authorize('RESIDENT', 'SOCIETY_ADMIN', 'SECURITY'), getPreApprovals);
 
 // Get pre-approval details by access code (must be before /:id to avoid conflicts)
-router.get(
-  '/access-code/:code',
-  authenticate,
-  authorize('SECURITY'),
-  getPreApprovalByCode
-);
+router.get('/access-code/:code', authenticate, authorize('SECURITY'), getPreApprovalByCode);
 
 // Get pre-approval by ID
 router.get(
@@ -122,5 +102,3 @@ router.post(
 );
 
 export default router;
-
-

@@ -25,11 +25,17 @@ const handleValidationErrors = (req, res, next) => {
 // Validation middleware
 const validateGetAuditLogs = [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
   query('action').optional().isString().withMessage('Action must be a string'),
   query('entity').optional().isString().withMessage('Entity must be a string'),
   query('userId').optional().isInt({ min: 1 }).withMessage('UserId must be a positive integer'),
-  query('societyId').optional().isInt({ min: 1 }).withMessage('SocietyId must be a positive integer'),
+  query('societyId')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('SocietyId must be a positive integer'),
   query('role').optional().isString().withMessage('Role must be a string'),
   query('startDate').optional().isISO8601().withMessage('Start date must be a valid ISO 8601 date'),
   query('endDate').optional().isISO8601().withMessage('End date must be a valid ISO 8601 date'),
@@ -87,5 +93,3 @@ router.get(
 );
 
 export default router;
-
-

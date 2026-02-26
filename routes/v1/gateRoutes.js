@@ -40,10 +40,7 @@ const validateUpdateGate = [
   handleValidationErrors,
 ];
 
-const validateGateId = [
-  param('id').isInt().withMessage('Invalid gate ID'),
-  handleValidationErrors,
-];
+const validateGateId = [param('id').isInt().withMessage('Invalid gate ID'), handleValidationErrors];
 
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/gate.js
@@ -55,12 +52,7 @@ router.post(
   createGate
 );
 
-router.get(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN', 'SECURITY'),
-  getGates
-);
+router.get('/', authenticate, authorize('SUPER_ADMIN', 'SOCIETY_ADMIN', 'SECURITY'), getGates);
 
 router.get(
   '/:id',
@@ -88,4 +80,3 @@ router.delete(
 );
 
 export default router;
-

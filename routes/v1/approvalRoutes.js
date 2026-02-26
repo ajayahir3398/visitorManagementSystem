@@ -32,12 +32,7 @@ const validateVisitorLogId = [
 // Swagger documentation is in config/swagger/paths/v1/approval.js
 
 // Get pending approvals
-router.get(
-  '/pending',
-  authenticate,
-  authorize('RESIDENT'),
-  getPendingApprovals
-);
+router.get('/pending', authenticate, authorize('RESIDENT'), getPendingApprovals);
 
 // Approve visitor
 router.post(
@@ -58,4 +53,3 @@ router.post(
 );
 
 export default router;
-

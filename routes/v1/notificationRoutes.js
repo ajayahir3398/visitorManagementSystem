@@ -34,7 +34,10 @@ const handleValidationErrors = (req, res, next) => {
 const validateRegisterToken = [
   body('token').notEmpty().withMessage('FCM token is required'),
   body('deviceId').optional().isString().withMessage('Device ID must be a string'),
-  body('platform').optional().isIn(['android', 'ios']).withMessage('Platform must be android or ios'),
+  body('platform')
+    .optional()
+    .isIn(['android', 'ios'])
+    .withMessage('Platform must be android or ios'),
   handleValidationErrors,
 ];
 
@@ -114,7 +117,12 @@ router.post('/send-bulk', authenticate, validateBulkNotification, sendBulkNotifi
 router.post('/send-by-role', authenticate, validateNotificationByRole, sendNotificationByRole);
 
 // Send notification by society (Admin only)
-router.post('/send-by-society', authenticate, validateNotificationBySociety, sendNotificationBySociety);
+router.post(
+  '/send-by-society',
+  authenticate,
+  validateNotificationBySociety,
+  sendNotificationBySociety
+);
 
 // Get user's notifications
 router.get('/', authenticate, getNotifications);

@@ -2,59 +2,50 @@ import express from 'express';
 import { body, query, param, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import {
-    createMaintenancePlan,
-    getMaintenancePlans,
-    getMaintenancePlanById,
-    updateMaintenancePlan,
-    deleteMaintenancePlan,
+  createMaintenancePlan,
+  getMaintenancePlans,
+  getMaintenancePlanById,
+  updateMaintenancePlan,
+  deleteMaintenancePlan,
 } from '../../controllers/v1/maintenancePlanController.js';
 
 const router = express.Router();
 
 // Validation error handler
 const handleValidationErrors = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({
-            success: false,
-            message: 'Validation failed',
-            errors: errors.array(),
-        });
-    }
-    next();
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.array(),
+    });
+  }
+  next();
 };
 
 // Validation middleware
 const validateCreatePlan = [
-    body('planType')
-        .notEmpty()
-        .withMessage('Plan type is required')
-        .isIn(['MONTHLY', 'YEARLY'])
-        .withMessage('Plan type must be MONTHLY or YEARLY'),
-    body('amount')
-        .notEmpty()
-        .withMessage('Amount is required')
-        .isInt({ min: 1 })
-        .withMessage('Amount must be a positive integer'),
-    handleValidationErrors,
+  body('planType')
+    .notEmpty()
+    .withMessage('Plan type is required')
+    .isIn(['MONTHLY', 'YEARLY'])
+    .withMessage('Plan type must be MONTHLY or YEARLY'),
+  body('amount')
+    .notEmpty()
+    .withMessage('Amount is required')
+    .isInt({ min: 1 })
+    .withMessage('Amount must be a positive integer'),
+  handleValidationErrors,
 ];
 
 const validateUpdatePlan = [
-    body('amount')
-        .optional()
-        .isInt({ min: 1 })
-        .withMessage('Amount must be a positive integer'),
-    body('isActive')
-        .optional()
-        .isBoolean()
-        .withMessage('isActive must be a boolean'),
-    handleValidationErrors,
+  body('amount').optional().isInt({ min: 1 }).withMessage('Amount must be a positive integer'),
+  body('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),
+  handleValidationErrors,
 ];
 
-const validatePlanId = [
-    param('id').isInt().withMessage('Invalid plan ID'),
-    handleValidationErrors,
-];
+const validatePlanId = [param('id').isInt().withMessage('Invalid plan ID'), handleValidationErrors];
 
 // Routes
 
@@ -64,11 +55,11 @@ const validatePlanId = [
  * Access: SOCIETY_ADMIN
  */
 router.post(
-    '/',
-    authenticate,
-    authorize('SOCIETY_ADMIN'),
-    validateCreatePlan,
-    createMaintenancePlan
+  '/',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  validateCreatePlan,
+  createMaintenancePlan
 );
 
 /**
@@ -76,12 +67,7 @@ router.post(
  * GET /api/v1/maintenance-plans
  * Access: SOCIETY_ADMIN, RESIDENT
  */
-router.get(
-    '/',
-    authenticate,
-    authorize('SOCIETY_ADMIN', 'RESIDENT'),
-    getMaintenancePlans
-);
+router.get('/', authenticate, authorize('SOCIETY_ADMIN', 'RESIDENT'), getMaintenancePlans);
 
 /**
  * Get maintenance plan by ID
@@ -89,11 +75,11 @@ router.get(
  * Access: SOCIETY_ADMIN, RESIDENT
  */
 router.get(
-    '/:id',
-    authenticate,
-    authorize('SOCIETY_ADMIN', 'RESIDENT'),
-    validatePlanId,
-    getMaintenancePlanById
+  '/:id',
+  authenticate,
+  authorize('SOCIETY_ADMIN', 'RESIDENT'),
+  validatePlanId,
+  getMaintenancePlanById
 );
 
 /**
@@ -102,12 +88,12 @@ router.get(
  * Access: SOCIETY_ADMIN
  */
 router.put(
-    '/:id',
-    authenticate,
-    authorize('SOCIETY_ADMIN'),
-    validatePlanId,
-    validateUpdatePlan,
-    updateMaintenancePlan
+  '/:id',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  validatePlanId,
+  validateUpdatePlan,
+  updateMaintenancePlan
 );
 
 /**
@@ -116,11 +102,11 @@ router.put(
  * Access: SOCIETY_ADMIN
  */
 router.delete(
-    '/:id',
-    authenticate,
-    authorize('SOCIETY_ADMIN'),
-    validatePlanId,
-    deleteMaintenancePlan
+  '/:id',
+  authenticate,
+  authorize('SOCIETY_ADMIN'),
+  validatePlanId,
+  deleteMaintenancePlan
 );
 
 export default router;

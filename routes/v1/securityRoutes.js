@@ -9,12 +9,6 @@ const router = express.Router();
  * @desc    Get security dashboard data
  * @access  SECURITY only
  */
-router.get(
-  '/dashboard',
-  authenticate,
-  authorize('SECURITY'),
-  getSecurityDashboard
-);
+router.get('/dashboard', authenticate, authorize('SECURITY'), getSecurityDashboard);
 
 export default router;
-

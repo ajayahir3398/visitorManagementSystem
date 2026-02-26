@@ -64,4 +64,3 @@ router.use('/maintenance', maintenanceRoutes);
 router.use('/notifications', notificationRoutes);
 
 export default router;
-

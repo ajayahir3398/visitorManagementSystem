@@ -10,6 +10,7 @@ import {
   logoutAll,
   changePassword,
 } from '../../controllers/v1/authController.js';
+import { authLimiter } from '../../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -29,10 +30,7 @@ const handleValidationErrors = (req, res, next) => {
 // Validation middleware
 const validateLogin = [
   body('password').notEmpty().withMessage('Password is required'),
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('Invalid email format'),
+  body('email').optional().isEmail().withMessage('Invalid email format'),
   body('mobile')
     .optional()
     .matches(/^[0-9]{10}$/)
@@ -90,9 +88,9 @@ const validateChangePassword = [
 
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/auth.js
-router.post('/login', validateLogin, login);
-router.post('/otp', validateOTP, requestOTP);
-router.post('/verify-otp', validateVerifyOTP, verifyOTPLogin);
+router.post('/login', authLimiter, validateLogin, login);
+router.post('/otp', authLimiter, validateOTP, requestOTP);
+router.post('/verify-otp', authLimiter, validateVerifyOTP, verifyOTPLogin);
 router.post('/refresh-token', validateRefreshToken, refreshToken);
 
 // Logout routes
@@ -102,12 +100,6 @@ router.post('/logout', optionalAuthenticate, validateLogout, logout);
 // logout-all: Requires authentication, logs out from all devices
 router.post('/logout-all', authenticate, logoutAll);
 
-router.put(
-  '/change-password',
-  authenticate,
-  validateChangePassword,
-  changePassword
-);
+router.put('/change-password', authenticate, validateChangePassword, changePassword);
 
 export default router;
-
