@@ -293,7 +293,8 @@ export default {
   '/api/v1/auth/logout': {
     post: {
       summary: 'Logout user (invalidate refresh token)',
-      description: 'Logout user and invalidate refresh token. Supports two methods: 1) Using access token in Authorization header (recommended), 2) Using refreshToken in request body (fallback). If refreshToken is not provided with access token, logs out from all devices.',
+      description:
+        'Logout user and invalidate refresh token. Supports two methods: 1) Using access token in Authorization header (recommended), 2) Using refreshToken in request body (fallback). If refreshToken is not provided with access token, logs out from all devices.',
       tags: ['v1 - Authentication'],
       security: [{ bearerAuth: [] }],
       requestBody: {
@@ -313,7 +314,8 @@ export default {
               withoutRefreshToken: {
                 summary: 'Logout from all devices (no refreshToken in body)',
                 value: {},
-                description: 'When access token is provided in header and no refreshToken in body, logs out from all devices',
+                description:
+                  'When access token is provided in header and no refreshToken in body, logs out from all devices',
               },
             },
           },
@@ -386,7 +388,8 @@ export default {
   '/api/v1/auth/logout-all': {
     post: {
       summary: 'Logout from all devices',
-      description: 'Invalidate all refresh tokens for the authenticated user, effectively logging them out from all devices. Requires authentication via access token.',
+      description:
+        'Invalidate all refresh tokens for the authenticated user, effectively logging them out from all devices. Requires authentication via access token.',
       tags: ['v1 - Authentication'],
       security: [{ bearerAuth: [] }],
       responses: {
@@ -427,7 +430,8 @@ export default {
     put: {
       summary: 'Change own password',
       tags: ['v1 - Authentication'],
-      description: 'Allows an authenticated user to change their own password by providing the current and new passwords.',
+      description:
+        'Allows an authenticated user to change their own password by providing the current and new passwords.',
       security: [{ bearerAuth: [] }],
       requestBody: {
         required: true,
@@ -440,7 +444,7 @@ export default {
                 currentPassword: {
                   type: 'string',
                   format: 'password',
-                  description: 'The user\'s existing password',
+                  description: "The user's existing password",
                 },
                 newPassword: {
                   type: 'string',
@@ -502,5 +506,3 @@ export default {
     },
   },
 };
-
-

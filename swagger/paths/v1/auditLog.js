@@ -2,7 +2,8 @@ export default {
   '/api/v1/audit-logs': {
     get: {
       summary: 'Get audit logs',
-      description: 'Retrieve audit logs with filtering and pagination. Super Admin can see all logs, Society Admin can only see their society\'s logs.',
+      description:
+        "Retrieve audit logs with filtering and pagination. Super Admin can see all logs, Society Admin can only see their society's logs.",
       tags: ['v1 - Audit Logs'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -143,7 +144,8 @@ export default {
   '/api/v1/audit-logs/stats': {
     get: {
       summary: 'Get audit log statistics',
-      description: 'Retrieve statistics about audit logs including action counts, role distribution, and entity counts.',
+      description:
+        'Retrieve statistics about audit logs including action counts, role distribution, and entity counts.',
       tags: ['v1 - Audit Logs'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -282,5 +284,3 @@ export default {
     },
   },
 };
-
-

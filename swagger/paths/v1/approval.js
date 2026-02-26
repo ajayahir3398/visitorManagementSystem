@@ -2,7 +2,7 @@ export default {
   '/api/v1/approvals/pending': {
     get: {
       summary: 'Get pending approvals for resident',
-      description: 'Get list of pending visitor entries waiting for approval from resident\'s units',
+      description: "Get list of pending visitor entries waiting for approval from resident's units",
       tags: ['v1 - Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -56,7 +56,8 @@ export default {
   '/api/v1/approvals/visitor-logs/{id}/approve': {
     post: {
       summary: 'Approve visitor entry',
-      description: 'Resident approves a pending visitor entry. Updates visitor log status to "approved" and creates/updates approval record.',
+      description:
+        'Resident approves a pending visitor entry. Updates visitor log status to "approved" and creates/updates approval record.',
       tags: ['v1 - Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -125,7 +126,8 @@ export default {
   '/api/v1/approvals/visitor-logs/{id}/reject': {
     post: {
       summary: 'Reject visitor entry',
-      description: 'Resident rejects a pending visitor entry. Updates visitor log status to "rejected" and creates/updates approval record.',
+      description:
+        'Resident rejects a pending visitor entry. Updates visitor log status to "rejected" and creates/updates approval record.',
       tags: ['v1 - Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -192,4 +194,3 @@ export default {
     },
   },
 };
-

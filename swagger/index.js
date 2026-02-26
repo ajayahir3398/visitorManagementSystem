@@ -9,7 +9,8 @@ const options = {
     info: {
       title: 'Visitor Management System API',
       version: '1.0.0',
-      description: 'API documentation for Visitor Management System - A system for managing visitors in apartments/societies and corporate offices',
+      description:
+        'API documentation for Visitor Management System - A system for managing visitors in apartments/societies and corporate offices',
       contact: {
         name: 'API Support',
         email: 'support@example.com',
@@ -48,4 +49,3 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 export default swaggerSpec;
-
