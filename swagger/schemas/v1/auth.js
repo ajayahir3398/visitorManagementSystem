@@ -150,10 +150,12 @@ export default {
       refreshToken: {
         type: 'string',
         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        description: 'Refresh token to invalidate (optional). If not provided and access token is in header, logs out from all devices.',
+        description:
+          'Refresh token to invalidate (optional). If not provided and access token is in header, logs out from all devices.',
       },
     },
-    description: 'Request body is optional. Can use either: 1) Access token in Authorization header (recommended), 2) refreshToken in body (fallback), or 3) Both (validates token ownership)',
+    description:
+      'Request body is optional. Can use either: 1) Access token in Authorization header (recommended), 2) refreshToken in body (fallback), or 3) Both (validates token ownership)',
   },
   LogoutResponse: {
     type: 'object',
@@ -165,7 +167,8 @@ export default {
       message: {
         type: 'string',
         example: 'Logged out successfully',
-        description: 'Message indicating logout success. May indicate "single device" or "all devices" logout.',
+        description:
+          'Message indicating logout success. May indicate "single device" or "all devices" logout.',
       },
     },
   },
@@ -193,4 +196,3 @@ export default {
     },
   },
 };
-

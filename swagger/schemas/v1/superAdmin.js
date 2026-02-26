@@ -56,7 +56,6 @@ export default {
     },
   },
 
-
   SuperAdminNotificationsResponse: {
     type: 'object',
     properties: {
@@ -231,7 +230,11 @@ export default {
         properties: {
           societyId: { type: 'integer', example: 1 },
           subscriptionId: { type: 'integer', example: 5 },
-          newExpiryDate: { type: 'string', format: 'date-time', example: '2025-04-15T00:00:00.000Z' },
+          newExpiryDate: {
+            type: 'string',
+            format: 'date-time',
+            example: '2025-04-15T00:00:00.000Z',
+          },
           status: { type: 'string', example: 'TRIAL' },
         },
       },

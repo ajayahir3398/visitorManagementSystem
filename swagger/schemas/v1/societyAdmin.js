@@ -133,7 +133,10 @@ export default {
     type: 'object',
     properties: {
       success: { type: 'boolean', example: true },
-      message: { type: 'string', example: 'Maintenance collection chart data retrieved successfully' },
+      message: {
+        type: 'string',
+        example: 'Maintenance collection chart data retrieved successfully',
+      },
       data: {
         type: 'array',
         items: {

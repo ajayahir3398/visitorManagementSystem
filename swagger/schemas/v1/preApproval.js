@@ -95,7 +95,8 @@ export default {
   CreatePreApprovalRequest: {
     type: 'object',
     required: ['validFrom', 'validTill'],
-    description: 'The unit is automatically identified from the logged-in resident\'s profile (primary unit or first available unit).',
+    description:
+      "The unit is automatically identified from the logged-in resident's profile (primary unit or first available unit).",
     properties: {
       guestName: {
         type: 'string',
@@ -245,5 +246,3 @@ export default {
     },
   },
 };
-
-
