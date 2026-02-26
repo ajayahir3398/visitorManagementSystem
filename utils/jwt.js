@@ -50,4 +50,3 @@ export const verifyRefreshToken = (token) => {
 export const decodeToken = (token) => {
   return jwt.decode(token);
 };
-

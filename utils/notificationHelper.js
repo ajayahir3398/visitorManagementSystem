@@ -11,7 +11,9 @@ import { sendMulticastNotification } from '../services/firebaseService.js';
  */
 export const sendNotificationToUser = async (userId, title, body, data = {}) => {
   try {
-    console.log(`🔔 [NotifHelper] sendNotificationToUser called — userId: ${userId}, title: "${title}"`);
+    console.log(
+      `🔔 [NotifHelper] sendNotificationToUser called — userId: ${userId}, title: "${title}"`
+    );
 
     if (!userId) {
       console.error('❌ [NotifHelper] sendNotificationToUser: userId is missing/undefined');
@@ -31,7 +33,9 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
           isRead: false,
         },
       });
-      console.log(`✅ [NotifHelper] Notification stored in DB for user ${userId}, ID: ${notification.id}`);
+      console.log(
+        `✅ [NotifHelper] Notification stored in DB for user ${userId}, ID: ${notification.id}`
+      );
     } catch (dbError) {
       console.error('❌ [NotifHelper] Error saving notification to DB:', dbError.message);
     }
@@ -44,10 +48,14 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
       },
     });
 
-    console.log(`🔍 [NotifHelper] Found ${fcmTokens.length} active FCM token(s) for user ${userId}`);
+    console.log(
+      `🔍 [NotifHelper] Found ${fcmTokens.length} active FCM token(s) for user ${userId}`
+    );
 
     if (fcmTokens.length === 0) {
-      console.log(`⚠️ [NotifHelper] No active FCM tokens for user ${userId}. Notification saved to DB only.`);
+      console.log(
+        `⚠️ [NotifHelper] No active FCM tokens for user ${userId}. Notification saved to DB only.`
+      );
       return {
         success: true, // success true because it is saved in DB
         message: 'Notification saved but no active FCM tokens found',
@@ -60,7 +68,9 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
     const tokens = fcmTokens.map((token) => token.token);
     const result = await sendMulticastNotification(tokens, { title, body }, data);
 
-    console.log(`📨 [NotifHelper] FCM result for user ${userId}: success=${result.success}, sent=${result.successCount || 0}, failed=${result.failureCount || 0}`);
+    console.log(
+      `📨 [NotifHelper] FCM result for user ${userId}: success=${result.success}, sent=${result.successCount || 0}, failed=${result.failureCount || 0}`
+    );
 
     return {
       success: result.success,
@@ -69,7 +79,10 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
       notificationId: notification?.id,
     };
   } catch (error) {
-    console.error(`❌ [NotifHelper] sendNotificationToUser FAILED for user ${userId}:`, error.message);
+    console.error(
+      `❌ [NotifHelper] sendNotificationToUser FAILED for user ${userId}:`,
+      error.message
+    );
     return {
       success: false,
       error: error.message,
@@ -88,7 +101,9 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
  */
 export const sendNotificationToUsers = async (userIds, title, body, data = {}) => {
   try {
-    console.log(`🔔 [NotifHelper] sendNotificationToUsers called — userIds: [${userIds?.join(', ')}], title: "${title}"`);
+    console.log(
+      `🔔 [NotifHelper] sendNotificationToUsers called — userIds: [${userIds?.join(', ')}], title: "${title}"`
+    );
 
     if (!userIds || userIds.length === 0) {
       console.log(`⚠️ [NotifHelper] sendNotificationToUsers: No user IDs provided`);
@@ -101,7 +116,7 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
 
     // 1. Create notification records in database
     try {
-      const notificationsData = userIds.map(userId => ({
+      const notificationsData = userIds.map((userId) => ({
         userId,
         title,
         body,
@@ -113,7 +128,9 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
       const dbResult = await prisma.notification.createMany({
         data: notificationsData,
       });
-      console.log(`✅ [NotifHelper] ${dbResult.count} notification(s) stored in DB for ${userIds.length} user(s)`);
+      console.log(
+        `✅ [NotifHelper] ${dbResult.count} notification(s) stored in DB for ${userIds.length} user(s)`
+      );
     } catch (dbError) {
       console.error('❌ [NotifHelper] Error saving notifications to DB:', dbError.message);
     }
@@ -126,10 +143,14 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
       },
     });
 
-    console.log(`🔍 [NotifHelper] Found ${fcmTokens.length} active FCM token(s) for ${userIds.length} user(s)`);
+    console.log(
+      `🔍 [NotifHelper] Found ${fcmTokens.length} active FCM token(s) for ${userIds.length} user(s)`
+    );
 
     if (fcmTokens.length === 0) {
-      console.log(`⚠️ [NotifHelper] No active FCM tokens for users: [${userIds.join(', ')}]. Notifications saved to DB only.`);
+      console.log(
+        `⚠️ [NotifHelper] No active FCM tokens for users: [${userIds.join(', ')}]. Notifications saved to DB only.`
+      );
       return {
         success: true,
         message: 'Notifications saved but no active FCM tokens found',
@@ -141,7 +162,9 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
     const tokens = fcmTokens.map((token) => token.token);
     const result = await sendMulticastNotification(tokens, { title, body }, data);
 
-    console.log(`📨 [NotifHelper] FCM multicast result: success=${result.success}, sent=${result.successCount || 0}, failed=${result.failureCount || 0}`);
+    console.log(
+      `📨 [NotifHelper] FCM multicast result: success=${result.success}, sent=${result.successCount || 0}, failed=${result.failureCount || 0}`
+    );
 
     return {
       success: result.success,
@@ -190,10 +213,15 @@ export const sendNotificationToUnitResidents = async (unitId, title, body, data 
     }
 
     const userIds = unitMembers.map((member) => member.userId);
-    console.log(`👥 [NotifHelper] Found ${userIds.length} resident(s) in unit ${unitId}: [${userIds.join(', ')}]`);
+    console.log(
+      `👥 [NotifHelper] Found ${userIds.length} resident(s) in unit ${unitId}: [${userIds.join(', ')}]`
+    );
     return await sendNotificationToUsers(userIds, title, body, data);
   } catch (error) {
-    console.error(`❌ [NotifHelper] sendNotificationToUnitResidents FAILED for unit ${unitId}:`, error.message);
+    console.error(
+      `❌ [NotifHelper] sendNotificationToUnitResidents FAILED for unit ${unitId}:`,
+      error.message
+    );
     return {
       success: false,
       error: error.message,
@@ -212,9 +240,17 @@ export const sendNotificationToUnitResidents = async (unitId, title, body, data 
  * @param {Object} data - Additional data payload
  * @returns {Promise<Object>}
  */
-export const sendNotificationToUnitResidentsByFlatNo = async (societyId, flatNo, title, body, data = {}) => {
+export const sendNotificationToUnitResidentsByFlatNo = async (
+  societyId,
+  flatNo,
+  title,
+  body,
+  data = {}
+) => {
   try {
-    console.log(`🔔 [NotifHelper] sendNotificationToUnitResidentsByFlatNo called — societyId: ${societyId}, flatNo: "${flatNo}"`);
+    console.log(
+      `🔔 [NotifHelper] sendNotificationToUnitResidentsByFlatNo called — societyId: ${societyId}, flatNo: "${flatNo}"`
+    );
 
     if (!societyId || !flatNo) {
       console.log(`⚠️ [NotifHelper] Missing societyId or flatNo, cannot resolve unit`);
@@ -238,7 +274,10 @@ export const sendNotificationToUnitResidentsByFlatNo = async (societyId, flatNo,
     console.log(`✅ [NotifHelper] Resolved flatNo "${flatNo}" → unitId: ${unit.id}`);
     return await sendNotificationToUnitResidents(unit.id, title, body, data);
   } catch (error) {
-    console.error(`❌ [NotifHelper] sendNotificationToUnitResidentsByFlatNo FAILED:`, error.message);
+    console.error(
+      `❌ [NotifHelper] sendNotificationToUnitResidentsByFlatNo FAILED:`,
+      error.message
+    );
     return {
       success: false,
       error: error.message,

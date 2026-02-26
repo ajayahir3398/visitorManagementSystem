@@ -4,8 +4,7 @@ import v2Tags from './v2/index.js';
 // Combine all version tags
 export default [
   ...v1Tags,
-//   ...v2Tags,
+  //   ...v2Tags,
   // Future versions:
   // ...v3Tags,
 ];
-

@@ -1,4 +1,7 @@
-import { updateAllSubscriptionStatuses, checkSubscriptionExpiryAndNotify } from '../services/subscriptionService.js';
+import {
+  updateAllSubscriptionStatuses,
+  checkSubscriptionExpiryAndNotify,
+} from '../services/subscriptionService.js';
 import cron from 'node-cron';
 
 /**
@@ -9,7 +12,7 @@ const isDatabaseConnectionError = (error) => {
     error?.code === 'P1001' || // Can't reach database server
     error?.code === 'ECONNREFUSED' ||
     error?.code === 'ETIMEDOUT' ||
-    error?.message?.includes('Can\'t reach database server') ||
+    error?.message?.includes("Can't reach database server") ||
     error?.message?.includes('DatabaseNotReachable')
   );
 };
@@ -17,7 +20,7 @@ const isDatabaseConnectionError = (error) => {
 /**
  * Cron job to auto-update subscription statuses
  * This should be called daily (e.g., at midnight)
- * 
+ *
  * Usage:
  * - Set up a cron job to call this function daily
  * - Or use node-cron package to schedule it
@@ -26,7 +29,9 @@ export const runSubscriptionStatusUpdate = async () => {
   try {
     console.log('Starting subscription status update...');
     const result = await updateAllSubscriptionStatuses();
-    console.log(`✅ Subscription status update completed: ${result.updated}/${result.total} updated`);
+    console.log(
+      `✅ Subscription status update completed: ${result.updated}/${result.total} updated`
+    );
 
     // Also check for expiry verification and notifications
     await checkSubscriptionExpiryAndNotify();
@@ -35,7 +40,9 @@ export const runSubscriptionStatusUpdate = async () => {
   } catch (error) {
     // Handle database connection errors gracefully
     if (isDatabaseConnectionError(error)) {
-      console.warn('⚠️  Database not available for subscription status update. Will retry on next scheduled run.');
+      console.warn(
+        '⚠️  Database not available for subscription status update. Will retry on next scheduled run.'
+      );
       return { total: 0, updated: 0 };
     }
 
@@ -72,4 +79,3 @@ export const scheduleSubscriptionUpdates = () => {
     console.error('❌ Error starting subscription update scheduler:', error);
   }
 };
-

@@ -75,11 +75,7 @@ export const verifyOTP = async (mobile, otpCode) => {
 export const cleanExpiredOTPs = async () => {
   await prisma.otp.deleteMany({
     where: {
-      OR: [
-        { expiresAt: { lt: new Date() } },
-        { verified: true },
-      ],
+      OR: [{ expiresAt: { lt: new Date() } }, { verified: true }],
     },
   });
 };
-

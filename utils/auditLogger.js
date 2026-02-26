@@ -2,9 +2,9 @@ import prisma from '../lib/prisma.js';
 import { fixSequence } from './sequenceFix.js';
 /**
  * Central Audit Logger Utility
- * 
+ *
  * Logs user actions for security, debugging, compliance, and audit purposes.
- * 
+ *
  * @param {Object} params - Audit log parameters
  * @param {Object} params.user - User object from req.user (optional)
  * @param {String} params.action - Action name (e.g., "LOGIN", "VISITOR_ENTRY", "PRE_APPROVAL_CREATED")
@@ -12,7 +12,7 @@ import { fixSequence } from './sequenceFix.js';
  * @param {Number} params.entityId - ID of the affected entity (optional)
  * @param {String} params.description - Human-readable description (optional)
  * @param {Object} params.req - Express request object (optional, for IP and user agent)
- * 
+ *
  * @example
  * await logAction({
  *   user: req.user,
@@ -155,7 +155,6 @@ export const AUDIT_ACTIONS = {
   NOTICE_DEACTIVATED: 'NOTICE_DEACTIVATED',
   NOTICE_READ: 'NOTICE_READ',
 
-
   // Emergency Management
   EMERGENCY_RAISED: 'EMERGENCY_RAISED',
   EMERGENCY_ACKNOWLEDGED: 'EMERGENCY_ACKNOWLEDGED',
@@ -202,5 +201,3 @@ export const AUDIT_ENTITIES = {
   FCM_TOKEN: 'FcmToken',
   NOTIFICATION: 'Notification',
 };
-
-

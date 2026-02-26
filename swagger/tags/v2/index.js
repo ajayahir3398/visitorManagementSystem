@@ -8,4 +8,3 @@ export default [
     description: 'API v2 - Health check endpoint',
   },
 ];
-

@@ -93,11 +93,13 @@ export default [
   },
   {
     name: 'v1 - Super Admin Dashboard',
-    description: 'API v1 - Super Admin dashboard metrics (summary, revenue, subscriptions, users, visitors, notifications)',
+    description:
+      'API v1 - Super Admin dashboard metrics (summary, revenue, subscriptions, users, visitors, notifications)',
   },
   {
     name: 'v1 - Super Admin Charts',
-    description: 'API v1 - Super Admin chart data (society status, revenue trend, visitor trend, plan distribution, conversion, cities)',
+    description:
+      'API v1 - Super Admin chart data (society status, revenue trend, visitor trend, plan distribution, conversion, cities)',
   },
   {
     name: 'v1 - Super Admin Actions',
@@ -105,10 +107,12 @@ export default [
   },
   {
     name: 'v1 - Society Admin Dashboard',
-    description: 'API v1 - Society Admin dashboard metrics (overview, maintenance, visitors, emergencies, notices, activity)',
+    description:
+      'API v1 - Society Admin dashboard metrics (overview, maintenance, visitors, emergencies, notices, activity)',
   },
   {
     name: 'v1 - Society Admin Charts',
-    description: 'API v1 - Society Admin chart data (maintenance collection, visitor trend, emergency types, bill status)',
+    description:
+      'API v1 - Society Admin chart data (maintenance collection, visitor trend, emergency types, bill status)',
   },
 ];
