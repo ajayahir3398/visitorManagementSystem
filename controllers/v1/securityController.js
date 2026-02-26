@@ -5,7 +5,7 @@ import { getSubscription, updateSubscriptionStatus } from '../../services/subscr
  * Get security dashboard data
  * GET /api/v1/security/dashboard
  * Access: SECURITY only
- * 
+ *
  * Returns:
  * - System status (active/grace/locked)
  * - Society information
@@ -63,7 +63,7 @@ export const getSecurityDashboard = async (req, res) => {
 
     if (subscription) {
       subscription = await updateSubscriptionStatus(subscription);
-      
+
       if (subscription.status === 'TRIAL' || subscription.status === 'ACTIVE') {
         systemStatus = 'ACTIVE';
       } else if (subscription.status === 'GRACE') {
@@ -152,7 +152,7 @@ export const getSecurityDashboard = async (req, res) => {
     const pendingApprovalsWithWaitTime = pendingApprovals.map((log) => {
       const waitTimeMs = new Date() - new Date(log.createdAt);
       const waitTimeMinutes = Math.floor(waitTimeMs / (1000 * 60));
-      
+
       let waitTimeBadge = '';
       if (waitTimeMinutes < 1) {
         waitTimeBadge = 'Just now';
@@ -244,4 +244,3 @@ export const getSecurityDashboard = async (req, res) => {
     });
   }
 };
-
