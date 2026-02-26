@@ -33,9 +33,7 @@ const validateSocietyId = [
 
 const validateExtendSubscription = [
   param('id').isInt().withMessage('Invalid society ID'),
-  body('days')
-    .isInt({ min: 1, max: 365 })
-    .withMessage('Days must be between 1 and 365'),
+  body('days').isInt({ min: 1, max: 365 }).withMessage('Days must be between 1 and 365'),
   handleValidationErrors,
 ];
 

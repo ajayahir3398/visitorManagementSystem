@@ -58,13 +58,7 @@ const validateVisitorLogId = [
 // Swagger documentation is in config/swagger/paths/v1/visitorLog.js
 
 // Create visitor entry
-router.post(
-  '/',
-  authenticate,
-  authorize('SECURITY'),
-  validateCreateEntry,
-  createVisitorEntry
-);
+router.post('/', authenticate, authorize('SECURITY'), validateCreateEntry, createVisitorEntry);
 
 // Mark visitor exit
 router.put(
@@ -102,4 +96,3 @@ router.get(
 );
 
 export default router;
-

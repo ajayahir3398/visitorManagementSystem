@@ -37,7 +37,10 @@ const validateCreateUnit = [
     .withMessage('societyId must be an integer'),
   body('block').notEmpty().withMessage('block is required').isString().trim(),
   body('unitType').optional().isString().trim(),
-  body('status').optional().isIn(['ACTIVE', 'INACTIVE']).withMessage('Status must be ACTIVE or INACTIVE'),
+  body('status')
+    .optional()
+    .isIn(['ACTIVE', 'INACTIVE'])
+    .withMessage('Status must be ACTIVE or INACTIVE'),
   handleValidationErrors,
 ];
 
@@ -45,14 +48,14 @@ const validateUpdateUnit = [
   body('unitNo').optional().notEmpty().withMessage('unitNo cannot be empty').trim(),
   body('block').optional().notEmpty().withMessage('block cannot be empty').isString().trim(),
   body('unitType').optional().isString().trim(),
-  body('status').optional().isIn(['ACTIVE', 'INACTIVE']).withMessage('Status must be ACTIVE or INACTIVE'),
+  body('status')
+    .optional()
+    .isIn(['ACTIVE', 'INACTIVE'])
+    .withMessage('Status must be ACTIVE or INACTIVE'),
   handleValidationErrors,
 ];
 
-const validateUnitId = [
-  param('id').isInt().withMessage('Invalid unit ID'),
-  handleValidationErrors,
-];
+const validateUnitId = [param('id').isInt().withMessage('Invalid unit ID'), handleValidationErrors];
 
 const validateAddMember = [
   body('userId')
@@ -146,4 +149,3 @@ router.delete(
 );
 
 export default router;
-

@@ -58,12 +58,7 @@ const validateBuySubscription = [
 // Swagger documentation is in config/swagger/paths/v1/subscription.js
 
 // Get current subscription (for logged-in society admin)
-router.get(
-  '/current',
-  authenticate,
-  authorize('SOCIETY_ADMIN'),
-  getCurrentSubscription
-);
+router.get('/current', authenticate, authorize('SOCIETY_ADMIN'), getCurrentSubscription);
 
 // Buy/Activate subscription plan
 router.post(
@@ -84,12 +79,7 @@ router.get(
 );
 
 // Get all subscriptions (with filters)
-router.get(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN'),
-  getAllSubscriptions
-);
+router.get('/', authenticate, authorize('SUPER_ADMIN'), getAllSubscriptions);
 
 // Extend subscription by subscription ID
 router.post(
@@ -112,4 +102,3 @@ router.post(
 );
 
 export default router;
-

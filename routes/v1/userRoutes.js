@@ -34,7 +34,10 @@ const validateCreateUser = [
     .matches(/^[0-9]{10}$/)
     .withMessage('Mobile must be 10 digits'),
   body('email').optional().isEmail().withMessage('Invalid email format'),
-  body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('password')
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
   body('societyId').optional().isInt().withMessage('Invalid society ID'),
   body('roleId').optional().isInt().withMessage('Invalid role ID'),
   body('status')
@@ -51,7 +54,10 @@ const validateUpdateUser = [
     .matches(/^[0-9]{10}$/)
     .withMessage('Mobile must be 10 digits'),
   body('email').optional().isEmail().withMessage('Invalid email format'),
-  body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('password')
+    .optional()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
   body('societyId').optional().isInt().withMessage('Invalid society ID'),
   body('roleId').optional().isInt().withMessage('Invalid role ID'),
   body('status')
@@ -61,10 +67,7 @@ const validateUpdateUser = [
   handleValidationErrors,
 ];
 
-const validateUserId = [
-  param('id').isInt().withMessage('Invalid user ID'),
-  handleValidationErrors,
-];
+const validateUserId = [param('id').isInt().withMessage('Invalid user ID'), handleValidationErrors];
 
 // Routes
 // Swagger documentation is in config/swagger/paths/v1/user.js
@@ -76,12 +79,7 @@ router.post(
   createUser
 );
 
-router.get(
-  '/',
-  authenticate,
-  authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'),
-  getUsers
-);
+router.get('/', authenticate, authorize('SUPER_ADMIN', 'SOCIETY_ADMIN'), getUsers);
 
 router.get(
   '/:id',
@@ -116,4 +114,3 @@ router.post(
 );
 
 export default router;
-

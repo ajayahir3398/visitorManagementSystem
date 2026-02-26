@@ -53,8 +53,15 @@ const validateVisitorId = [
 ];
 
 const validateSearch = [
-  query('q').notEmpty().withMessage('Search query is required').isLength({ min: 2 }).withMessage('Search query must be at least 2 characters'),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limit must be between 1 and 100'),
+  query('q')
+    .notEmpty()
+    .withMessage('Search query is required')
+    .isLength({ min: 2 })
+    .withMessage('Search query must be at least 2 characters'),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100'),
   handleValidationErrors,
 ];
 
@@ -71,12 +78,7 @@ router.post(
 );
 
 // Get all visitors (with search)
-router.get(
-  '/',
-  authenticate,
-  authorize('SOCIETY_ADMIN', 'SECURITY'),
-  getVisitors
-);
+router.get('/', authenticate, authorize('SOCIETY_ADMIN', 'SECURITY'), getVisitors);
 
 // Search visitors
 router.get(
@@ -107,13 +109,6 @@ router.put(
 );
 
 // Delete visitor
-router.delete(
-  '/:id',
-  authenticate,
-  authorize('SOCIETY_ADMIN'),
-  validateVisitorId,
-  deleteVisitor
-);
+router.delete('/:id', authenticate, authorize('SOCIETY_ADMIN'), validateVisitorId, deleteVisitor);
 
 export default router;
-

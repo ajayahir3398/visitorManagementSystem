@@ -19,4 +19,3 @@ router.get('/subscriptions', getSubscriptions);
 router.get('/notifications', getNotifications);
 
 export default router;
-

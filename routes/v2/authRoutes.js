@@ -25,10 +25,7 @@ const handleValidationErrors = (req, res, next) => {
 // Validation middleware
 const validateLogin = [
   body('password').notEmpty().withMessage('Password is required'),
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('Invalid email format'),
+  body('email').optional().isEmail().withMessage('Invalid email format'),
   body('mobile')
     .optional()
     .matches(/^[0-9]{10}$/)
@@ -74,4 +71,3 @@ router.post('/verify-otp', validateVerifyOTP, verifyOTPLogin);
 router.post('/refresh-token', validateRefreshToken, refreshToken);
 
 export default router;
-
