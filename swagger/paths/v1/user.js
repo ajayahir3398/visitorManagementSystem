@@ -351,7 +351,8 @@ export default {
     post: {
       summary: 'Bulk create resident users',
       tags: ['v1 - Users'],
-      description: 'Upload a CSV file to create residents and assign them to units. Columns required -> unit_no, name, mobile. Optional -> block, email, role.',
+      description:
+        'Upload a CSV file to create residents and assign them to units. Columns required -> unit_no, name, mobile. Optional -> block, email, role.',
       security: [{ bearerAuth: [] }],
       requestBody: {
         content: {
@@ -392,4 +393,3 @@ export default {
     },
   },
 };
-

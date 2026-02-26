@@ -3,7 +3,7 @@ import prisma from '../lib/prisma.js';
 /**
  * Fix PostgreSQL sequence for a given table if out of sync
  * This prevents unique constraint errors on id fields
- * 
+ *
  * @param {string} tableName - The name of the table (e.g., 'units', 'users')
  * @returns {Promise<void>}
  */
@@ -21,4 +21,3 @@ export async function fixSequence(tableName) {
     console.warn(`⚠️  Warning: Could not fix ${tableName} sequence:`, seqError.message);
   }
 }
-
