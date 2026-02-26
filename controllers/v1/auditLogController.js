@@ -188,7 +188,7 @@ export const getAuditLogById = async (req, res) => {
       if (log.societyId !== req.user.society_id) {
         return res.status(403).json({
           success: false,
-          message: 'Access denied. You can only view your society\'s audit logs.',
+          message: "Access denied. You can only view your society's audit logs.",
         });
       }
     } else if (req.user.role_name !== 'SUPER_ADMIN') {
@@ -339,5 +339,3 @@ export const getAuditLogStats = async (req, res) => {
     });
   }
 };
-
-
