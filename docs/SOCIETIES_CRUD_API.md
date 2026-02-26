@@ -26,13 +26,13 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/societies` | Create a new society | SUPER_ADMIN |
-| GET | `/societies` | Get all societies (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/societies/:id` | Get society by ID | SUPER_ADMIN, SOCIETY_ADMIN, RESIDENT, SECURITY |
-| PUT | `/societies/:id` | Update society | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/societies/:id` | Delete society | SUPER_ADMIN |
+| Method | Endpoint         | Description                                   | Required Role                                  |
+| ------ | ---------------- | --------------------------------------------- | ---------------------------------------------- |
+| POST   | `/societies`     | Create a new society                          | SUPER_ADMIN                                    |
+| GET    | `/societies`     | Get all societies (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| GET    | `/societies/:id` | Get society by ID                             | SUPER_ADMIN, SOCIETY_ADMIN, RESIDENT, SECURITY |
+| PUT    | `/societies/:id` | Update society                                | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| DELETE | `/societies/:id` | Delete society                                | SUPER_ADMIN                                    |
 
 ---
 
@@ -66,15 +66,15 @@ POST /api/v1/societies
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Society name |
-| `type` | string | Yes | Must be `"apartment"` or `"office"` |
-| `address` | string | No | Street address |
-| `city` | string | No | City name |
-| `state` | string | No | State name |
-| `pincode` | string | No | Postal code (max 10 characters) |
-| `subscriptionId` | integer | No | Subscription ID |
+| Field            | Type    | Required | Description                         |
+| ---------------- | ------- | -------- | ----------------------------------- |
+| `name`           | string  | Yes      | Society name                        |
+| `type`           | string  | Yes      | Must be `"apartment"` or `"office"` |
+| `address`        | string  | No       | Street address                      |
+| `city`           | string  | No       | City name                           |
+| `state`          | string  | No       | State name                          |
+| `pincode`        | string  | No       | Postal code (max 10 characters)     |
+| `subscriptionId` | integer | No       | Subscription ID                     |
 
 ### Success Response (201)
 
@@ -103,6 +103,7 @@ POST /api/v1/societies
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -118,6 +119,7 @@ POST /api/v1/societies
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -152,7 +154,7 @@ const createSociety = async (societyData) => {
     if (error.response?.status === 400) {
       // Handle validation errors
       const errors = error.response.data.errors || [];
-      errors.forEach(err => {
+      errors.forEach((err) => {
         console.error(`${err.param}: ${err.msg}`);
       });
     } else if (error.response?.status === 403) {
@@ -202,13 +204,13 @@ GET /api/v1/societies
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `status` | string | - | Filter by status: `"active"` or `"expired"` |
-| `type` | string | - | Filter by type: `"apartment"` or `"office"` |
-| `search` | string | - | Search by name, city, or state (case-insensitive) |
+| Parameter | Type    | Default | Description                                       |
+| --------- | ------- | ------- | ------------------------------------------------- |
+| `page`    | integer | 1       | Page number                                       |
+| `limit`   | integer | 10      | Items per page (max 100)                          |
+| `status`  | string  | -       | Filter by status: `"active"` or `"expired"`       |
+| `type`    | string  | -       | Filter by type: `"apartment"` or `"office"`       |
+| `search`  | string  | -       | Search by name, city, or state (case-insensitive) |
 
 ### Example Request
 
@@ -329,14 +331,14 @@ const SocietiesListScreen = () => {
         <View>
           <Text>{item.name}</Text>
           <Text>{item.type}</Text>
-          <Text>{item.city}, {item.state}</Text>
+          <Text>
+            {item.city}, {item.state}
+          </Text>
           <Text>Users: {item._count.users}</Text>
         </View>
       )}
       ListFooterComponent={
-        pagination && pagination.page < pagination.pages ? (
-          <ActivityIndicator />
-        ) : null
+        pagination && pagination.page < pagination.pages ? <ActivityIndicator /> : null
       }
     />
   );
@@ -355,7 +357,7 @@ const getSocieties = async (page = 1, limit = 10, filters = {}) => {
     };
 
     const response = await apiClient.get('/societies', { params });
-    
+
     if (response.data.success) {
       return {
         societies: response.data.data.societies,
@@ -405,9 +407,9 @@ GET /api/v1/societies/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Society ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Society ID  |
 
 ### Success Response (200)
 
@@ -439,6 +441,7 @@ GET /api/v1/societies/:id
 ### Error Responses
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -447,6 +450,7 @@ GET /api/v1/societies/:id
 ```
 
 **403 Forbidden** - User trying to access another society
+
 ```json
 {
   "success": false,
@@ -467,12 +471,12 @@ const useSociety = (societyId) => {
 
   const fetchSociety = async () => {
     if (!societyId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/societies/${societyId}`);
-      
+
       if (response.data.success) {
         setSociety(response.data.data.society);
       } else {
@@ -528,7 +532,7 @@ const SocietyDetailScreen = ({ route }) => {
 const getSocietyById = async (societyId) => {
   try {
     const response = await apiClient.get(`/societies/${societyId}`);
-    
+
     if (response.data.success) {
       return response.data.data.society;
     } else {
@@ -576,9 +580,9 @@ PUT /api/v1/societies/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Society ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Society ID  |
 
 ### Request Body
 
@@ -599,16 +603,16 @@ All fields are optional. Only include fields you want to update.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | No | Society name |
-| `type` | string | No | Must be `"apartment"` or `"office"` |
-| `address` | string | No | Street address (use `null` to clear) |
-| `city` | string | No | City name (use `null` to clear) |
-| `state` | string | No | State name (use `null` to clear) |
-| `pincode` | string | No | Postal code (use `null` to clear) |
-| `subscriptionId` | integer | No | **SUPER_ADMIN only** |
-| `status` | string | No | **SUPER_ADMIN only**. Must be `"active"` or `"expired"` |
+| Field            | Type    | Required | Description                                             |
+| ---------------- | ------- | -------- | ------------------------------------------------------- |
+| `name`           | string  | No       | Society name                                            |
+| `type`           | string  | No       | Must be `"apartment"` or `"office"`                     |
+| `address`        | string  | No       | Street address (use `null` to clear)                    |
+| `city`           | string  | No       | City name (use `null` to clear)                         |
+| `state`          | string  | No       | State name (use `null` to clear)                        |
+| `pincode`        | string  | No       | Postal code (use `null` to clear)                       |
+| `subscriptionId` | integer | No       | **SUPER_ADMIN only**                                    |
+| `status`         | string  | No       | **SUPER_ADMIN only**. Must be `"active"` or `"expired"` |
 
 ### Success Response (200)
 
@@ -637,6 +641,7 @@ All fields are optional. Only include fields you want to update.
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -652,6 +657,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -660,6 +666,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -695,7 +702,7 @@ const updateSociety = async (societyId, updateData) => {
   } catch (error) {
     if (error.response?.status === 400) {
       const errors = error.response.data.errors || [];
-      errors.forEach(err => {
+      errors.forEach((err) => {
         console.error(`${err.param}: ${err.msg}`);
       });
       Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -801,9 +808,9 @@ DELETE /api/v1/societies/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Society ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Society ID  |
 
 ### Success Response (200)
 
@@ -817,6 +824,7 @@ DELETE /api/v1/societies/:id
 ### Error Responses
 
 **400 Bad Request** - Society has users
+
 ```json
 {
   "success": false,
@@ -825,6 +833,7 @@ DELETE /api/v1/societies/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -833,6 +842,7 @@ DELETE /api/v1/societies/:id
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -909,11 +919,7 @@ const SocietyDetailScreen = ({ route, navigation }) => {
   return (
     <View>
       {/* Society details */}
-      <Button
-        title="Delete Society"
-        onPress={handleDelete}
-        color="red"
-      />
+      <Button title="Delete Society" onPress={handleDelete} color="red" />
     </View>
   );
 };
@@ -1112,7 +1118,7 @@ try {
 const handleValidationError = (error) => {
   if (error.response?.status === 400 && error.response.data.errors) {
     const errors = error.response.data.errors;
-    const errorMessages = errors.map(err => `${err.param}: ${err.msg}`).join('\n');
+    const errorMessages = errors.map((err) => `${err.param}: ${err.msg}`).join('\n');
     Alert.alert('Validation Error', errorMessages);
   }
 };
@@ -1123,10 +1129,7 @@ const handleValidationError = (error) => {
 ```javascript
 const handlePermissionError = (error) => {
   if (error.response?.status === 403) {
-    Alert.alert(
-      'Access Denied',
-      'You do not have permission to perform this action'
-    );
+    Alert.alert('Access Denied', 'You do not have permission to perform this action');
   }
 };
 ```
@@ -1198,13 +1201,13 @@ interface Society {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Create Society | ✅ | ❌ | ❌ | ❌ |
-| Get All Societies | ✅ | ✅ (own only) | ❌ | ❌ |
-| Get Society by ID | ✅ | ✅ (own only) | ❌ | ❌ |
-| Update Society | ✅ | ❌ | ❌ | ❌ |
-| Delete Society | ✅ | ❌ | ❌ | ❌ |
+| Operation         | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
+| ----------------- | ----------- | ------------- | -------- | -------- |
+| Create Society    | ✅          | ❌            | ❌       | ❌       |
+| Get All Societies | ✅          | ✅ (own only) | ❌       | ❌       |
+| Get Society by ID | ✅          | ✅ (own only) | ❌       | ❌       |
+| Update Society    | ✅          | ❌            | ❌       | ❌       |
+| Delete Society    | ✅          | ❌            | ❌       | ❌       |
 
 ---
 
@@ -1236,4 +1239,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

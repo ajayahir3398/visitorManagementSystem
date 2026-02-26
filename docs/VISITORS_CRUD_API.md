@@ -26,14 +26,14 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/visitors` | Create a new visitor | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
-| GET | `/visitors` | Get all visitors (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| GET | `/visitors/search` | Search visitors by name or mobile | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| GET | `/visitors/:id` | Get visitor by ID | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| PUT | `/visitors/:id` | Update visitor | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
-| DELETE | `/visitors/:id` | Delete visitor | SUPER_ADMIN, SOCIETY_ADMIN |
+| Method | Endpoint           | Description                                  | Required Role                                  |
+| ------ | ------------------ | -------------------------------------------- | ---------------------------------------------- |
+| POST   | `/visitors`        | Create a new visitor                         | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY           |
+| GET    | `/visitors`        | Get all visitors (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| GET    | `/visitors/search` | Search visitors by name or mobile            | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| GET    | `/visitors/:id`    | Get visitor by ID                            | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| PUT    | `/visitors/:id`    | Update visitor                               | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY           |
+| DELETE | `/visitors/:id`    | Delete visitor                               | SUPER_ADMIN, SOCIETY_ADMIN                     |
 
 ---
 
@@ -63,11 +63,11 @@ POST /api/v1/visitors
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Visitor's full name |
-| `mobile` | string | Yes | 10-digit mobile number |
-| `photoBase64` | string | No | Base64 data URI for visitor's photo |
+| Field         | Type   | Required | Description                         |
+| ------------- | ------ | -------- | ----------------------------------- |
+| `name`        | string | Yes      | Visitor's full name                 |
+| `mobile`      | string | Yes      | 10-digit mobile number              |
+| `photoBase64` | string | No       | Base64 data URI for visitor's photo |
 
 ### Success Response (201) - New Visitor Created
 
@@ -110,6 +110,7 @@ If a visitor with the same mobile number already exists, the API returns the exi
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -125,6 +126,7 @@ If a visitor with the same mobile number already exists, the API returns the exi
 ```
 
 **400 Bad Request** - Invalid mobile format
+
 ```json
 {
   "success": false,
@@ -159,7 +161,7 @@ const createVisitor = async (visitorData) => {
       // Handle validation errors
       if (error.response.data.errors) {
         const errors = error.response.data.errors;
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -338,12 +340,12 @@ GET /api/v1/visitors
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `search` | string | - | Search by name or mobile (case-insensitive) |
-| `mobile` | string | - | Filter by exact mobile number |
+| Parameter | Type    | Default | Description                                 |
+| --------- | ------- | ------- | ------------------------------------------- |
+| `page`    | integer | 1       | Page number                                 |
+| `limit`   | integer | 10      | Items per page (max 100)                    |
+| `search`  | string  | -       | Search by name or mobile (case-insensitive) |
+| `mobile`  | string  | -       | Filter by exact mobile number               |
 
 ### Example Request
 
@@ -420,7 +422,7 @@ const useVisitors = (filters = {}) => {
         if (page === 1) {
           setVisitors(response.data.data.visitors);
         } else {
-          setVisitors(prev => [...prev, ...response.data.data.visitors]);
+          setVisitors((prev) => [...prev, ...response.data.data.visitors]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -584,10 +586,10 @@ GET /api/v1/visitors/search
 
 ### Query Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query (minimum 2 characters) |
-| `limit` | integer | No | Maximum results (default: 20, max: 100) |
+| Parameter | Type    | Required | Description                             |
+| --------- | ------- | -------- | --------------------------------------- |
+| `q`       | string  | Yes      | Search query (minimum 2 characters)     |
+| `limit`   | integer | No       | Maximum results (default: 20, max: 100) |
 
 ### Example Request
 
@@ -625,6 +627,7 @@ GET /api/v1/visitors/search?q=John&limit=10
 ### Error Responses
 
 **400 Bad Request** - Search query too short
+
 ```json
 {
   "success": false,
@@ -773,9 +776,9 @@ GET /api/v1/visitors/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Visitor ID  |
 
 ### Success Response (200)
 
@@ -801,6 +804,7 @@ GET /api/v1/visitors/:id
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor ID
+
 ```json
 {
   "success": false,
@@ -809,6 +813,7 @@ GET /api/v1/visitors/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -817,6 +822,7 @@ GET /api/v1/visitors/:id
 ```
 
 **403 Forbidden** - RESIDENT trying to access visitor from another society
+
 ```json
 {
   "success": false,
@@ -838,12 +844,12 @@ const useVisitor = (visitorId) => {
 
   const fetchVisitor = async () => {
     if (!visitorId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/visitors/${visitorId}`);
-      
+
       if (response.data.success) {
         setVisitor(response.data.data.visitor);
       } else {
@@ -883,12 +889,16 @@ const VisitorDetailScreen = ({ route }) => {
       {visitor.photoBase64 && (
         <Image
           source={{ uri: visitor.photoBase64 }}
-          style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 20, alignSelf: 'center' }}
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            marginBottom: 20,
+            alignSelf: 'center',
+          }}
         />
       )}
-      <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>
-        {visitor.name}
-      </Text>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>{visitor.name}</Text>
       <Text style={{ marginTop: 10, textAlign: 'center' }}>Mobile: {visitor.mobile}</Text>
       <Text style={{ marginTop: 10, textAlign: 'center' }}>
         Visitor Logs: {visitor._count.visitorLogs}
@@ -907,7 +917,7 @@ const VisitorDetailScreen = ({ route }) => {
 const getVisitorById = async (visitorId) => {
   try {
     const response = await apiClient.get(`/visitors/${visitorId}`);
-    
+
     if (response.data.success) {
       return response.data.data.visitor;
     } else {
@@ -955,9 +965,9 @@ PUT /api/v1/visitors/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Visitor ID  |
 
 ### Request Body
 
@@ -973,11 +983,11 @@ All fields are optional. Only include fields you want to update.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | No | Visitor's full name |
-| `mobile` | string | No | 10-digit mobile number (must be unique if changed) |
-| `photoBase64` | string | No | Base64 data URI for visitor's photo (use `null` to clear) |
+| Field         | Type   | Required | Description                                               |
+| ------------- | ------ | -------- | --------------------------------------------------------- |
+| `name`        | string | No       | Visitor's full name                                       |
+| `mobile`      | string | No       | 10-digit mobile number (must be unique if changed)        |
+| `photoBase64` | string | No       | Base64 data URI for visitor's photo (use `null` to clear) |
 
 ### Success Response (200)
 
@@ -1000,6 +1010,7 @@ All fields are optional. Only include fields you want to update.
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor ID
+
 ```json
 {
   "success": false,
@@ -1008,6 +1019,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **400 Bad Request** - Invalid mobile format
+
 ```json
 {
   "success": false,
@@ -1016,6 +1028,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **400 Bad Request** - Mobile already exists
+
 ```json
 {
   "success": false,
@@ -1024,6 +1037,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1214,9 +1228,9 @@ DELETE /api/v1/visitors/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Visitor ID  |
 
 ### Success Response (200)
 
@@ -1230,6 +1244,7 @@ DELETE /api/v1/visitors/:id
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor ID
+
 ```json
 {
   "success": false,
@@ -1238,6 +1253,7 @@ DELETE /api/v1/visitors/:id
 ```
 
 **400 Bad Request** - Visitor has logs
+
 ```json
 {
   "success": false,
@@ -1246,6 +1262,7 @@ DELETE /api/v1/visitors/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1467,14 +1484,17 @@ const handleError = (error, operation) => {
   switch (status) {
     case 400:
       if (data.errors) {
-        const errorMsg = data.errors.map(e => e.msg).join('\n');
+        const errorMsg = data.errors.map((e) => e.msg).join('\n');
         Alert.alert('Validation Error', errorMsg);
       } else {
         Alert.alert('Error', data.message || 'Invalid request');
       }
       break;
     case 403:
-      Alert.alert('Access Denied', data.message || 'You do not have permission to perform this action');
+      Alert.alert(
+        'Access Denied',
+        data.message || 'You do not have permission to perform this action'
+      );
       break;
     case 404:
       Alert.alert('Not Found', data.message || 'Resource not found');
@@ -1535,7 +1555,7 @@ const VisitorsScreen = () => {
   const handleDeleteVisitor = async (visitorId) => {
     try {
       await visitorService.delete(visitorId);
-      setVisitors(visitors.filter(v => v.id !== visitorId));
+      setVisitors(visitors.filter((v) => v.id !== visitorId));
     } catch (error) {
       // Error already handled
     }
@@ -1549,14 +1569,14 @@ const VisitorsScreen = () => {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Create Visitor | ✅ | ✅ | ✅ | ❌ |
-| Get All Visitors | ✅ | ✅ | ✅ | ✅ (own society only) |
-| Search Visitors | ✅ | ✅ | ✅ | ✅ (own society only) |
-| Get Visitor by ID | ✅ | ✅ | ✅ | ✅ (own society only) |
-| Update Visitor | ✅ | ✅ | ✅ | ❌ |
-| Delete Visitor | ✅ | ✅ | ❌ | ❌ |
+| Operation         | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT              |
+| ----------------- | ----------- | ------------- | -------- | --------------------- |
+| Create Visitor    | ✅          | ✅            | ✅       | ❌                    |
+| Get All Visitors  | ✅          | ✅            | ✅       | ✅ (own society only) |
+| Search Visitors   | ✅          | ✅            | ✅       | ✅ (own society only) |
+| Get Visitor by ID | ✅          | ✅            | ✅       | ✅ (own society only) |
+| Update Visitor    | ✅          | ✅            | ✅       | ❌                    |
+| Delete Visitor    | ✅          | ✅            | ❌       | ❌                    |
 
 ---
 
@@ -1579,6 +1599,7 @@ const VisitorsScreen = () => {
 ### Duplicate Visitor Handling
 
 When creating a visitor:
+
 - If a visitor with the same mobile number exists, the API returns the existing visitor with status `200` and message `"Visitor already exists"`
 - This prevents duplicate visitor records
 - Check `response.status === 201` to determine if a new visitor was created
@@ -1596,13 +1617,16 @@ When creating a visitor:
 ### Deleting Visitors
 
 Visitors cannot be deleted if they have:
+
 - Visitor logs associated with them
 
 You must:
+
 1. Delete or reassign visitor logs (if applicable)
 2. Then delete the visitor
 
 **Note**: This is a safety measure to preserve visitor log history. If you need to remove a visitor that has logs, you may need to:
+
 - Archive or reassign the visitor logs
 - Or implement a soft delete mechanism (marking visitors as inactive instead of deleting)
 
@@ -1625,11 +1649,13 @@ You must:
 - **Search** (`/visitors/search`): Quick search for autocomplete, optimized for speed, limited fields returned
 
 Use Search for:
+
 - Autocomplete dropdowns
 - Quick lookups
 - Real-time search suggestions
 
 Use Get All for:
+
 - Full visitor lists
 - Detailed information
 - Pagination
@@ -1680,4 +1706,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

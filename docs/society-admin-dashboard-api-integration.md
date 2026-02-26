@@ -22,48 +22,42 @@ Authorization: Bearer <token>
 ### `src/services/societyAdminService.ts`
 
 ```typescript
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE = "YOUR_API_BASE_URL/api/v1";
+const API_BASE = 'YOUR_API_BASE_URL/api/v1';
 
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await AsyncStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 // ── Dashboard Metrics ──
 
-export const getDashboardOverview = () => api.get("/admin/dashboard/overview");
+export const getDashboardOverview = () => api.get('/admin/dashboard/overview');
 
-export const getMaintenanceSummary = () =>
-  api.get("/admin/dashboard/maintenance");
+export const getMaintenanceSummary = () => api.get('/admin/dashboard/maintenance');
 
-export const getVisitorSummary = () => api.get("/admin/dashboard/visitors");
+export const getVisitorSummary = () => api.get('/admin/dashboard/visitors');
 
-export const getEmergencySummary = () =>
-  api.get("/admin/dashboard/emergencies");
+export const getEmergencySummary = () => api.get('/admin/dashboard/emergencies');
 
-export const getNoticeSummary = () => api.get("/admin/dashboard/notices");
+export const getNoticeSummary = () => api.get('/admin/dashboard/notices');
 
-export const getRecentActivity = () => api.get("/admin/dashboard/activity");
+export const getRecentActivity = () => api.get('/admin/dashboard/activity');
 
 // ── Charts ──
 
-export const getMaintenanceCollectionChart = () =>
-  api.get("/admin/charts/maintenance-collection");
+export const getMaintenanceCollectionChart = () => api.get('/admin/charts/maintenance-collection');
 
-export const getVisitorTrendChart = () =>
-  api.get("/admin/charts/visitor-trend");
+export const getVisitorTrendChart = () => api.get('/admin/charts/visitor-trend');
 
-export const getEmergencyTypesChart = () =>
-  api.get("/admin/charts/emergency-types");
+export const getEmergencyTypesChart = () => api.get('/admin/charts/emergency-types');
 
-export const getMaintenanceStatusChart = () =>
-  api.get("/admin/charts/maintenance-status");
+export const getMaintenanceStatusChart = () => api.get('/admin/charts/maintenance-status');
 ```
 
 ---
@@ -160,7 +154,7 @@ export interface ApiResponse<T> {
 ### `src/screens/SocietyAdminDashboard.tsx`
 
 ```tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -168,27 +162,25 @@ import {
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
-} from "react-native";
+} from 'react-native';
 import {
   getDashboardOverview,
   getMaintenanceSummary,
   getVisitorSummary,
   getEmergencySummary,
-} from "../services/societyAdminService";
+} from '../services/societyAdminService';
 import type {
   DashboardOverview,
   MaintenanceSummary,
   VisitorSummary,
   EmergencySummary,
-} from "../types/societyAdmin";
+} from '../types/societyAdmin';
 
 const SocietyAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
-  const [maintenance, setMaintenance] = useState<MaintenanceSummary | null>(
-    null,
-  );
+  const [maintenance, setMaintenance] = useState<MaintenanceSummary | null>(null);
   const [visitors, setVisitors] = useState<VisitorSummary | null>(null);
   const [emergencies, setEmergencies] = useState<EmergencySummary | null>(null);
 
@@ -205,7 +197,7 @@ const SocietyAdminDashboard = () => {
       setVisitors(vsRes.data.data);
       setEmergencies(emRes.data.data);
     } catch (error) {
-      console.error("Dashboard error:", error);
+      console.error('Dashboard error:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -241,9 +233,7 @@ const SocietyAdminDashboard = () => {
       {/* ── Urgent Alert ── */}
       {(overview?.openEmergencies ?? 0) > 0 && (
         <View style={styles.alert}>
-          <Text style={styles.alertText}>
-            🚨 {overview?.openEmergencies} Open Emergency
-          </Text>
+          <Text style={styles.alertText}>🚨 {overview?.openEmergencies} Open Emergency</Text>
         </View>
       )}
 
@@ -251,15 +241,10 @@ const SocietyAdminDashboard = () => {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>💰 Maintenance</Text>
         <Text>
-          Unpaid: {maintenance?.unpaidBills} | Overdue:{" "}
-          {maintenance?.overdueBills}
+          Unpaid: {maintenance?.unpaidBills} | Overdue: {maintenance?.overdueBills}
         </Text>
-        <Text>
-          Collected: ₹{maintenance?.collectedThisMonth?.toLocaleString()}
-        </Text>
-        <Text>
-          Overdue Amt: ₹{maintenance?.overdueAmount?.toLocaleString()}
-        </Text>
+        <Text>Collected: ₹{maintenance?.collectedThisMonth?.toLocaleString()}</Text>
+        <Text>Overdue Amt: ₹{maintenance?.overdueAmount?.toLocaleString()}</Text>
       </View>
 
       {/* ── Visitors ── */}
@@ -269,8 +254,7 @@ const SocietyAdminDashboard = () => {
           Total: {visitors?.todayVisitors} | Inside: {visitors?.insidePremises}
         </Text>
         <Text>
-          Pending: {visitors?.pendingApprovals} | Pre-approved:{" "}
-          {visitors?.preApprovedToday}
+          Pending: {visitors?.pendingApprovals} | Pre-approved: {visitors?.preApprovedToday}
         </Text>
       </View>
     </ScrollView>
@@ -285,38 +269,38 @@ const KPI = ({ label, value }: { label: string; value?: number }) => (
 );
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F5F7FA", padding: 16 },
+  container: { flex: 1, backgroundColor: '#F5F7FA', padding: 16 },
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   kpi: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 4,
-    alignItems: "center",
+    alignItems: 'center',
     elevation: 2,
   },
-  kpiValue: { fontSize: 28, fontWeight: "bold", color: "#2563EB" },
-  kpiLabel: { fontSize: 12, color: "#666", marginTop: 4 },
+  kpiValue: { fontSize: 28, fontWeight: 'bold', color: '#2563EB' },
+  kpiLabel: { fontSize: 12, color: '#666', marginTop: 4 },
   alert: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: '#FEE2E2',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
-  alertText: { color: "#DC2626", fontWeight: "600", fontSize: 14 },
+  alertText: { color: '#DC2626', fontWeight: '600', fontSize: 14 },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
   },
-  cardTitle: { fontSize: 16, fontWeight: "600", marginBottom: 8 },
+  cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
 });
 
 export default SocietyAdminDashboard;
@@ -357,12 +341,12 @@ const handleApiError = (error: any) => {
     if (status === 401) {
       // Token expired → redirect to login
     } else if (status === 403) {
-      Alert.alert("Access Denied", "Society Admin access required");
+      Alert.alert('Access Denied', 'Society Admin access required');
     } else {
-      Alert.alert("Error", data.message || "Something went wrong");
+      Alert.alert('Error', data.message || 'Something went wrong');
     }
   } else {
-    Alert.alert("Network Error", "Check your internet connection");
+    Alert.alert('Network Error', 'Check your internet connection');
   }
 };
 ```

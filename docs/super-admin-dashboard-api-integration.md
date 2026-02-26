@@ -24,16 +24,16 @@ Create a dedicated service file for all Super Admin Dashboard API calls.
 ### `src/services/superAdminService.ts`
 
 ```typescript
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE = "YOUR_API_BASE_URL/api/v1";
+const API_BASE = 'YOUR_API_BASE_URL/api/v1';
 
 // Create axios instance with auth interceptor
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("accessToken");
+  const token = await AsyncStorage.getItem('accessToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -45,46 +45,36 @@ api.interceptors.request.use(async (config) => {
 // ═══════════════════════════════════════════════════
 
 /** Platform overview summary (KPI cards) */
-export const getDashboardSummary = () =>
-  api.get("/super-admin/dashboard/summary");
+export const getDashboardSummary = () => api.get('/super-admin/dashboard/summary');
 
 /** Revenue summary (MRR, this month, last month) */
-export const getRevenueSummary = () =>
-  api.get("/super-admin/dashboard/revenue");
+export const getRevenueSummary = () => api.get('/super-admin/dashboard/revenue');
 
 /** Subscription breakdown (active/trial/grace/locked) */
-export const getSubscriptionBreakdown = () =>
-  api.get("/super-admin/dashboard/subscriptions");
-
+export const getSubscriptionBreakdown = () => api.get('/super-admin/dashboard/subscriptions');
 
 /** Notification stats */
-export const getNotificationStats = () =>
-  api.get("/super-admin/dashboard/notifications");
+export const getNotificationStats = () => api.get('/super-admin/dashboard/notifications');
 
 // ═══════════════════════════════════════════════════
 // CHARTS
 // ═══════════════════════════════════════════════════
 
 /** Society status distribution (Pie chart) */
-export const getSocietyStatusChart = () =>
-  api.get("/super-admin/charts/society-status");
+export const getSocietyStatusChart = () => api.get('/super-admin/charts/society-status');
 
 /** Monthly revenue trend (Line chart) */
 export const getMonthlyRevenueChart = (year?: number) =>
-  api.get("/super-admin/charts/revenue", { params: { year } });
-
+  api.get('/super-admin/charts/revenue', { params: { year } });
 
 /** Plan distribution (Donut chart) */
-export const getPlanDistributionChart = () =>
-  api.get("/super-admin/charts/plan-distribution");
+export const getPlanDistributionChart = () => api.get('/super-admin/charts/plan-distribution');
 
 /** Trial → Paid conversion (Funnel chart) */
-export const getConversionChart = () =>
-  api.get("/super-admin/charts/conversion");
+export const getConversionChart = () => api.get('/super-admin/charts/conversion');
 
 /** Top cities by society count */
-export const getTopCitiesChart = () =>
-  api.get("/super-admin/charts/top-cities");
+export const getTopCitiesChart = () => api.get('/super-admin/charts/top-cities');
 
 // ═══════════════════════════════════════════════════
 // QUICK ACTIONS
@@ -136,7 +126,6 @@ export interface SubscriptionBreakdown {
   expiringIn7Days: number;
 }
 
-
 // ── Notification Stats ──
 export interface NotificationStats {
   total: number;
@@ -153,7 +142,6 @@ export interface MonthlyChartItem {
   month: string;
   amount: number;
 }
-
 
 export interface PlanDistributionItem {
   plan: string;
@@ -198,33 +186,26 @@ export interface ApiResponse<T> {
 ### `src/screens/SuperAdminDashboard.tsx`
 
 ```tsx
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import {
   getDashboardSummary,
   getRevenueSummary,
   getSubscriptionBreakdown,
-} from "../services/superAdminService";
+} from '../services/superAdminService';
 import type {
   DashboardSummary,
   RevenueSummary,
   SubscriptionBreakdown,
   ApiResponse,
-} from "../types/superAdmin";
+} from '../types/superAdmin';
 
 const SuperAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [revenue, setRevenue] = useState<RevenueSummary | null>(null);
-  const [subscriptions, setSubscriptions] =
-    useState<SubscriptionBreakdown | null>(null);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionBreakdown | null>(null);
 
   const loadData = async () => {
     try {
@@ -238,7 +219,7 @@ const SuperAdminDashboard = () => {
       setRevenue(revenueRes.data.data);
       setSubscriptions(subsRes.data.data);
     } catch (error) {
-      console.error("Dashboard load error:", error);
+      console.error('Dashboard load error:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -257,13 +238,9 @@ const SuperAdminDashboard = () => {
   if (loading) return <ActivityIndicator size="large" />;
 
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {/* KPI Cards */}
-      <View style={{ flexDirection: "row", flexWrap: "wrap", padding: 16 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 16 }}>
         <KPICard label="Total Societies" value={summary?.totalSocieties} />
         <KPICard label="Active" value={summary?.activeSocieties} />
         <KPICard label="Trial" value={summary?.trialSocieties} />
@@ -272,7 +249,7 @@ const SuperAdminDashboard = () => {
 
       {/* Revenue */}
       <View style={{ padding: 16 }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Revenue</Text>
+        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Revenue</Text>
         <Text>MRR: ₹{revenue?.mrr?.toLocaleString()}</Text>
         <Text>This Month: ₹{revenue?.thisMonth?.toLocaleString()}</Text>
         <Text>Last Month: ₹{revenue?.lastMonth?.toLocaleString()}</Text>
@@ -284,19 +261,19 @@ const SuperAdminDashboard = () => {
 const KPICard = ({ label, value }: { label: string; value?: number }) => (
   <View
     style={{
-      width: "48%",
-      margin: "1%",
+      width: '48%',
+      margin: '1%',
       padding: 16,
-      backgroundColor: "#fff",
+      backgroundColor: '#fff',
       borderRadius: 12,
-      shadowColor: "#000",
+      shadowColor: '#000',
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 3,
     }}
   >
-    <Text style={{ fontSize: 24, fontWeight: "bold" }}>{value ?? 0}</Text>
-    <Text style={{ color: "#666", marginTop: 4 }}>{label}</Text>
+    <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{value ?? 0}</Text>
+    <Text style={{ color: '#666', marginTop: 4 }}>{label}</Text>
   </View>
 );
 
@@ -308,11 +285,7 @@ export default SuperAdminDashboard;
 ## 4. Quick Actions Usage
 
 ```typescript
-import {
-  lockSociety,
-  unlockSociety,
-  extendSubscription,
-} from "../services/superAdminService";
+import { lockSociety, unlockSociety, extendSubscription } from '../services/superAdminService';
 
 // Lock
 const handleLock = async (societyId: number) => {
@@ -329,7 +302,7 @@ const handleUnlock = async (societyId: number) => {
 // Extend Subscription by 7 days
 const handleExtend = async (societyId: number) => {
   const res = await extendSubscription(societyId, 7);
-  console.log("New expiry:", res.data.data.newExpiryDate);
+  console.log('New expiry:', res.data.data.newExpiryDate);
 };
 ```
 
@@ -358,11 +331,11 @@ const handleExtend = async (societyId: number) => {
 
 ### Quick Actions
 
-| Method | Endpoint                                | Body               | Description    |
-| ------ | --------------------------------------- | ------------------ | -------------- |
-| POST   | `/super-admin/society/:id/lock`         | —                  | Lock society   |
-| POST   | `/super-admin/society/:id/unlock`       | —                  | Unlock society |
-| POST   | `/super-admin/society/:id/extend-subscription` | `{ days: number }` | Extend subscription   |
+| Method | Endpoint                                       | Body               | Description         |
+| ------ | ---------------------------------------------- | ------------------ | ------------------- |
+| POST   | `/super-admin/society/:id/lock`                | —                  | Lock society        |
+| POST   | `/super-admin/society/:id/unlock`              | —                  | Unlock society      |
+| POST   | `/super-admin/society/:id/extend-subscription` | `{ days: number }` | Extend subscription |
 
 ---
 
@@ -414,12 +387,12 @@ const handleApiError = (error: any) => {
     if (status === 401) {
       // Token expired → redirect to login
     } else if (status === 403) {
-      Alert.alert("Access Denied", "You need Super Admin permissions");
+      Alert.alert('Access Denied', 'You need Super Admin permissions');
     } else {
-      Alert.alert("Error", data.message || "Something went wrong");
+      Alert.alert('Error', data.message || 'Something went wrong');
     }
   } else {
-    Alert.alert("Network Error", "Please check your internet connection");
+    Alert.alert('Network Error', 'Please check your internet connection');
   }
 };
 ```

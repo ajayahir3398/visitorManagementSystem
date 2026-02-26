@@ -26,13 +26,13 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/users` | Create a new user | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/users` | Get all users (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/users/:id` | Get user by ID | SUPER_ADMIN, SOCIETY_ADMIN |
-| PUT | `/users/:id` | Update user | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/users/:id` | Delete user | SUPER_ADMIN, SOCIETY_ADMIN |
+| Method | Endpoint     | Description                               | Required Role              |
+| ------ | ------------ | ----------------------------------------- | -------------------------- |
+| POST   | `/users`     | Create a new user                         | SUPER_ADMIN, SOCIETY_ADMIN |
+| GET    | `/users`     | Get all users (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN |
+| GET    | `/users/:id` | Get user by ID                            | SUPER_ADMIN, SOCIETY_ADMIN |
+| PUT    | `/users/:id` | Update user                               | SUPER_ADMIN, SOCIETY_ADMIN |
+| DELETE | `/users/:id` | Delete user                               | SUPER_ADMIN, SOCIETY_ADMIN |
 
 ---
 
@@ -68,20 +68,21 @@ POST /api/v1/users
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | User's full name |
-| `mobile` | string | Yes | 10-digit mobile number (must be unique) |
-| `email` | string | No | Email address (must be unique if provided) |
-| `password` | string | No | Password (min 6 characters, required for admins) |
-| `societyId` | integer | No | Society ID to assign user to |
-| `roleId` | integer | No | Role ID (defaults to SOCIETY_ADMIN if not provided) |
-| `status` | string | No | User status: `"active"` or `"blocked"` (default: `"active"`) |
-| `photoBase64` | string | No | Base64 encoded user profile photo (data URI format) |
+| Field         | Type    | Required | Description                                                  |
+| ------------- | ------- | -------- | ------------------------------------------------------------ |
+| `name`        | string  | Yes      | User's full name                                             |
+| `mobile`      | string  | Yes      | 10-digit mobile number (must be unique)                      |
+| `email`       | string  | No       | Email address (must be unique if provided)                   |
+| `password`    | string  | No       | Password (min 6 characters, required for admins)             |
+| `societyId`   | integer | No       | Society ID to assign user to                                 |
+| `roleId`      | integer | No       | Role ID (defaults to SOCIETY_ADMIN if not provided)          |
+| `status`      | string  | No       | User status: `"active"` or `"blocked"` (default: `"active"`) |
+| `photoBase64` | string  | No       | Base64 encoded user profile photo (data URI format)          |
 
 ### Role IDs Reference
 
 Common role IDs (may vary based on your database):
+
 - `1` - SUPER_ADMIN
 - `2` - SOCIETY_ADMIN
 - `3` - SECURITY
@@ -123,6 +124,7 @@ Common role IDs (may vary based on your database):
 ### Error Responses
 
 **400 Bad Request** - Validation error or duplicate
+
 ```json
 {
   "success": false,
@@ -138,6 +140,7 @@ Common role IDs (may vary based on your database):
 ```
 
 **400 Bad Request** - Duplicate mobile
+
 ```json
 {
   "success": false,
@@ -146,6 +149,7 @@ Common role IDs (may vary based on your database):
 ```
 
 **400 Bad Request** - Duplicate email
+
 ```json
 {
   "success": false,
@@ -154,6 +158,7 @@ Common role IDs (may vary based on your database):
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -190,7 +195,7 @@ const createUser = async (userData) => {
       // Handle validation errors
       if (error.response.data.errors) {
         const errors = error.response.data.errors;
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -245,14 +250,14 @@ GET /api/v1/users
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `status` | string | - | Filter by status: `"active"` or `"blocked"` |
-| `roleId` | integer | - | Filter by role ID |
-| `societyId` | integer | - | Filter by society ID |
-| `search` | string | - | Search by name, email, or mobile (case-insensitive) |
+| Parameter   | Type    | Default | Description                                         |
+| ----------- | ------- | ------- | --------------------------------------------------- |
+| `page`      | integer | 1       | Page number                                         |
+| `limit`     | integer | 10      | Items per page (max 100)                            |
+| `status`    | string  | -       | Filter by status: `"active"` or `"blocked"`         |
+| `roleId`    | integer | -       | Filter by role ID                                   |
+| `societyId` | integer | -       | Filter by society ID                                |
+| `search`    | string  | -       | Search by name, email, or mobile (case-insensitive) |
 
 ### Example Request
 
@@ -333,7 +338,7 @@ const useUsers = (filters = {}) => {
         if (page === 1) {
           setUsers(response.data.data.users);
         } else {
-          setUsers(prev => [...prev, ...response.data.data.users]);
+          setUsers((prev) => [...prev, ...response.data.data.users]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -387,9 +392,7 @@ const UsersListScreen = () => {
           <Text>{item.email || 'No email'}</Text>
           <Text>{item.mobile}</Text>
           <Text>Role: {item.role.name}</Text>
-          {item.society && (
-            <Text>Society: {item.society.name}</Text>
-          )}
+          {item.society && <Text>Society: {item.society.name}</Text>}
           <Text>Status: {item.status}</Text>
         </View>
       )}
@@ -415,7 +418,7 @@ const getUsers = async (page = 1, limit = 10, filters = {}) => {
     };
 
     const response = await apiClient.get('/users', { params });
-    
+
     if (response.data.success) {
       return {
         users: response.data.data.users,
@@ -466,9 +469,9 @@ GET /api/v1/users/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | User ID     |
 
 ### Success Response (200)
 
@@ -509,6 +512,7 @@ GET /api/v1/users/:id
 ### Error Responses
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -517,6 +521,7 @@ GET /api/v1/users/:id
 ```
 
 **403 Forbidden** - SOCIETY_ADMIN trying to access user from another society
+
 ```json
 {
   "success": false,
@@ -538,12 +543,12 @@ const useUser = (userId) => {
 
   const fetchUser = async () => {
     if (!userId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/users/${userId}`);
-      
+
       if (response.data.success) {
         setUser(response.data.data.user);
       } else {
@@ -588,9 +593,7 @@ const UserDetailScreen = ({ route }) => {
         <>
           <Text>Society: {user.society.name}</Text>
           <Text>Society Type: {user.society.type}</Text>
-          {user.society.address && (
-            <Text>Address: {user.society.address}</Text>
-          )}
+          {user.society.address && <Text>Address: {user.society.address}</Text>}
         </>
       )}
       <Text>Status: {user.status}</Text>
@@ -606,7 +609,7 @@ const UserDetailScreen = ({ route }) => {
 const getUserById = async (userId) => {
   try {
     const response = await apiClient.get(`/users/${userId}`);
-    
+
     if (response.data.success) {
       return response.data.data.user;
     } else {
@@ -654,9 +657,9 @@ PUT /api/v1/users/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | User ID     |
 
 ### Request Body
 
@@ -677,16 +680,16 @@ All fields are optional. Only include fields you want to update.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | No | User's full name |
-| `mobile` | string | No | 10-digit mobile number (must be unique) |
-| `email` | string | No | Email address (must be unique if provided, use `null` to clear) |
-| `password` | string | No | New password (min 6 characters) |
-| `societyId` | integer | No | Society ID (use `null` to remove from society) |
-| `roleId` | integer | No | Role ID |
-| `status` | string | No | User status: `"active"` or `"blocked"` |
-| `photoBase64` | string | No | Base64 encoded user profile photo (use `null` to clear) |
+| Field         | Type    | Required | Description                                                     |
+| ------------- | ------- | -------- | --------------------------------------------------------------- |
+| `name`        | string  | No       | User's full name                                                |
+| `mobile`      | string  | No       | 10-digit mobile number (must be unique)                         |
+| `email`       | string  | No       | Email address (must be unique if provided, use `null` to clear) |
+| `password`    | string  | No       | New password (min 6 characters)                                 |
+| `societyId`   | integer | No       | Society ID (use `null` to remove from society)                  |
+| `roleId`      | integer | No       | Role ID                                                         |
+| `status`      | string  | No       | User status: `"active"` or `"blocked"`                          |
+| `photoBase64` | string  | No       | Base64 encoded user profile photo (use `null` to clear)         |
 
 ### Success Response (200)
 
@@ -724,6 +727,7 @@ All fields are optional. Only include fields you want to update.
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -739,6 +743,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **400 Bad Request** - Duplicate mobile
+
 ```json
 {
   "success": false,
@@ -747,6 +752,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -755,6 +761,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -791,7 +798,7 @@ const updateUser = async (userId, updateData) => {
     if (error.response?.status === 400) {
       if (error.response.data.errors) {
         const errors = error.response.data.errors || [];
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -910,9 +917,9 @@ DELETE /api/v1/users/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | User ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | User ID     |
 
 ### Success Response (200)
 
@@ -926,6 +933,7 @@ DELETE /api/v1/users/:id
 ### Error Responses
 
 **400 Bad Request** - User has related records
+
 ```json
 {
   "success": false,
@@ -934,6 +942,7 @@ DELETE /api/v1/users/:id
 ```
 
 **403 Forbidden** - Cannot delete SUPER_ADMIN
+
 ```json
 {
   "success": false,
@@ -942,6 +951,7 @@ DELETE /api/v1/users/:id
 ```
 
 **403 Forbidden** - SOCIETY_ADMIN trying to delete SUPER_ADMIN or SOCIETY_ADMIN
+
 ```json
 {
   "success": false,
@@ -950,6 +960,7 @@ DELETE /api/v1/users/:id
 ```
 
 **403 Forbidden** - SOCIETY_ADMIN trying to delete user from another society
+
 ```json
 {
   "success": false,
@@ -958,6 +969,7 @@ DELETE /api/v1/users/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1039,11 +1051,7 @@ const UserDetailScreen = ({ route, navigation }) => {
   return (
     <View>
       {/* User details */}
-      <Button
-        title="Delete User"
-        onPress={handleDelete}
-        color="red"
-      />
+      <Button title="Delete User" onPress={handleDelete} color="red" />
     </View>
   );
 };
@@ -1249,7 +1257,7 @@ try {
 const handleValidationError = (error) => {
   if (error.response?.status === 400 && error.response.data.errors) {
     const errors = error.response.data.errors;
-    const errorMessages = errors.map(err => `${err.param}: ${err.msg}`).join('\n');
+    const errorMessages = errors.map((err) => `${err.param}: ${err.msg}`).join('\n');
     Alert.alert('Validation Error', errorMessages);
   } else if (error.response?.status === 400) {
     // Duplicate mobile/email error
@@ -1347,11 +1355,13 @@ interface User {
 ### Response Structure Notes
 
 **Role Object**: All endpoints return the role object with:
+
 - `id`: Role ID
 - `name`: Role name (SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT)
 - `createdAt`: Role creation timestamp
 
 **Society Object**: The level of detail varies by endpoint:
+
 - **`getAllUsers`**: Returns `id`, `name`, `type` only
 - **`getUserById`**: Returns `id`, `name`, `type`, `address`, `city`, `state`
 - **`createUser`**: Returns `id`, `name`, `type` only
@@ -1361,13 +1371,13 @@ interface User {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Create User | ✅ | ✅ (own society only) | ❌ | ❌ |
-| Get All Users | ✅ | ✅ (own society only) | ❌ | ❌ |
-| Get User by ID | ✅ | ✅ (own society only) | ❌ | ❌ |
-| Update User | ✅ | ✅ (own society only) | ❌ | ❌ |
-| Delete User | ✅ (except SUPER_ADMIN) | ✅ (SECURITY/RESIDENT in own society only) | ❌ | ❌ |
+| Operation      | SUPER_ADMIN             | SOCIETY_ADMIN                              | SECURITY | RESIDENT |
+| -------------- | ----------------------- | ------------------------------------------ | -------- | -------- |
+| Create User    | ✅                      | ✅ (own society only)                      | ❌       | ❌       |
+| Get All Users  | ✅                      | ✅ (own society only)                      | ❌       | ❌       |
+| Get User by ID | ✅                      | ✅ (own society only)                      | ❌       | ❌       |
+| Update User    | ✅                      | ✅ (own society only)                      | ❌       | ❌       |
+| Delete User    | ✅ (except SUPER_ADMIN) | ✅ (SECURITY/RESIDENT in own society only) | ❌       | ❌       |
 
 ---
 
@@ -1432,4 +1442,3 @@ You can test all endpoints using Swagger UI:
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
 - **Societies API**: [SOCIETIES_CRUD_API.md](./SOCIETIES_CRUD_API.md)
-

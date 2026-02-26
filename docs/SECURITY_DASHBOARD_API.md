@@ -53,9 +53,9 @@ The dashboard should display information in this priority order:
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| GET | `/security/dashboard` | Get security dashboard data | SECURITY |
+| Method | Endpoint              | Description                 | Required Role |
+| ------ | --------------------- | --------------------------- | ------------- |
+| GET    | `/security/dashboard` | Get security dashboard data | SECURITY      |
 
 ---
 
@@ -210,16 +210,16 @@ None
 
 #### Root Level
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `systemStatus` | string | System status: `ACTIVE`, `GRACE`, or `LOCKED` |
-| `systemStatusMessage` | string \| null | Optional message shown when status is `GRACE` or `LOCKED` |
-| `society` | object | Society information |
-| `gates` | array | List of all gates in the society |
-| `guard` | object | Current logged-in guard information |
-| `stats` | object | Today's statistics |
-| `pendingApprovals` | array | Top 10 pending approvals (most recent first) |
-| `activeVisitors` | array | Top 10 active visitors currently inside (most recent entry first) |
+| Field                 | Type           | Description                                                       |
+| --------------------- | -------------- | ----------------------------------------------------------------- |
+| `systemStatus`        | string         | System status: `ACTIVE`, `GRACE`, or `LOCKED`                     |
+| `systemStatusMessage` | string \| null | Optional message shown when status is `GRACE` or `LOCKED`         |
+| `society`             | object         | Society information                                               |
+| `gates`               | array          | List of all gates in the society                                  |
+| `guard`               | object         | Current logged-in guard information                               |
+| `stats`               | object         | Today's statistics                                                |
+| `pendingApprovals`    | array          | Top 10 pending approvals (most recent first)                      |
+| `activeVisitors`      | array          | Top 10 active visitors currently inside (most recent entry first) |
 
 #### System Status Values
 
@@ -235,35 +235,35 @@ None
 
 #### Stats Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `todayVisitors` | integer | Total number of visitors logged today |
+| Field              | Type    | Description                                      |
+| ------------------ | ------- | ------------------------------------------------ |
+| `todayVisitors`    | integer | Total number of visitors logged today            |
 | `pendingApprovals` | integer | Number of visitors waiting for resident approval |
-| `insidePremises` | integer | Number of visitors currently inside the premises |
+| `insidePremises`   | integer | Number of visitors currently inside the premises |
 
 #### Pending Approval Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | integer | Visitor log ID |
-| `visitor` | object | Visitor information (id, name, mobile, photoBase64) |
-| `unit` | object \| null | Unit information (id, unitNo, unitType) |
-| `gate` | object | Gate information (id, name) |
-| `waitTime` | integer | Waiting time in minutes |
-| `waitTimeBadge` | string | Human-readable waiting time badge (e.g., "15m ago", "1h 30m ago", "Just now") |
-| `purpose` | string \| null | Purpose of visit |
-| `createdAt` | string (ISO 8601) | When the entry was created |
+| Field           | Type              | Description                                                                   |
+| --------------- | ----------------- | ----------------------------------------------------------------------------- |
+| `id`            | integer           | Visitor log ID                                                                |
+| `visitor`       | object            | Visitor information (id, name, mobile, photoBase64)                           |
+| `unit`          | object \| null    | Unit information (id, unitNo, unitType)                                       |
+| `gate`          | object            | Gate information (id, name)                                                   |
+| `waitTime`      | integer           | Waiting time in minutes                                                       |
+| `waitTimeBadge` | string            | Human-readable waiting time badge (e.g., "15m ago", "1h 30m ago", "Just now") |
+| `purpose`       | string \| null    | Purpose of visit                                                              |
+| `createdAt`     | string (ISO 8601) | When the entry was created                                                    |
 
 #### Active Visitor Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | integer | Visitor log ID |
-| `visitor` | object | Visitor information (id, name, mobile, photoBase64) |
-| `unit` | object \| null | Unit information (id, unitNo, unitType) |
-| `gate` | object | Gate information (id, name) |
-| `entryTime` | string (ISO 8601) \| null | When the visitor entered |
-| `status` | string | Entry status: `pending`, `approved`, or `rejected` |
+| Field       | Type                      | Description                                         |
+| ----------- | ------------------------- | --------------------------------------------------- |
+| `id`        | integer                   | Visitor log ID                                      |
+| `visitor`   | object                    | Visitor information (id, name, mobile, photoBase64) |
+| `unit`      | object \| null            | Unit information (id, unitNo, unitType)             |
+| `gate`      | object                    | Gate information (id, name)                         |
+| `entryTime` | string (ISO 8601) \| null | When the visitor entered                            |
+| `status`    | string                    | Entry status: `pending`, `approved`, or `rejected`  |
 
 ### Error Responses
 
@@ -329,24 +329,24 @@ const API_BASE_URL = 'http://localhost:1111/api/v1';
 const fetchSecurityDashboard = async () => {
   try {
     const token = await AsyncStorage.getItem('accessToken');
-    
+
     const response = await axios.get(`${API_BASE_URL}/security/dashboard`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
     if (response.data.success) {
       const dashboardData = response.data.data;
-      
+
       // Use the data in your component
       console.log('System Status:', dashboardData.systemStatus);
       console.log('Society:', dashboardData.society.name);
       console.log('Today Visitors:', dashboardData.stats.todayVisitors);
       console.log('Pending Approvals:', dashboardData.pendingApprovals.length);
       console.log('Active Visitors:', dashboardData.activeVisitors.length);
-      
+
       return dashboardData;
     }
   } catch (error) {
@@ -370,7 +370,14 @@ const fetchSecurityDashboard = async () => {
 
 ```javascript
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
 import { fetchSecurityDashboard } from './api/securityAPI';
 
 const SecurityDashboard = () => {
@@ -415,7 +422,16 @@ const SecurityDashboard = () => {
     return null;
   }
 
-  const { systemStatus, systemStatusMessage, society, gates, guard, stats, pendingApprovals, activeVisitors } = dashboardData;
+  const {
+    systemStatus,
+    systemStatusMessage,
+    society,
+    gates,
+    guard,
+    stats,
+    pendingApprovals,
+    activeVisitors,
+  } = dashboardData;
 
   return (
     <ScrollView style={styles.container}>
@@ -428,14 +444,19 @@ const SecurityDashboard = () => {
 
       {/* System Status Banner */}
       {systemStatus !== 'ACTIVE' && systemStatusMessage && (
-        <View style={[styles.statusBanner, systemStatus === 'LOCKED' ? styles.statusBannerLocked : styles.statusBannerGrace]}>
+        <View
+          style={[
+            styles.statusBanner,
+            systemStatus === 'LOCKED' ? styles.statusBannerLocked : styles.statusBannerGrace,
+          ]}
+        >
           <Text style={styles.statusBannerText}>{systemStatusMessage}</Text>
         </View>
       )}
 
       {/* Primary Action Button */}
       <View style={styles.actionButtonContainer}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, systemStatus === 'LOCKED' && styles.actionButtonDisabled]}
           disabled={systemStatus === 'LOCKED'}
           onPress={() => navigation.navigate('NewVisitorEntry')}
@@ -492,7 +513,7 @@ const SecurityDashboard = () => {
                 <Text style={styles.listItemName}>{visitor.visitor.name}</Text>
                 <Text style={styles.listItemUnit}>{visitor.unit?.unitNo || 'N/A'}</Text>
               </View>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.exitButton}
                 onPress={() => handleMarkExit(visitor.id)}
               >
@@ -664,13 +685,13 @@ import axios from 'axios';
 const markVisitorExit = async (visitorLogId) => {
   try {
     const token = await AsyncStorage.getItem('accessToken');
-    
+
     const response = await axios.put(
       `${API_BASE_URL}/visitor-logs/${visitorLogId}/exit`,
       {},
       {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       }
@@ -764,4 +785,3 @@ const markVisitorExit = async (visitorLogId) => {
 ## Support
 
 For issues or questions, contact API support or refer to the main API documentation.
-

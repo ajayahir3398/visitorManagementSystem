@@ -26,15 +26,15 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/units` | Create a new unit | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/units` | Get all units (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| GET | `/units/:id` | Get unit by ID (with members) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| PUT | `/units/:id` | Update unit | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/units/:id` | Delete unit | SUPER_ADMIN, SOCIETY_ADMIN |
-| POST | `/units/:id/members` | Add member to unit | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/units/:id/members/:memberId` | Remove member from unit | SUPER_ADMIN, SOCIETY_ADMIN |
+| Method | Endpoint                       | Description                               | Required Role                                  |
+| ------ | ------------------------------ | ----------------------------------------- | ---------------------------------------------- |
+| POST   | `/units`                       | Create a new unit                         | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| GET    | `/units`                       | Get all units (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| GET    | `/units/:id`                   | Get unit by ID (with members)             | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| PUT    | `/units/:id`                   | Update unit                               | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| DELETE | `/units/:id`                   | Delete unit                               | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| POST   | `/units/:id/members`           | Add member to unit                        | SUPER_ADMIN, SOCIETY_ADMIN                     |
+| DELETE | `/units/:id/members/:memberId` | Remove member from unit                   | SUPER_ADMIN, SOCIETY_ADMIN                     |
 
 ---
 
@@ -66,12 +66,12 @@ POST /api/v1/units
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `unitNo` | string | Yes | Unit number (e.g., "A-302", "201", "HR-01") |
-| `societyId` | integer | Yes | Society ID where the unit belongs |
-| `unitType` | string | No | Unit type: `"FLAT"`, `"OFFICE"`, or `"SHOP"` |
-| `status` | string | No | Unit status: `"ACTIVE"` or `"INACTIVE"` (default: `"ACTIVE"`) |
+| Field       | Type    | Required | Description                                                   |
+| ----------- | ------- | -------- | ------------------------------------------------------------- |
+| `unitNo`    | string  | Yes      | Unit number (e.g., "A-302", "201", "HR-01")                   |
+| `societyId` | integer | Yes      | Society ID where the unit belongs                             |
+| `unitType`  | string  | No       | Unit type: `"FLAT"`, `"OFFICE"`, or `"SHOP"`                  |
+| `status`    | string  | No       | Unit status: `"ACTIVE"` or `"INACTIVE"` (default: `"ACTIVE"`) |
 
 ### Success Response (201)
 
@@ -105,6 +105,7 @@ POST /api/v1/units
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -120,6 +121,7 @@ POST /api/v1/units
 ```
 
 **400 Bad Request** - Duplicate unit number
+
 ```json
 {
   "success": false,
@@ -128,6 +130,7 @@ POST /api/v1/units
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -136,6 +139,7 @@ POST /api/v1/units
 ```
 
 **404 Not Found** - Society not found
+
 ```json
 {
   "success": false,
@@ -169,7 +173,7 @@ const createUnit = async (unitData) => {
       // Handle validation errors
       if (error.response.data.errors) {
         const errors = error.response.data.errors;
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -223,14 +227,14 @@ GET /api/v1/units
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `societyId` | integer | - | Filter by society ID |
-| `status` | string | - | Filter by status: `"ACTIVE"` or `"INACTIVE"` |
-| `unitType` | string | - | Filter by type: `"FLAT"`, `"OFFICE"`, or `"SHOP"` |
-| `search` | string | - | Search by unit number (case-insensitive) |
+| Parameter   | Type    | Default | Description                                       |
+| ----------- | ------- | ------- | ------------------------------------------------- |
+| `page`      | integer | 1       | Page number                                       |
+| `limit`     | integer | 10      | Items per page (max 100)                          |
+| `societyId` | integer | -       | Filter by society ID                              |
+| `status`    | string  | -       | Filter by status: `"ACTIVE"` or `"INACTIVE"`      |
+| `unitType`  | string  | -       | Filter by type: `"FLAT"`, `"OFFICE"`, or `"SHOP"` |
+| `search`    | string  | -       | Search by unit number (case-insensitive)          |
 
 ### Example Request
 
@@ -307,7 +311,7 @@ const useUnits = (filters = {}) => {
         if (page === 1) {
           setUnits(response.data.data.units);
         } else {
-          setUnits(prev => [...prev, ...response.data.data.units]);
+          setUnits((prev) => [...prev, ...response.data.data.units]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -387,7 +391,7 @@ const getUnits = async (page = 1, limit = 10, filters = {}) => {
     };
 
     const response = await apiClient.get('/units', { params });
-    
+
     if (response.data.success) {
       return {
         units: response.data.data.units,
@@ -438,9 +442,9 @@ GET /api/v1/units/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Unit ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Unit ID     |
 
 ### Success Response (200)
 
@@ -491,6 +495,7 @@ GET /api/v1/units/:id
 ### Error Responses
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -499,6 +504,7 @@ GET /api/v1/units/:id
 ```
 
 **403 Forbidden** - User trying to access unit from another society
+
 ```json
 {
   "success": false,
@@ -520,12 +526,12 @@ const useUnit = (unitId) => {
 
   const fetchUnit = async () => {
     if (!unitId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/units/${unitId}`);
-      
+
       if (response.data.success) {
         setUnit(response.data.data.unit);
       } else {
@@ -566,7 +572,7 @@ const UnitDetailScreen = ({ route }) => {
       <Text>Type: {unit.unitType || 'N/A'}</Text>
       <Text>Status: {unit.status}</Text>
       <Text>Society: {unit.society.name}</Text>
-      
+
       <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 20 }}>
         Members ({unit.members.length})
       </Text>
@@ -597,7 +603,7 @@ const UnitDetailScreen = ({ route }) => {
 const getUnitById = async (unitId) => {
   try {
     const response = await apiClient.get(`/units/${unitId}`);
-    
+
     if (response.data.success) {
       return response.data.data.unit;
     } else {
@@ -646,9 +652,9 @@ PUT /api/v1/units/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Unit ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Unit ID     |
 
 ### Request Body
 
@@ -664,11 +670,11 @@ All fields are optional. Only include fields you want to update.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `unitNo` | string | No | Unit number (must be unique within society if changed) |
-| `unitType` | string | No | Unit type: `"FLAT"`, `"OFFICE"`, or `"SHOP"` (use `null` to clear) |
-| `status` | string | No | Unit status: `"ACTIVE"` or `"INACTIVE"` |
+| Field      | Type   | Required | Description                                                        |
+| ---------- | ------ | -------- | ------------------------------------------------------------------ |
+| `unitNo`   | string | No       | Unit number (must be unique within society if changed)             |
+| `unitType` | string | No       | Unit type: `"FLAT"`, `"OFFICE"`, or `"SHOP"` (use `null` to clear) |
+| `status`   | string | No       | Unit status: `"ACTIVE"` or `"INACTIVE"`                            |
 
 ### Success Response (200)
 
@@ -702,6 +708,7 @@ All fields are optional. Only include fields you want to update.
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -717,6 +724,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **400 Bad Request** - Duplicate unit number
+
 ```json
 {
   "success": false,
@@ -725,6 +733,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -733,6 +742,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -765,7 +775,7 @@ const updateUnit = async (unitId, updateData) => {
     if (error.response?.status === 400) {
       if (error.response.data.errors) {
         const errors = error.response.data.errors || [];
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -860,9 +870,9 @@ DELETE /api/v1/units/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Unit ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Unit ID     |
 
 ### Success Response (200)
 
@@ -876,6 +886,7 @@ DELETE /api/v1/units/:id
 ### Error Responses
 
 **400 Bad Request** - Unit has members or visitor logs
+
 ```json
 {
   "success": false,
@@ -884,6 +895,7 @@ DELETE /api/v1/units/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -892,6 +904,7 @@ DELETE /api/v1/units/:id
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -968,11 +981,7 @@ const UnitDetailScreen = ({ route, navigation }) => {
   return (
     <View>
       {/* Unit details */}
-      <Button
-        title="Delete Unit"
-        onPress={handleDelete}
-        color="red"
-      />
+      <Button title="Delete Unit" onPress={handleDelete} color="red" />
     </View>
   );
 };
@@ -985,6 +994,7 @@ const UnitDetailScreen = ({ route, navigation }) => {
 ### Overview
 
 The system uses a **many-to-many relationship** between Users and Units through the `UnitMember` junction table. This allows:
+
 - Multiple residents to be associated with a unit (e.g., family members, tenants)
 - A resident to be associated with multiple units (e.g., owns multiple flats)
 - Each relationship to have a role (OWNER, TENANT, EMPLOYEE)
@@ -997,10 +1007,10 @@ The system uses a **many-to-many relationship** between Users and Units through 
 ```typescript
 interface UnitMember {
   id: number;
-  unitId: number;        // Foreign key to Unit
-  userId: number;        // Foreign key to User (resident)
+  unitId: number; // Foreign key to Unit
+  userId: number; // Foreign key to User (resident)
   role: 'OWNER' | 'TENANT' | 'EMPLOYEE';
-  isPrimary: boolean;    // One primary member per unit
+  isPrimary: boolean; // One primary member per unit
   createdAt: string;
   updatedAt: string;
 }
@@ -1036,9 +1046,9 @@ POST /api/v1/units/:id/members
 
 #### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Unit ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Unit ID     |
 
 #### Request Body
 
@@ -1052,11 +1062,11 @@ POST /api/v1/units/:id/members
 
 #### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `userId` | integer | Yes | The ID of the user (resident) to add |
-| `role` | string | Yes | Must be `"OWNER"`, `"TENANT"`, or `"EMPLOYEE"` |
-| `isPrimary` | boolean | No | Set as primary member (defaults to `false`). If `true`, sets this member as primary and unsets others |
+| Field       | Type    | Required | Description                                                                                           |
+| ----------- | ------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `userId`    | integer | Yes      | The ID of the user (resident) to add                                                                  |
+| `role`      | string  | Yes      | Must be `"OWNER"`, `"TENANT"`, or `"EMPLOYEE"`                                                        |
+| `isPrimary` | boolean | No       | Set as primary member (defaults to `false`). If `true`, sets this member as primary and unsets others |
 
 #### Success Response (201)
 
@@ -1091,6 +1101,7 @@ POST /api/v1/units/:id/members
 #### Error Responses
 
 **400 Bad Request** - User already a member
+
 ```json
 {
   "success": false,
@@ -1099,6 +1110,7 @@ POST /api/v1/units/:id/members
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -1107,6 +1119,7 @@ POST /api/v1/units/:id/members
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1171,10 +1184,10 @@ DELETE /api/v1/units/:id/members/:memberId
 
 #### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Unit ID |
-| `memberId` | integer | Yes | UnitMember ID (not userId) |
+| Parameter  | Type    | Required | Description                |
+| ---------- | ------- | -------- | -------------------------- |
+| `id`       | integer | Yes      | Unit ID                    |
+| `memberId` | integer | Yes      | UnitMember ID (not userId) |
 
 #### Success Response (200)
 
@@ -1251,9 +1264,9 @@ const UnitMembersScreen = ({ route, navigation }) => {
         params: { status: 'active' },
       });
       if (response.data.success) {
-        const existingUserIds = unit?.members?.map(m => m.userId) || [];
+        const existingUserIds = unit?.members?.map((m) => m.userId) || [];
         const available = response.data.data.users.filter(
-          user => !existingUserIds.includes(user.id) && user.role.name === 'RESIDENT'
+          (user) => !existingUserIds.includes(user.id) && user.role.name === 'RESIDENT'
         );
         setAvailableResidents(available);
       }
@@ -1284,27 +1297,23 @@ const UnitMembersScreen = ({ route, navigation }) => {
   };
 
   const handleRemoveMember = async (memberId) => {
-    Alert.alert(
-      'Remove Member',
-      'Are you sure you want to remove this resident?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await unitService.removeMember(unitId, memberId);
-              Alert.alert('Success', 'Resident removed');
-              fetchUnit();
-              fetchAvailableResidents();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to remove resident');
-            }
-          },
+    Alert.alert('Remove Member', 'Are you sure you want to remove this resident?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await unitService.removeMember(unitId, memberId);
+            Alert.alert('Success', 'Resident removed');
+            fetchUnit();
+            fetchAvailableResidents();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to remove resident');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (loading) return <ActivityIndicator />;
@@ -1315,9 +1324,7 @@ const UnitMembersScreen = ({ route, navigation }) => {
         Unit: {unit?.unitNo}
       </Text>
 
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
-        Current Members
-      </Text>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Current Members</Text>
       <FlatList
         data={unit?.members || []}
         keyExtractor={(item) => item.id.toString()}
@@ -1402,7 +1409,7 @@ POST /api/v1/units/1/members
 #### 4. View Unit Members
 
 ```javascript
-GET /api/v1/units/1
+GET / api / v1 / units / 1;
 // Response includes members array with user details
 ```
 
@@ -1689,7 +1696,7 @@ try {
 const handleValidationError = (error) => {
   if (error.response?.status === 400 && error.response.data.errors) {
     const errors = error.response.data.errors;
-    const errorMessages = errors.map(err => `${err.param}: ${err.msg}`).join('\n');
+    const errorMessages = errors.map((err) => `${err.param}: ${err.msg}`).join('\n');
     Alert.alert('Validation Error', errorMessages);
   } else if (error.response?.status === 400) {
     // Duplicate unit number error
@@ -1800,14 +1807,14 @@ interface UnitMember {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Create Unit | ✅ | ✅ (own society) | ❌ | ❌ |
-| Get All Units | ✅ | ✅ (own society) | ✅ (own society) | ✅ (own society) |
-| Get Unit by ID | ✅ | ✅ (own society) | ✅ (own society) | ✅ (own society) |
-| Update Unit | ✅ | ✅ (own society) | ❌ | ❌ |
-| Delete Unit | ✅ | ✅ (own society) | ❌ | ❌ |
-| Add/Remove Members | ✅ | ✅ (own society) | ❌ | ❌ |
+| Operation          | SUPER_ADMIN | SOCIETY_ADMIN    | SECURITY         | RESIDENT         |
+| ------------------ | ----------- | ---------------- | ---------------- | ---------------- |
+| Create Unit        | ✅          | ✅ (own society) | ❌               | ❌               |
+| Get All Units      | ✅          | ✅ (own society) | ✅ (own society) | ✅ (own society) |
+| Get Unit by ID     | ✅          | ✅ (own society) | ✅ (own society) | ✅ (own society) |
+| Update Unit        | ✅          | ✅ (own society) | ❌               | ❌               |
+| Delete Unit        | ✅          | ✅ (own society) | ❌               | ❌               |
+| Add/Remove Members | ✅          | ✅ (own society) | ❌               | ❌               |
 
 ---
 
@@ -1834,10 +1841,12 @@ interface UnitMember {
 ### Deleting Units
 
 Units cannot be deleted if they have:
+
 - Members (residents) associated with them
 - Visitor logs associated with them
 
 You must:
+
 1. Remove all members from the unit (see Section 6.2 - Remove Member from Unit)
 2. Delete or reassign visitor logs (if applicable)
 3. Then delete the unit
@@ -1892,4 +1901,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

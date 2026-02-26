@@ -20,13 +20,13 @@ Share Login Credentials with Society Admin
 
 ## Subscription States
 
-| State | Meaning | Access Allowed |
-|-------|---------|----------------|
-| **TRIAL** | Free trial active | ✅ Yes |
-| **ACTIVE** | Paid plan running | ✅ Yes |
-| **GRACE** | Expired but temporarily allowed (3 days) | ✅ Yes |
-| **LOCKED** | Core features blocked | ❌ No |
-| **SUSPENDED** | Manually blocked (non-payment / abuse) | ❌ No |
+| State         | Meaning                                  | Access Allowed |
+| ------------- | ---------------------------------------- | -------------- |
+| **TRIAL**     | Free trial active                        | ✅ Yes         |
+| **ACTIVE**    | Paid plan running                        | ✅ Yes         |
+| **GRACE**     | Expired but temporarily allowed (3 days) | ✅ Yes         |
+| **LOCKED**    | Core features blocked                    | ❌ No          |
+| **SUSPENDED** | Manually blocked (non-payment / abuse)   | ❌ No          |
 
 ## Auto Status Update Logic
 
@@ -61,6 +61,7 @@ When a **Society Admin** is created with a `societyId`, the system automatically
 **File**: `services/subscriptionService.js`
 
 Key functions:
+
 - `getSubscription(societyId)` - Get subscription for a society
 - `calculateSubscriptionStatus(subscription)` - Calculate status based on dates
 - `updateSubscriptionStatus(subscription)` - Update subscription status
@@ -73,12 +74,14 @@ Key functions:
 **File**: `middleware/subscription.js`
 
 #### `checkSubscription`
+
 - Blocks access if subscription is `LOCKED` or `SUSPENDED`
 - Auto-updates subscription status before checking
 - Skips check for `SUPER_ADMIN`
 - Returns 403 with appropriate message if blocked
 
 **Usage**:
+
 ```javascript
 import { checkSubscription } from '../middleware/subscription.js';
 
@@ -86,6 +89,7 @@ router.post('/protected-route', authenticate, checkSubscription, controller);
 ```
 
 #### `attachSubscription`
+
 - Optional middleware that attaches subscription info to request
 - Doesn't block access, just provides subscription data
 - Useful for displaying subscription status in responses
@@ -162,7 +166,7 @@ const result = await updateAllSubscriptionStatuses();
 ```javascript
 await prisma.subscription.update({
   where: { id: subscriptionId },
-  data: { status: 'SUSPENDED' }
+  data: { status: 'SUSPENDED' },
 });
 ```
 
@@ -230,4 +234,3 @@ model Subscription {
 - SUSPENDED subscriptions require manual intervention
 - SUPER_ADMIN bypasses all subscription checks
 - Status updates happen automatically, no manual intervention needed
-

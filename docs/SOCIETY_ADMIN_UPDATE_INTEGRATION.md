@@ -11,7 +11,9 @@ This guide provides code examples and best practices for implementing the "Updat
 - **Role Required**: `SOCIETY_ADMIN` (can only update their own society)
 
 ### Allowed Fields
+
 Society Admins can update:
+
 - `name` (string)
 - `type` (Enum: `"apartment"`, `"office"`)
 - `address` (string)
@@ -20,10 +22,12 @@ Society Admins can update:
 - `pincode` (string)
 
 ### Restricted Fields
+
 Updates to the following fields will be **rejected** for Society Admins:
+
 - `status`
 - `subscriptionId`
-(These require `SUPER_ADMIN` permissions)
+  (These require `SUPER_ADMIN` permissions)
 
 ---
 
@@ -38,7 +42,7 @@ const API_URL = 'http://your-api-domain.com/api/v1';
 export const updateOwnSocietyDetails = async (societyId, updateData) => {
   try {
     const token = await AsyncStorage.getItem('accessToken');
-    
+
     // Filter out restricted fields to prevent unnecessary 403 errors
     const payload = {
       name: updateData.name,
@@ -79,8 +83,8 @@ import { updateOwnSocietyDetails } from '../services/societyService';
 
 const EditSocietyScreen = ({ route, navigation }) => {
   // Assuming society details are passed via navigation or fetched previously
-  const { society } = route.params; 
-  
+  const { society } = route.params;
+
   const [formData, setFormData] = useState({
     name: society.name,
     type: society.type,
@@ -89,7 +93,7 @@ const EditSocietyScreen = ({ route, navigation }) => {
     state: society.state || '',
     pincode: society.pincode || '',
   });
-  
+
   const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
@@ -115,7 +119,7 @@ const EditSocietyScreen = ({ route, navigation }) => {
   return (
     <ScrollView style={{ padding: 20 }}>
       <Text style={{ fontSize: 20, marginBottom: 20 }}>Edit Society Details</Text>
-      
+
       <Text>Society Name</Text>
       <TextInput
         style={{ borderBottomWidth: 1, marginBottom: 15 }}
@@ -152,9 +156,9 @@ const EditSocietyScreen = ({ route, navigation }) => {
         keyboardType="numeric"
       />
 
-      <Button 
-        title={loading ? "Saving..." : "Save Changes"} 
-        onPress={handleUpdate} 
+      <Button
+        title={loading ? 'Saving...' : 'Save Changes'}
+        onPress={handleUpdate}
         disabled={loading}
       />
     </ScrollView>

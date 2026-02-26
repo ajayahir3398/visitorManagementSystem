@@ -26,13 +26,13 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/visitor-logs` | Create a new visitor entry | SECURITY |
-| PUT | `/visitor-logs/:id/exit` | Mark visitor exit | SECURITY |
-| GET | `/visitor-logs/active` | Get active entries (visitors currently inside) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
-| GET | `/visitor-logs` | Get all visitor logs (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
-| GET | `/visitor-logs/:id` | Get visitor log by ID | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| Method | Endpoint                 | Description                                      | Required Role                                  |
+| ------ | ------------------------ | ------------------------------------------------ | ---------------------------------------------- |
+| POST   | `/visitor-logs`          | Create a new visitor entry                       | SECURITY                                       |
+| PUT    | `/visitor-logs/:id/exit` | Mark visitor exit                                | SECURITY                                       |
+| GET    | `/visitor-logs/active`   | Get active entries (visitors currently inside)   | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY           |
+| GET    | `/visitor-logs`          | Get all visitor logs (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
+| GET    | `/visitor-logs/:id`      | Get visitor log by ID                            | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT |
 
 ---
 
@@ -66,15 +66,15 @@ POST /api/v1/visitor-logs
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `visitorId` | integer | Yes | Visitor ID |
-| `gateId` | integer | Yes | Gate ID where visitor entered |
-| `unitId` | integer | Conditional | Unit ID (required if `flatNo` not provided) |
-| `flatNo` | string | Conditional | Flat/Unit number (required if `unitId` not provided, for backward compatibility) |
-| `purpose` | string | No | Purpose of visit |
-| `photoBase64` | string | No | Base64 data URI for visitor's photo (updates visitor record) |
-| `entryTime` | string (ISO 8601) | No | Entry time (defaults to current time if not provided) |
+| Field         | Type              | Required    | Description                                                                      |
+| ------------- | ----------------- | ----------- | -------------------------------------------------------------------------------- |
+| `visitorId`   | integer           | Yes         | Visitor ID                                                                       |
+| `gateId`      | integer           | Yes         | Gate ID where visitor entered                                                    |
+| `unitId`      | integer           | Conditional | Unit ID (required if `flatNo` not provided)                                      |
+| `flatNo`      | string            | Conditional | Flat/Unit number (required if `unitId` not provided, for backward compatibility) |
+| `purpose`     | string            | No          | Purpose of visit                                                                 |
+| `photoBase64` | string            | No          | Base64 data URI for visitor's photo (updates visitor record)                     |
+| `entryTime`   | string (ISO 8601) | No          | Entry time (defaults to current time if not provided)                            |
 
 **Note**: Either `unitId` or `flatNo` must be provided.
 
@@ -124,6 +124,7 @@ POST /api/v1/visitor-logs
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -139,6 +140,7 @@ POST /api/v1/visitor-logs
 ```
 
 **400 Bad Request** - Missing unitId or flatNo
+
 ```json
 {
   "success": false,
@@ -147,6 +149,7 @@ POST /api/v1/visitor-logs
 ```
 
 **400 Bad Request** - Visitor already has active entry
+
 ```json
 {
   "success": false,
@@ -162,6 +165,7 @@ POST /api/v1/visitor-logs
 ```
 
 **403 Forbidden** - Security guard not associated with society
+
 ```json
 {
   "success": false,
@@ -170,6 +174,7 @@ POST /api/v1/visitor-logs
 ```
 
 **403 Forbidden** - Gate doesn't belong to security's society
+
 ```json
 {
   "success": false,
@@ -178,6 +183,7 @@ POST /api/v1/visitor-logs
 ```
 
 **404 Not Found** - Visitor not found
+
 ```json
 {
   "success": false,
@@ -186,6 +192,7 @@ POST /api/v1/visitor-logs
 ```
 
 **404 Not Found** - Gate not found
+
 ```json
 {
   "success": false,
@@ -194,6 +201,7 @@ POST /api/v1/visitor-logs
 ```
 
 **404 Not Found** - Unit not found
+
 ```json
 {
   "success": false,
@@ -240,22 +248,18 @@ const createVisitorEntry = async (entryData) => {
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
       } else if (error.response.data.data?.visitorLog) {
         // Visitor already has active entry
-        Alert.alert(
-          'Active Entry Exists',
-          error.response.data.message,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'View Entry',
-              onPress: () => {
-                // Navigate to visitor log detail
-                navigation.navigate('VisitorLogDetail', {
-                  logId: error.response.data.data.visitorLog.id,
-                });
-              },
+        Alert.alert('Active Entry Exists', error.response.data.message, [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'View Entry',
+            onPress: () => {
+              // Navigate to visitor log detail
+              navigation.navigate('VisitorLogDetail', {
+                logId: error.response.data.data.visitorLog.id,
+              });
             },
-          ]
-        );
+          },
+        ]);
       } else {
         Alert.alert('Error', error.response.data.message);
       }
@@ -373,21 +377,17 @@ const CreateEntryScreen = ({ navigation, route }) => {
       if (error.response?.status === 400) {
         if (error.response.data.data?.visitorLog) {
           // Active entry exists
-          Alert.alert(
-            'Active Entry',
-            error.response.data.message,
-            [
-              { text: 'OK' },
-              {
-                text: 'View Entry',
-                onPress: () => {
-                  navigation.navigate('VisitorLogDetail', {
-                    logId: error.response.data.data.visitorLog.id,
-                  });
-                },
+          Alert.alert('Active Entry', error.response.data.message, [
+            { text: 'OK' },
+            {
+              text: 'View Entry',
+              onPress: () => {
+                navigation.navigate('VisitorLogDetail', {
+                  logId: error.response.data.data.visitorLog.id,
+                });
               },
-            ]
-          );
+            },
+          ]);
         } else {
           Alert.alert('Error', error.response.data.message);
         }
@@ -406,11 +406,7 @@ const CreateEntryScreen = ({ navigation, route }) => {
       </Text>
 
       <Text style={{ marginTop: 15, marginBottom: 5 }}>Gate *</Text>
-      <Picker
-        selectedValue={gateId}
-        onValueChange={setGateId}
-        enabled={!loading}
-      >
+      <Picker selectedValue={gateId} onValueChange={setGateId} enabled={!loading}>
         <Picker.Item label="Select Gate" value={null} />
         {gates.map((gate) => (
           <Picker.Item key={gate.id} label={gate.name} value={gate.id} />
@@ -494,9 +490,9 @@ PUT /api/v1/visitor-logs/:id/exit
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor Log ID |
+| Parameter | Type    | Required | Description    |
+| --------- | ------- | -------- | -------------- |
+| `id`      | integer | Yes      | Visitor Log ID |
 
 ### Request Body
 
@@ -510,9 +506,9 @@ All fields are optional.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `exitTime` | string (ISO 8601) | No | Exit time (defaults to current time if not provided) |
+| Field      | Type              | Required | Description                                          |
+| ---------- | ----------------- | -------- | ---------------------------------------------------- |
+| `exitTime` | string (ISO 8601) | No       | Exit time (defaults to current time if not provided) |
 
 ### Success Response (200)
 
@@ -565,6 +561,7 @@ All fields are optional.
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor log ID
+
 ```json
 {
   "success": false,
@@ -573,6 +570,7 @@ All fields are optional.
 ```
 
 **400 Bad Request** - Visitor already exited
+
 ```json
 {
   "success": false,
@@ -588,6 +586,7 @@ All fields are optional.
 ```
 
 **403 Forbidden** - Security guard not associated with society
+
 ```json
 {
   "success": false,
@@ -596,6 +595,7 @@ All fields are optional.
 ```
 
 **403 Forbidden** - Visitor log doesn't belong to security's society
+
 ```json
 {
   "success": false,
@@ -604,6 +604,7 @@ All fields are optional.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -648,28 +649,24 @@ const markVisitorExit = async (logId, exitTime = null) => {
 
 // Usage
 const handleMarkExit = async (logId) => {
-  Alert.alert(
-    'Mark Exit',
-    'Are you sure the visitor has exited?',
-    [
-      {
-        text: 'Cancel',
-        style: 'cancel',
+  Alert.alert('Mark Exit', 'Are you sure the visitor has exited?', [
+    {
+      text: 'Cancel',
+      style: 'cancel',
+    },
+    {
+      text: 'Mark Exit',
+      onPress: async () => {
+        try {
+          await markVisitorExit(logId);
+          Alert.alert('Success', 'Visitor exit marked successfully');
+          // Refresh list
+        } catch (error) {
+          // Error already handled
+        }
       },
-      {
-        text: 'Mark Exit',
-        onPress: async () => {
-          try {
-            await markVisitorExit(logId);
-            Alert.alert('Success', 'Visitor exit marked successfully');
-            // Refresh list
-          } catch (error) {
-            // Error already handled
-          }
-        },
-      },
-    ]
-  );
+    },
+  ]);
 };
 ```
 
@@ -692,11 +689,11 @@ GET /api/v1/visitor-logs/active
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `gateId` | integer | - | Filter by gate ID |
+| Parameter | Type    | Default | Description              |
+| --------- | ------- | ------- | ------------------------ |
+| `page`    | integer | 1       | Page number              |
+| `limit`   | integer | 10      | Items per page (max 100) |
+| `gateId`  | integer | -       | Filter by gate ID        |
 
 ### Example Request
 
@@ -761,7 +758,15 @@ GET /api/v1/visitor-logs/active?page=1&limit=10&gateId=1
 ```javascript
 import apiClient from '../services/authService';
 import { useState, useEffect } from 'react';
-import { FlatList, View, Text, ActivityIndicator, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import {
+  FlatList,
+  View,
+  Text,
+  ActivityIndicator,
+  RefreshControl,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 
 const useActiveEntries = (filters = {}) => {
   const [entries, setEntries] = useState([]);
@@ -785,7 +790,7 @@ const useActiveEntries = (filters = {}) => {
         if (page === 1) {
           setEntries(response.data.data.visitorLogs);
         } else {
-          setEntries(prev => [...prev, ...response.data.data.visitorLogs]);
+          setEntries((prev) => [...prev, ...response.data.data.visitorLogs]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -823,30 +828,26 @@ const ActiveEntriesScreen = ({ navigation }) => {
   });
 
   const handleMarkExit = async (logId) => {
-    Alert.alert(
-      'Mark Exit',
-      'Are you sure the visitor has exited?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Mark Exit',
-          onPress: async () => {
-            try {
-              const response = await apiClient.put(`/visitor-logs/${logId}/exit`, {});
-              if (response.data.success) {
-                Alert.alert('Success', 'Visitor exit marked successfully');
-                refresh(); // Refresh the list
-              }
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to mark exit');
+    Alert.alert('Mark Exit', 'Are you sure the visitor has exited?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Mark Exit',
+        onPress: async () => {
+          try {
+            const response = await apiClient.put(`/visitor-logs/${logId}/exit`, {});
+            if (response.data.success) {
+              Alert.alert('Success', 'Visitor exit marked successfully');
+              refresh(); // Refresh the list
             }
-          },
+          } catch (error) {
+            Alert.alert('Error', error.response?.data?.message || 'Failed to mark exit');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (error) {
@@ -872,13 +873,9 @@ const ActiveEntriesScreen = ({ navigation }) => {
           >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                  {item.visitor.name}
-                </Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.visitor.name}</Text>
                 <Text>Mobile: {item.visitor.mobile}</Text>
-                <Text>
-                  Unit: {item.unit ? item.unit.unitNo : item.flatNo || 'N/A'}
-                </Text>
+                <Text>Unit: {item.unit ? item.unit.unitNo : item.flatNo || 'N/A'}</Text>
                 <Text>Gate: {item.gate.name}</Text>
                 <Text>Status: {item.status}</Text>
                 <Text style={{ color: 'gray', fontSize: 12 }}>
@@ -937,22 +934,22 @@ GET /api/v1/visitor-logs
 ### Authorization
 
 - **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`, `SECURITY`, `RESIDENT`
-- **Note**: 
+- **Note**:
   - `SOCIETY_ADMIN` and `SECURITY` users can only see logs from their own society
   - `RESIDENT` users can only see logs for their units
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `status` | string | - | Filter by status: `"pending"`, `"approved"`, `"rejected"`, `"exited"` |
-| `gateId` | integer | - | Filter by gate ID |
-| `visitorId` | integer | - | Filter by visitor ID |
-| `flatNo` | string | - | Filter by flat/unit number |
-| `date` | string (YYYY-MM-DD) | - | Filter by date (e.g., "2024-01-01") |
-| `search` | string | - | Search by visitor name, mobile, flat number, or purpose |
+| Parameter   | Type                | Default | Description                                                           |
+| ----------- | ------------------- | ------- | --------------------------------------------------------------------- |
+| `page`      | integer             | 1       | Page number                                                           |
+| `limit`     | integer             | 10      | Items per page (max 100)                                              |
+| `status`    | string              | -       | Filter by status: `"pending"`, `"approved"`, `"rejected"`, `"exited"` |
+| `gateId`    | integer             | -       | Filter by gate ID                                                     |
+| `visitorId` | integer             | -       | Filter by visitor ID                                                  |
+| `flatNo`    | string              | -       | Filter by flat/unit number                                            |
+| `date`      | string (YYYY-MM-DD) | -       | Filter by date (e.g., "2024-01-01")                                   |
+| `search`    | string              | -       | Search by visitor name, mobile, flat number, or purpose               |
 
 ### Example Request
 
@@ -1053,7 +1050,7 @@ const useVisitorLogs = (filters = {}) => {
         if (page === 1) {
           setLogs(response.data.data.visitorLogs);
         } else {
-          setLogs(prev => [...prev, ...response.data.data.visitorLogs]);
+          setLogs((prev) => [...prev, ...response.data.data.visitorLogs]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -1124,9 +1121,7 @@ const VisitorLogsScreen = ({ navigation }) => {
             style={{ padding: 15, borderBottomWidth: 1 }}
             onPress={() => navigation.navigate('VisitorLogDetail', { logId: item.id })}
           >
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              {item.visitor.name}
-            </Text>
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.visitor.name}</Text>
             <Text>Unit: {item.unit ? item.unit.unitNo : item.flatNo || 'N/A'}</Text>
             <Text>Gate: {item.gate.name}</Text>
             <Text>Status: {item.status}</Text>
@@ -1174,15 +1169,15 @@ GET /api/v1/visitor-logs/:id
 ### Authorization
 
 - **Required Role**: `SUPER_ADMIN`, `SOCIETY_ADMIN`, `SECURITY`, `RESIDENT`
-- **Note**: 
+- **Note**:
   - `SOCIETY_ADMIN` and `SECURITY` users can only access logs from their own society
   - `RESIDENT` users can only access logs for their units
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor Log ID |
+| Parameter | Type    | Required | Description    |
+| --------- | ------- | -------- | -------------- |
+| `id`      | integer | Yes      | Visitor Log ID |
 
 ### Success Response (200)
 
@@ -1249,6 +1244,7 @@ GET /api/v1/visitor-logs/:id
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor log ID
+
 ```json
 {
   "success": false,
@@ -1257,6 +1253,7 @@ GET /api/v1/visitor-logs/:id
 ```
 
 **403 Forbidden** - Access denied
+
 ```json
 {
   "success": false,
@@ -1265,6 +1262,7 @@ GET /api/v1/visitor-logs/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1286,12 +1284,12 @@ const useVisitorLog = (logId) => {
 
   const fetchLog = async () => {
     if (!logId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/visitor-logs/${logId}`);
-      
+
       if (response.data.success) {
         setLog(response.data.data.visitorLog);
       } else {
@@ -1328,11 +1326,16 @@ const VisitorLogDetailScreen = ({ route, navigation }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'approved': return '#4CAF50';
-      case 'rejected': return '#f44336';
-      case 'pending': return '#FF9800';
-      case 'exited': return '#2196F3';
-      default: return '#757575';
+      case 'approved':
+        return '#4CAF50';
+      case 'rejected':
+        return '#f44336';
+      case 'pending':
+        return '#FF9800';
+      case 'exited':
+        return '#2196F3';
+      default:
+        return '#757575';
     }
   };
 
@@ -1364,9 +1367,7 @@ const VisitorLogDetailScreen = ({ route, navigation }) => {
               borderRadius: 12,
             }}
           >
-            <Text style={{ color: 'white', textTransform: 'capitalize' }}>
-              {log.status}
-            </Text>
+            <Text style={{ color: 'white', textTransform: 'capitalize' }}>{log.status}</Text>
           </View>
         </View>
       </View>
@@ -1374,12 +1375,11 @@ const VisitorLogDetailScreen = ({ route, navigation }) => {
       <View style={{ marginBottom: 15 }}>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Timing</Text>
         <Text>Entry Time: {new Date(log.entryTime).toLocaleString()}</Text>
-        {log.exitTime && (
-          <Text>Exit Time: {new Date(log.exitTime).toLocaleString()}</Text>
-        )}
+        {log.exitTime && <Text>Exit Time: {new Date(log.exitTime).toLocaleString()}</Text>}
         {log.exitTime && (
           <Text>
-            Duration: {Math.round((new Date(log.exitTime) - new Date(log.entryTime)) / 60000)} minutes
+            Duration: {Math.round((new Date(log.exitTime) - new Date(log.entryTime)) / 60000)}{' '}
+            minutes
           </Text>
         )}
       </View>
@@ -1569,7 +1569,7 @@ const handleError = (error, operation) => {
   switch (status) {
     case 400:
       if (data.errors) {
-        const errorMsg = data.errors.map(e => e.msg).join('\n');
+        const errorMsg = data.errors.map((e) => e.msg).join('\n');
         Alert.alert('Validation Error', errorMsg);
       } else if (data.data?.visitorLog) {
         // Active entry exists or already exited
@@ -1579,7 +1579,10 @@ const handleError = (error, operation) => {
       }
       break;
     case 403:
-      Alert.alert('Access Denied', data.message || 'You do not have permission to perform this action');
+      Alert.alert(
+        'Access Denied',
+        data.message || 'You do not have permission to perform this action'
+      );
       break;
     case 404:
       Alert.alert('Not Found', data.message || 'Resource not found');
@@ -1652,13 +1655,13 @@ const VisitorLogsScreen = () => {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Create Entry | ❌ | ❌ | ✅ (own society) | ❌ |
-| Mark Exit | ❌ | ❌ | ✅ (own society) | ❌ |
-| Get Active Entries | ✅ | ✅ (own society) | ✅ (own society) | ❌ |
-| Get All Logs | ✅ | ✅ (own society) | ✅ (own society) | ✅ (own units) |
-| Get Log by ID | ✅ | ✅ (own society) | ✅ (own society) | ✅ (own units) |
+| Operation          | SUPER_ADMIN | SOCIETY_ADMIN    | SECURITY         | RESIDENT       |
+| ------------------ | ----------- | ---------------- | ---------------- | -------------- |
+| Create Entry       | ❌          | ❌               | ✅ (own society) | ❌             |
+| Mark Exit          | ❌          | ❌               | ✅ (own society) | ❌             |
+| Get Active Entries | ✅          | ✅ (own society) | ✅ (own society) | ❌             |
+| Get All Logs       | ✅          | ✅ (own society) | ✅ (own society) | ✅ (own units) |
+| Get Log by ID      | ✅          | ✅ (own society) | ✅ (own society) | ✅ (own units) |
 
 ---
 
@@ -1667,6 +1670,7 @@ const VisitorLogsScreen = () => {
 ### Visitor Entry Status
 
 Visitor logs have the following statuses:
+
 - **pending**: Entry created, awaiting resident approval
 - **approved**: Entry approved by resident
 - **rejected**: Entry rejected by resident
@@ -1675,6 +1679,7 @@ Visitor logs have the following statuses:
 ### Active Entries
 
 An entry is considered "active" if:
+
 - Status is not `"exited"`
 - `exitTime` is `null`
 
@@ -1709,6 +1714,7 @@ Visitors cannot have multiple active entries. If a visitor tries to enter again 
 ### Search Functionality
 
 The search parameter searches across:
+
 - Visitor name (case-insensitive)
 - Visitor mobile number
 - Flat number (case-insensitive)
@@ -1779,4 +1785,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

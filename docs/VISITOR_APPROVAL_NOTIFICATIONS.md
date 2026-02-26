@@ -20,6 +20,7 @@ The system sends push notifications in two scenarios:
 **Recipients:** All residents of the unit (unit members)
 
 **Notification Content:**
+
 - **Title:** "New Visitor Request"
 - **Body:** "{Visitor Name} is waiting at {Gate Name} for {Unit Number}"
 - **Data Payload:**
@@ -42,6 +43,7 @@ The system sends push notifications in two scenarios:
 **Recipients:** Security user who created the visitor entry (`createdBy`)
 
 **Notification Content:**
+
 - **Title:** "Visitor Approved"
 - **Body:** "{Resident Name} approved {Visitor Name} for {Unit Number}"
 - **Data Payload:**
@@ -64,6 +66,7 @@ The system sends push notifications in two scenarios:
 **Recipients:** Security user who created the visitor entry (`createdBy`)
 
 **Notification Content:**
+
 - **Title:** "Visitor Rejected"
 - **Body:** "{Resident Name} rejected {Visitor Name} for {Unit Number}"
 - **Data Payload:**
@@ -98,6 +101,7 @@ The system sends push notifications in two scenarios:
 ### Data Payload Structure
 
 All notifications include:
+
 - `screen`: Navigation target screen name
 - `visitorLogId`: ID of the visitor log (as string)
 - `type`: Notification type for handling logic
@@ -114,20 +118,20 @@ In your React Native app, handle these notification types:
 // In your notification handler
 messaging().onMessage(async (remoteMessage) => {
   const { type, visitorLogId, screen } = remoteMessage.data;
-  
+
   switch (type) {
     case 'visitor_request':
       // Show notification: "New visitor waiting"
       // Navigate to visitor log detail
       navigation.navigate(screen, { id: parseInt(visitorLogId) });
       break;
-      
+
     case 'visitor_approved':
       // Show notification: "Visitor approved"
       // Navigate to visitor log detail
       navigation.navigate(screen, { id: parseInt(visitorLogId) });
       break;
-      
+
     case 'visitor_rejected':
       // Show notification: "Visitor rejected"
       // Navigate to visitor log detail
@@ -178,11 +182,13 @@ messaging().onMessage(async (remoteMessage) => {
 ### Notifications Not Received
 
 1. **Check FCM tokens:** Verify users have registered tokens
+
    ```bash
    GET /api/v1/notifications/tokens?userId={userId}
    ```
 
 2. **Check Firebase configuration:** Verify service account is set up
+
    ```env
    FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
    ```

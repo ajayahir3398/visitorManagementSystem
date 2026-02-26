@@ -26,11 +26,11 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/violations` | Report a new violation | SECURITY, SOCIETY_ADMIN |
-| GET | `/violations` | Get all violations | All Roles |
-| PUT | `/violations/:id/status` | Update violation status | SOCIETY_ADMIN |
+| Method | Endpoint                 | Description             | Required Role           |
+| ------ | ------------------------ | ----------------------- | ----------------------- |
+| POST   | `/violations`            | Report a new violation  | SECURITY, SOCIETY_ADMIN |
+| GET    | `/violations`            | Get all violations      | All Roles               |
+| PUT    | `/violations/:id/status` | Update violation status | SOCIETY_ADMIN           |
 
 ---
 
@@ -66,20 +66,20 @@ POST /api/v1/violations
   "violatorUnitId": 2,
   "description": "Playing loud music after allowed hours",
   "photoBase64": "data:image/jpeg;base64,/9j/4AAQ...",
-  "penaltyAmount": 500.00
+  "penaltyAmount": 500.0
 }
 ```
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `ruleId` | integer | Yes | ID of the rule violated |
-| `violatorUserId` | integer | No | User ID of the violator (if known) |
-| `violatorUnitId` | number | No* | Unit ID of violator |
-| `description` | string | No | Details of violation |
-| `photoBase64` | string | No | Base64 encoded proof image |
-| `penaltyAmount` | number | No | Proposed penalty amount |(defaults to rule penalty) |
+| Field            | Type    | Required | Description                        |
+| ---------------- | ------- | -------- | ---------------------------------- | -------------------------- |
+| `ruleId`         | integer | Yes      | ID of the rule violated            |
+| `violatorUserId` | integer | No       | User ID of the violator (if known) |
+| `violatorUnitId` | number  | No\*     | Unit ID of violator                |
+| `description`    | string  | No       | Details of violation               |
+| `photoBase64`    | string  | No       | Base64 encoded proof image         |
+| `penaltyAmount`  | number  | No       | Proposed penalty amount            | (defaults to rule penalty) |
 
 ### Success Response (201)
 
@@ -107,17 +107,17 @@ POST /api/v1/violations
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
   "message": "Validation failed",
-  "errors": [
-    { "msg": "Rule ID is required", "param": "ruleId" }
-  ]
+  "errors": [{ "msg": "Rule ID is required", "param": "ruleId" }]
 }
 ```
 
 **403 Forbidden**
+
 ```json
 {
   "success": false,
@@ -166,10 +166,10 @@ GET /api/v1/violations
 
 ### Query Parameters
 
-| Name | Type | Description |
-|------|------|-------------|
-| `status` | string | Filter by status (`PENDING`, `RESOLVED`, etc.) |
-| `unitId` | integer | Filter by specific unit |
+| Name     | Type    | Description                                    |
+| -------- | ------- | ---------------------------------------------- |
+| `status` | string  | Filter by status (`PENDING`, `RESOLVED`, etc.) |
+| `unitId` | integer | Filter by specific unit                        |
 
 ### Success Response (200)
 
@@ -200,29 +200,29 @@ import apiClient from '../services/authService';
 import { useState, useEffect } from 'react';
 
 const useViolations = (filters = {}) => {
-    const [violations, setViolations] = useState([]);
-    const [loading, setLoading] = useState(false);
+  const [violations, setViolations] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    const fetchViolations = async () => {
-        setLoading(true);
-        try {
-            const params = { ...filters };
-            const response = await apiClient.get('/violations', { params });
-            if (response.data.success) {
-                setViolations(response.data.data.violations);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchViolations = async () => {
+    setLoading(true);
+    try {
+      const params = { ...filters };
+      const response = await apiClient.get('/violations', { params });
+      if (response.data.success) {
+        setViolations(response.data.data.violations);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchViolations();
-    }, [JSON.stringify(filters)]);
+  useEffect(() => {
+    fetchViolations();
+  }, [JSON.stringify(filters)]);
 
-    return { violations, loading, refetch: fetchViolations };
+  return { violations, loading, refetch: fetchViolations };
 };
 ```
 
@@ -247,7 +247,7 @@ PUT /api/v1/violations/:id/status
 ```json
 {
   "status": "RESOLVED",
-  "penaltyAmount": 500.00
+  "penaltyAmount": 500.0
 }
 ```
 
@@ -270,6 +270,7 @@ PUT /api/v1/violations/:id/status
 ### Error Responses
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -281,13 +282,13 @@ PUT /api/v1/violations/:id/status
 
 ```javascript
 const updateViolationStatus = async (id, status) => {
-    try {
-        const response = await apiClient.put(`/violations/${id}/status`, { status });
-        return response.data;
-    } catch (error) {
-        Alert.alert('Error', 'Failed to update status');
-        throw error;
-    }
+  try {
+    const response = await apiClient.put(`/violations/${id}/status`, { status });
+    return response.data;
+  } catch (error) {
+    Alert.alert('Error', 'Failed to update status');
+    throw error;
+  }
 };
 ```
 
@@ -335,6 +336,6 @@ export const violationService = {
   updateStatus: async (id: number, status: string) => {
     const response = await apiClient.put(`/violations/${id}/status`, { status });
     return response.data;
-  }
+  },
 };
 ```
