@@ -20,6 +20,7 @@ Complete API documentation for Subscription Plans and Subscriptions management.
 ### Subscription Plans
 
 Subscription plans define the pricing, duration, and features available to societies. Plans can be:
+
 - **TRIAL**: Free trial plan (60 days, ₹0)
 - **MONTHLY**: Monthly subscription (₹800/month)
 - **YEARLY**: Yearly subscription (₹8000/year)
@@ -41,6 +42,7 @@ Subscriptions link societies to plans and track their active status, expiry date
 ## Subscription Plans API
 
 ### Base URL
+
 ```
 /api/v1/plans
 ```
@@ -56,6 +58,7 @@ Get all active subscription plans. **No authentication required.**
 **Access:** Public
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -106,6 +109,7 @@ Get all active subscription plans. **No authentication required.**
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET http://localhost:1111/api/v1/plans
 ```
@@ -121,9 +125,11 @@ Get a specific subscription plan by ID.
 **Access:** Public
 
 **Parameters:**
+
 - `id` (path, required): Plan ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -148,6 +154,7 @@ Get a specific subscription plan by ID.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET http://localhost:1111/api/v1/plans/2
 ```
@@ -163,6 +170,7 @@ Create a new subscription plan.
 **Access:** SUPER_ADMIN only
 
 **Request Body:**
+
 ```json
 {
   "code": "QUARTERLY",
@@ -180,6 +188,7 @@ Create a new subscription plan.
 ```
 
 **Required Fields:**
+
 - `code` (string, 1-20 chars): Unique plan code
 - `name` (string, 1-50 chars): Plan name
 - `price` (integer, >= 0): Price in smallest unit
@@ -187,11 +196,13 @@ Create a new subscription plan.
 - `billingCycle` (string): "MONTHLY" or "YEARLY"
 
 **Optional Fields:**
+
 - `visitorLimit` (integer, >= 1): Visitor limit (null = unlimited)
 - `features` (object): Plan features JSON
 - `isActive` (boolean): Whether plan is active (default: true)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -217,6 +228,7 @@ Create a new subscription plan.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:1111/api/v1/plans \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN" \
@@ -242,9 +254,11 @@ Update an existing subscription plan.
 **Access:** SUPER_ADMIN only
 
 **Parameters:**
+
 - `id` (path, required): Plan ID
 
 **Request Body:** (All fields optional)
+
 ```json
 {
   "name": "Updated Monthly Plan",
@@ -254,6 +268,7 @@ Update an existing subscription plan.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -273,6 +288,7 @@ Update an existing subscription plan.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X PUT http://localhost:1111/api/v1/plans/2 \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN" \
@@ -293,9 +309,11 @@ Enable or disable a subscription plan.
 **Access:** SUPER_ADMIN only
 
 **Parameters:**
+
 - `id` (path, required): Plan ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -312,6 +330,7 @@ Enable or disable a subscription plan.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:1111/api/v1/plans/2/toggle \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN"
@@ -328,6 +347,7 @@ Get all subscription plans including inactive ones.
 **Access:** SUPER_ADMIN only
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -353,6 +373,7 @@ Get all subscription plans including inactive ones.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET http://localhost:1111/api/v1/plans/all \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN"
@@ -363,6 +384,7 @@ curl -X GET http://localhost:1111/api/v1/plans/all \
 ## Subscriptions API
 
 ### Base URL
+
 ```
 /api/v1/subscriptions
 ```
@@ -378,6 +400,7 @@ Get the current subscription for the logged-in society admin's society.
 **Access:** SOCIETY_ADMIN only
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -410,6 +433,7 @@ Get the current subscription for the logged-in society admin's society.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET http://localhost:1111/api/v1/subscriptions/current \
   -H "Authorization: Bearer YOUR_SOCIETY_ADMIN_TOKEN"
@@ -426,6 +450,7 @@ Purchase and activate a subscription plan for the society.
 **Access:** SOCIETY_ADMIN only
 
 **Request Body:**
+
 ```json
 {
   "planId": 2
@@ -433,9 +458,11 @@ Purchase and activate a subscription plan for the society.
 ```
 
 **Required Fields:**
+
 - `planId` (integer, >= 1): ID of the subscription plan to purchase
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -468,6 +495,7 @@ Purchase and activate a subscription plan for the society.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:1111/api/v1/subscriptions/buy \
   -H "Authorization: Bearer YOUR_SOCIETY_ADMIN_TOKEN" \
@@ -490,9 +518,11 @@ Get subscription details for a specific society.
 **Access:** SUPER_ADMIN, SOCIETY_ADMIN (own society only)
 
 **Parameters:**
+
 - `societyId` (path, required): Society ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -522,6 +552,7 @@ Get subscription details for a specific society.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET http://localhost:1111/api/v1/subscriptions/society/1 \
   -H "Authorization: Bearer YOUR_TOKEN"
@@ -538,6 +569,7 @@ Get all subscriptions with optional filters and pagination.
 **Access:** SUPER_ADMIN only
 
 **Query Parameters:**
+
 - `page` (integer, default: 1): Page number
 - `limit` (integer, default: 10): Items per page
 - `status` (string, optional): Filter by status (TRIAL, ACTIVE, GRACE, LOCKED, SUSPENDED)
@@ -545,6 +577,7 @@ Get all subscriptions with optional filters and pagination.
 - `planId` (integer, optional): Filter by plan ID
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -581,6 +614,7 @@ Get all subscriptions with optional filters and pagination.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X GET "http://localhost:1111/api/v1/subscriptions?page=1&limit=10&status=ACTIVE" \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN"
@@ -597,9 +631,11 @@ Extend a subscription period by adding additional days.
 **Access:** SUPER_ADMIN only
 
 **Parameters:**
+
 - `id` (path, required): Subscription ID
 
 **Request Body:**
+
 ```json
 {
   "additionalDays": 30
@@ -607,9 +643,11 @@ Extend a subscription period by adding additional days.
 ```
 
 **Required Fields:**
+
 - `additionalDays` (integer, >= 1): Number of days to extend
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -629,6 +667,7 @@ Extend a subscription period by adding additional days.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:1111/api/v1/subscriptions/1/extend \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN" \
@@ -649,9 +688,11 @@ Extend a subscription period for a society by adding additional days.
 **Access:** SUPER_ADMIN only
 
 **Parameters:**
+
 - `societyId` (path, required): Society ID
 
 **Request Body:**
+
 ```json
 {
   "additionalDays": 30
@@ -659,6 +700,7 @@ Extend a subscription period for a society by adding additional days.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -676,6 +718,7 @@ Extend a subscription period for a society by adding additional days.
 ```
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
   -H "Authorization: Bearer YOUR_SUPER_ADMIN_TOKEN" \
@@ -750,6 +793,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ### Common Error Responses
 
 #### 400 Bad Request
+
 ```json
 {
   "success": false,
@@ -765,6 +809,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ```
 
 #### 401 Unauthorized
+
 ```json
 {
   "success": false,
@@ -773,6 +818,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ```
 
 #### 403 Forbidden
+
 ```json
 {
   "success": false,
@@ -781,6 +827,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ```
 
 #### 404 Not Found
+
 ```json
 {
   "success": false,
@@ -789,6 +836,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ```
 
 #### 409 Conflict
+
 ```json
 {
   "success": false,
@@ -797,6 +845,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ```
 
 #### 500 Internal Server Error
+
 ```json
 {
   "success": false,
@@ -810,14 +859,17 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 ## Authentication & Authorization
 
 ### Public Endpoints (No Auth Required)
+
 - `GET /api/v1/plans` - Get all active plans
 - `GET /api/v1/plans/:id` - Get plan by ID
 
 ### Society Admin Endpoints
+
 - `GET /api/v1/subscriptions/current` - Get current subscription
 - `POST /api/v1/subscriptions/buy` - Buy/activate subscription
 
 ### Super Admin Endpoints
+
 - `POST /api/v1/plans` - Create plan
 - `PUT /api/v1/plans/:id` - Update plan
 - `POST /api/v1/plans/:id/toggle` - Toggle plan status
@@ -828,6 +880,7 @@ curl -X POST http://localhost:1111/api/v1/subscriptions/society/1/extend \
 - `POST /api/v1/subscriptions/society/:societyId/extend` - Extend subscription by society
 
 ### Authentication Header Format
+
 ```
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
@@ -848,27 +901,28 @@ LOCKED (No access)
 
 ### Status Meanings
 
-| Status | Meaning | Access Allowed |
-|--------|---------|----------------|
-| **TRIAL** | Free trial active | ✅ Yes |
-| **ACTIVE** | Paid plan running | ✅ Yes |
-| **GRACE** | Expired but temporarily allowed (3 days) | ✅ Yes |
-| **LOCKED** | Core features blocked | ❌ No |
-| **SUSPENDED** | Manually blocked | ❌ No |
+| Status        | Meaning                                  | Access Allowed |
+| ------------- | ---------------------------------------- | -------------- |
+| **TRIAL**     | Free trial active                        | ✅ Yes         |
+| **ACTIVE**    | Paid plan running                        | ✅ Yes         |
+| **GRACE**     | Expired but temporarily allowed (3 days) | ✅ Yes         |
+| **LOCKED**    | Core features blocked                    | ❌ No          |
+| **SUSPENDED** | Manually blocked                         | ❌ No          |
 
 ---
 
 ## Data Models
 
 ### SubscriptionPlan
+
 ```typescript
 {
   id: number;
-  code: string;              // MONTHLY, YEARLY, TRIAL
+  code: string; // MONTHLY, YEARLY, TRIAL
   name: string;
-  price: number;             // In smallest unit (₹800 → 800)
-  durationMonths: number;   // 1, 12, etc.
-  billingCycle: string;     // MONTHLY, YEARLY
+  price: number; // In smallest unit (₹800 → 800)
+  durationMonths: number; // 1, 12, etc.
+  billingCycle: string; // MONTHLY, YEARLY
   visitorLimit: number | null;
   features: object | null;
   isActive: boolean;
@@ -877,21 +931,22 @@ LOCKED (No access)
 ```
 
 ### Subscription
+
 ```typescript
 {
   id: number;
   societyId: number;
   planId: number;
-  status: string;           // TRIAL, ACTIVE, GRACE, LOCKED, SUSPENDED
-  startDate: string;        // ISO date
+  status: string; // TRIAL, ACTIVE, GRACE, LOCKED, SUSPENDED
+  startDate: string; // ISO date
   expiryDate: string | null; // ISO date
-  graceDays: number;       // Default: 3
+  graceDays: number; // Default: 3
   createdAt: string;
   plan: SubscriptionPlan;
   society: {
     id: number;
     name: string;
-  };
+  }
 }
 ```
 
@@ -924,7 +979,7 @@ LOCKED (No access)
 ## Support
 
 For issues or questions:
+
 - Check Swagger UI: `http://localhost:YOUR_PORT/api-docs`
 - Review error messages in responses
 - Check server logs for detailed error information
-

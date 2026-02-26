@@ -188,7 +188,7 @@ class NotificationService {
       const response = await fetch(`${API_BASE_URL}/notifications/register-token`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -226,7 +226,7 @@ class NotificationService {
       const response = await fetch(`${API_BASE_URL}/notifications/remove-token`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${this.accessToken}`,
+          Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token }),
@@ -478,7 +478,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       setLoading(true);
-      
+
       // Login to your backend
       const response = await login({ mobile, otp: '123456' }); // Your login logic
       const { accessToken } = response.data;
@@ -519,7 +519,7 @@ const LogoutButton = ({ onLogout }) => {
     try {
       // Get current FCM token
       const token = await messaging().getToken();
-      
+
       // Remove token from backend
       if (token) {
         await notificationService.removeToken(token);
@@ -578,6 +578,7 @@ const API_BASE_URL = 'http://your-api-url.com/api/v1';
 ```
 
 Replace with your actual API URL:
+
 - Development: `http://localhost:1111/api/v1`
 - Production: `https://your-api-domain.com/api/v1`
 
@@ -588,6 +589,7 @@ npm install react-native-device-info
 ```
 
 For iOS:
+
 ```bash
 cd ios
 pod install
@@ -605,7 +607,7 @@ cd ..
 const testTokenRegistration = async () => {
   const token = await messaging().getToken();
   console.log('FCM Token:', token);
-  
+
   const registered = await notificationService.registerToken(token);
   console.log('Token registered:', registered);
 };
@@ -630,6 +632,7 @@ const testTokenRegistration = async () => {
 ### 3. Test Navigation
 
 Send a notification with data payload:
+
 ```json
 {
   "title": "New Visitor",
@@ -650,6 +653,7 @@ The app should navigate to the specified screen when the notification is tapped.
 ### Issue: Token not registering
 
 **Check:**
+
 1. Access token is set: `notificationService.setAccessToken(token)`
 2. API URL is correct
 3. Backend is running
@@ -658,6 +662,7 @@ The app should navigate to the specified screen when the notification is tapped.
 ### Issue: Notifications not received
 
 **Check:**
+
 1. Permission is granted: `await notificationService.requestPermission()`
 2. Token is registered in backend
 3. App is not in Do Not Disturb mode
@@ -666,6 +671,7 @@ The app should navigate to the specified screen when the notification is tapped.
 ### Issue: Navigation not working
 
 **Check:**
+
 1. Navigation is initialized before handling notifications
 2. Screen names match your navigation structure
 3. Parameters are correctly formatted
@@ -673,6 +679,7 @@ The app should navigate to the specified screen when the notification is tapped.
 ### Issue: Background notifications not working
 
 **Check:**
+
 1. Background handler is registered in `index.js`
 2. iOS: Background Modes → Remote notifications is enabled
 3. Android: No special setup needed

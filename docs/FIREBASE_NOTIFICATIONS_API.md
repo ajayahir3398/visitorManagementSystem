@@ -76,6 +76,7 @@ model FcmToken {
 ```
 
 **Key Points:**
+
 - One user can have multiple FCM tokens (multiple devices)
 - Tokens are unique across the system
 - Tokens can be deactivated (isActive = false) without deletion
@@ -86,10 +87,13 @@ model FcmToken {
 ## API Endpoints
 
 ### Base URL
+
 All notification endpoints are under `/api/v1/notifications`
 
 ### Authentication
+
 All endpoints require authentication via Bearer token in the Authorization header:
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -103,15 +107,17 @@ Authorization: Bearer <access_token>
 **Description:** Register a new FCM token or update an existing one for the authenticated user.
 
 **Request Body:**
+
 ```json
 {
   "token": "fcm_token_from_mobile_app",
-  "deviceId": "device_unique_id",  // Optional
-  "platform": "android"             // Optional: "android" or "ios"
+  "deviceId": "device_unique_id", // Optional
+  "platform": "android" // Optional: "android" or "ios"
 }
 ```
 
 **Response (201):**
+
 ```json
 {
   "success": true,
@@ -126,6 +132,7 @@ Authorization: Bearer <access_token>
 ```
 
 **When to Call:**
+
 - On app startup (after getting FCM token)
 - On user login
 - When FCM token is refreshed
@@ -139,6 +146,7 @@ Authorization: Bearer <access_token>
 **Description:** Deactivate an FCM token (e.g., on logout or app uninstall).
 
 **Request Body:**
+
 ```json
 {
   "token": "fcm_token_to_remove"
@@ -146,6 +154,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -154,6 +163,7 @@ Authorization: Bearer <access_token>
 ```
 
 **When to Call:**
+
 - On user logout
 - On app uninstall
 - When token becomes invalid
@@ -167,9 +177,11 @@ Authorization: Bearer <access_token>
 **Description:** Get all FCM tokens for a user. Users can view their own tokens, admins can view any user's tokens.
 
 **Query Parameters:**
+
 - `userId` (optional): User ID (admin only)
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -200,12 +212,14 @@ Authorization: Bearer <access_token>
 **Description:** Send a push notification to a single user. Users can send to themselves, admins can send to anyone.
 
 **Request Body:**
+
 ```json
 {
-  "userId": 1,                    // Optional, defaults to authenticated user
+  "userId": 1, // Optional, defaults to authenticated user
   "title": "New Visitor",
   "body": "You have a new visitor at the gate",
-  "data": {                        // Optional
+  "data": {
+    // Optional
     "screen": "visitor_logs",
     "visitorLogId": "123"
   }
@@ -213,6 +227,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -243,6 +258,7 @@ Authorization: Bearer <access_token>
 **Access:** SUPER_ADMIN, SOCIETY_ADMIN
 
 **Request Body:**
+
 ```json
 {
   "userIds": [1, 2, 3],
@@ -256,6 +272,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -279,6 +296,7 @@ Authorization: Bearer <access_token>
 **Access:** SUPER_ADMIN, SOCIETY_ADMIN
 
 **Request Body:**
+
 ```json
 {
   "role": "RESIDENT",
@@ -292,12 +310,14 @@ Authorization: Bearer <access_token>
 ```
 
 **Valid Roles:**
+
 - `SUPER_ADMIN`
 - `SOCIETY_ADMIN`
 - `SECURITY`
 - `RESIDENT`
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -325,9 +345,10 @@ Authorization: Bearer <access_token>
 **Access:** SUPER_ADMIN, SOCIETY_ADMIN
 
 **Request Body:**
+
 ```json
 {
-  "societyId": 1,                  // Optional, defaults to authenticated user's society
+  "societyId": 1, // Optional, defaults to authenticated user's society
   "title": "Society Notice",
   "body": "General body meeting scheduled for next week",
   "data": {
@@ -338,6 +359,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Response (200):**
+
 ```json
 {
   "success": true,
@@ -369,7 +391,7 @@ import { sendNotification } from '../../services/firebaseService.js';
 // After creating visitor log
 const resident = await prisma.user.findUnique({
   where: { id: visitorLog.unit.members[0].userId },
-  include: { fcmTokens: { where: { isActive: true } } }
+  include: { fcmTokens: { where: { isActive: true } } },
 });
 
 for (const token of resident.fcmTokens) {
@@ -394,7 +416,7 @@ for (const token of resident.fcmTokens) {
 const response = await fetch('http://localhost:1111/api/v1/notifications/send-by-role', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${adminToken}`,
+    Authorization: `Bearer ${adminToken}`,
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -416,7 +438,7 @@ const response = await fetch('http://localhost:1111/api/v1/notifications/send-by
 const response = await fetch('http://localhost:1111/api/v1/notifications/send-by-society', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${adminToken}`,
+    Authorization: `Bearer ${adminToken}`,
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -435,19 +457,21 @@ const response = await fetch('http://localhost:1111/api/v1/notifications/send-by
 ## Integration with React Native
 
 > **📱 Complete React Native Implementation Guide Available!**
-> 
+>
 > For a complete, production-ready React Native implementation with:
+>
 > - Full service class with error handling
 > - Custom hooks for easy integration
 > - Navigation handling
 > - Background/foreground/killed state support
 > - Complete code examples
-> 
+>
 > See: **[REACT_NATIVE_FIREBASE_NOTIFICATIONS.md](./REACT_NATIVE_FIREBASE_NOTIFICATIONS.md)**
 
 ### Quick Start
 
 #### Step 1: Install Packages
+
 ```bash
 npm install @react-native-firebase/app @react-native-firebase/messaging
 cd ios && pod install && cd ..
@@ -466,7 +490,7 @@ const token = await messaging().getToken();
 await fetch('http://your-api.com/api/v1/notifications/register-token', {
   method: 'POST',
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
+    Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
@@ -500,12 +524,14 @@ For complete implementation with error handling, navigation, and best practices,
 ### 1. Token Management
 
 ✅ **Do:**
+
 - Register token on app startup and login
 - Update token when it refreshes
 - Remove token on logout
 - Handle token refresh automatically
 
 ❌ **Don't:**
+
 - Store tokens in local storage only
 - Forget to remove tokens on logout
 - Send notifications to inactive tokens
@@ -513,12 +539,14 @@ For complete implementation with error handling, navigation, and best practices,
 ### 2. Notification Content
 
 ✅ **Do:**
+
 - Keep titles short (≤ 50 characters)
 - Keep body concise (≤ 150 characters)
 - Use data payload for navigation
 - Include relevant IDs in data payload
 
 ❌ **Don't:**
+
 - Send too many notifications
 - Use generic messages
 - Forget to handle notification clicks
@@ -526,6 +554,7 @@ For complete implementation with error handling, navigation, and best practices,
 ### 3. Error Handling
 
 ✅ **Do:**
+
 - Handle FCM errors gracefully
 - Log failed notifications
 - Retry failed notifications (with backoff)
@@ -534,6 +563,7 @@ For complete implementation with error handling, navigation, and best practices,
 ### 4. Security
 
 ✅ **Do:**
+
 - Validate user permissions before sending
 - Use HTTPS for API calls
 - Store service account JSON securely
@@ -548,6 +578,7 @@ For complete implementation with error handling, navigation, and best practices,
 **Error:** `Failed to initialize Firebase Admin SDK`
 
 **Solution:**
+
 1. Check that `FIREBASE_SERVICE_ACCOUNT_PATH` or `FIREBASE_SERVICE_ACCOUNT_JSON` is set
 2. Verify the service account JSON file exists and is valid
 3. Check file permissions
@@ -555,6 +586,7 @@ For complete implementation with error handling, navigation, and best practices,
 ### Issue: Notification not received
 
 **Possible Causes:**
+
 1. FCM token not registered
 2. Token is inactive
 3. App is in foreground (needs `onMessage` handler)
@@ -562,6 +594,7 @@ For complete implementation with error handling, navigation, and best practices,
 5. Firebase project not configured correctly
 
 **Solution:**
+
 1. Verify token is registered: `GET /api/v1/notifications/tokens`
 2. Check token is active
 3. Ensure foreground handler is set up
@@ -572,6 +605,7 @@ For complete implementation with error handling, navigation, and best practices,
 **Error:** `You do not have permission to send notifications`
 
 **Solution:**
+
 - Check user role (only admins can send bulk/role/society notifications)
 - Verify authentication token is valid
 - Check user has required permissions
@@ -581,6 +615,7 @@ For complete implementation with error handling, navigation, and best practices,
 **Error:** `Invalid FCM token`
 
 **Solution:**
+
 1. Token may have expired or been revoked
 2. Re-register the token from mobile app
 3. Remove old token and register new one
@@ -598,5 +633,6 @@ For complete implementation with error handling, navigation, and best practices,
 ## Support
 
 For issues or questions, please refer to:
+
 - API Documentation: `/api-docs` (Swagger UI)
 - Project README: `README.md`

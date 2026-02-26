@@ -32,14 +32,14 @@ Pre-Approvals allow residents to generate **6-digit access codes** for guests be
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/pre-approvals` | Create a new pre-approval with access code | RESIDENT |
-| GET | `/pre-approvals` | Get pre-approvals (scoped by role) | RESIDENT, ADMIN, SECURITY |
-| GET | `/pre-approvals/access-code/:code` | Get pre-approval details by access code | SECURITY |
-| GET | `/pre-approvals/:id` | Get pre-approval by ID | RESIDENT, ADMIN, SECURITY |
-| POST | `/pre-approvals/:id/revoke` | Revoke a pre-approval | RESIDENT |
-| POST | `/pre-approvals/verify` | Verify access code and create visitor entry | SOCIETY_ADMIN, SECURITY |
+| Method | Endpoint                           | Description                                 | Required Role             |
+| ------ | ---------------------------------- | ------------------------------------------- | ------------------------- |
+| POST   | `/pre-approvals`                   | Create a new pre-approval with access code  | RESIDENT                  |
+| GET    | `/pre-approvals`                   | Get pre-approvals (scoped by role)          | RESIDENT, ADMIN, SECURITY |
+| GET    | `/pre-approvals/access-code/:code` | Get pre-approval details by access code     | SECURITY                  |
+| GET    | `/pre-approvals/:id`               | Get pre-approval by ID                      | RESIDENT, ADMIN, SECURITY |
+| POST   | `/pre-approvals/:id/revoke`        | Revoke a pre-approval                       | RESIDENT                  |
+| POST   | `/pre-approvals/verify`            | Verify access code and create visitor entry | SOCIETY_ADMIN, SECURITY   |
 
 ---
 
@@ -48,6 +48,7 @@ Pre-Approvals allow residents to generate **6-digit access codes** for guests be
 Create a new pre-approval with a unique 6-digit access code.
 
 ### Authorization
+
 - **Required Role**: `RESIDENT` only
 
 ---
@@ -57,6 +58,7 @@ Create a new pre-approval with a unique 6-digit access code.
 Get a list of pre-approvals. Supports pagination and status filtering.
 
 ### Authorization
+
 - **Allowed Roles**: `RESIDENT`, `SOCIETY_ADMIN`, `SECURITY`
 - **Scoping**: Residents see only their own. Admins/Security see all in their society.
 
@@ -73,14 +75,15 @@ GET /api/v1/pre-approvals/access-code/:code
 ```
 
 ### Authorization
+
 - **Required Role**: `SECURITY` only
 - **Scoping**: Security guard can only view pre-approvals within their own society.
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `code` | string | ✅ | The 6-digit access code (e.g., `GV-483921`) |
+| Parameter | Type   | Required | Description                                 |
+| --------- | ------ | -------- | ------------------------------------------- |
+| `code`    | string | ✅       | The 6-digit access code (e.g., `GV-483921`) |
 
 ### Example Request
 
@@ -132,13 +135,13 @@ curl -X GET http://localhost:1111/api/v1/pre-approvals/access-code/GV-483921 \
 
 ### Error Responses
 
-| Status | Message | Cause |
-|--------|---------|-------|
-| 400 | Access code is required | Empty `:code` parameter |
-| 401 | Unauthorized | Missing or invalid token |
-| 403 | Security guard must be associated with a society | Security guard has no society assigned |
-| 403 | Access denied. This pre-approval does not belong to your society. | Code belongs to a different society |
-| 404 | Pre-approval not found for this code | Invalid or non-existent access code |
+| Status | Message                                                           | Cause                                  |
+| ------ | ----------------------------------------------------------------- | -------------------------------------- |
+| 400    | Access code is required                                           | Empty `:code` parameter                |
+| 401    | Unauthorized                                                      | Missing or invalid token               |
+| 403    | Security guard must be associated with a society                  | Security guard has no society assigned |
+| 403    | Access denied. This pre-approval does not belong to your society. | Code belongs to a different society    |
+| 404    | Pre-approval not found for this code                              | Invalid or non-existent access code    |
 
 ### React Native Integration
 
@@ -180,6 +183,7 @@ const handleLookupCode = async (code: string) => {
 Get details of a specific pre-approval by ID.
 
 ### Authorization
+
 - **Allowed Roles**: `RESIDENT`, `SOCIETY_ADMIN`, `SECURITY`
 - **Ownership**: Residents must own the pre-approval. Admins/Security must belong to the same society.
 
@@ -190,6 +194,7 @@ Get details of a specific pre-approval by ID.
 Revoke a pre-approval, making the access code invalid.
 
 ### Authorization
+
 - **Required Role**: `RESIDENT` only
 - **Note**: Resident can only revoke their own pre-approvals.
 
@@ -200,4 +205,5 @@ Revoke a pre-approval, making the access code invalid.
 Security guard verifies the 6-digit access code.
 
 ### Authorization
+
 - **Required Role**: `SOCIETY_ADMIN` or `SECURITY`

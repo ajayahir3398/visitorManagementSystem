@@ -26,13 +26,13 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/gates` | Create a new gate | SUPER_ADMIN, SOCIETY_ADMIN |
-| GET | `/gates` | Get all gates (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
-| GET | `/gates/:id` | Get gate by ID | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
-| PUT | `/gates/:id` | Update gate | SUPER_ADMIN, SOCIETY_ADMIN |
-| DELETE | `/gates/:id` | Delete gate | SUPER_ADMIN, SOCIETY_ADMIN |
+| Method | Endpoint     | Description                               | Required Role                        |
+| ------ | ------------ | ----------------------------------------- | ------------------------------------ |
+| POST   | `/gates`     | Create a new gate                         | SUPER_ADMIN, SOCIETY_ADMIN           |
+| GET    | `/gates`     | Get all gates (with pagination & filters) | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
+| GET    | `/gates/:id` | Get gate by ID                            | SUPER_ADMIN, SOCIETY_ADMIN, SECURITY |
+| PUT    | `/gates/:id` | Update gate                               | SUPER_ADMIN, SOCIETY_ADMIN           |
+| DELETE | `/gates/:id` | Delete gate                               | SUPER_ADMIN, SOCIETY_ADMIN           |
 
 ---
 
@@ -62,10 +62,10 @@ POST /api/v1/gates
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Gate name (e.g., "Main Gate", "Back Gate", "Service Gate") |
-| `societyId` | integer | Yes | Society ID where the gate belongs |
+| Field       | Type    | Required | Description                                                |
+| ----------- | ------- | -------- | ---------------------------------------------------------- |
+| `name`      | string  | Yes      | Gate name (e.g., "Main Gate", "Back Gate", "Service Gate") |
+| `societyId` | integer | Yes      | Society ID where the gate belongs                          |
 
 ### Success Response (201)
 
@@ -93,6 +93,7 @@ POST /api/v1/gates
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -108,6 +109,7 @@ POST /api/v1/gates
 ```
 
 **400 Bad Request** - Duplicate gate name
+
 ```json
 {
   "success": false,
@@ -116,6 +118,7 @@ POST /api/v1/gates
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -124,6 +127,7 @@ POST /api/v1/gates
 ```
 
 **404 Not Found** - Society not found
+
 ```json
 {
   "success": false,
@@ -155,7 +159,7 @@ const createGate = async (gateData) => {
       // Handle validation errors
       if (error.response.data.errors) {
         const errors = error.response.data.errors;
-        errors.forEach(err => {
+        errors.forEach((err) => {
           console.error(`${err.param}: ${err.msg}`);
         });
         Alert.alert('Validation Error', errors[0]?.msg || 'Invalid data');
@@ -207,12 +211,12 @@ GET /api/v1/gates
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page (max 100) |
-| `societyId` | integer | - | Filter by society ID |
-| `search` | string | - | Search by gate name (case-insensitive) |
+| Parameter   | Type    | Default | Description                            |
+| ----------- | ------- | ------- | -------------------------------------- |
+| `page`      | integer | 1       | Page number                            |
+| `limit`     | integer | 10      | Items per page (max 100)               |
+| `societyId` | integer | -       | Filter by society ID                   |
+| `search`    | string  | -       | Search by gate name (case-insensitive) |
 
 ### Example Request
 
@@ -299,7 +303,7 @@ const useGates = (filters = {}) => {
         if (page === 1) {
           setGates(response.data.data.gates);
         } else {
-          setGates(prev => [...prev, ...response.data.data.gates]);
+          setGates((prev) => [...prev, ...response.data.data.gates]);
         }
         setPagination(response.data.data.pagination);
       } else {
@@ -443,9 +447,9 @@ GET /api/v1/gates/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Gate ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Gate ID     |
 
 ### Success Response (200)
 
@@ -476,6 +480,7 @@ GET /api/v1/gates/:id
 ### Error Responses
 
 **400 Bad Request** - Invalid gate ID
+
 ```json
 {
   "success": false,
@@ -484,6 +489,7 @@ GET /api/v1/gates/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -492,6 +498,7 @@ GET /api/v1/gates/:id
 ```
 
 **403 Forbidden** - User trying to access gate from another society
+
 ```json
 {
   "success": false,
@@ -513,12 +520,12 @@ const useGate = (gateId) => {
 
   const fetchGate = async () => {
     if (!gateId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
       const response = await apiClient.get(`/gates/${gateId}`);
-      
+
       if (response.data.success) {
         setGate(response.data.data.gate);
       } else {
@@ -558,9 +565,7 @@ const GateDetailScreen = ({ route }) => {
       <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{gate.name}</Text>
       <Text style={{ marginTop: 10 }}>Society: {gate.society.name}</Text>
       <Text>Society Type: {gate.society.type}</Text>
-      <Text style={{ marginTop: 10 }}>
-        Visitor Logs: {gate._count.visitorLogs}
-      </Text>
+      <Text style={{ marginTop: 10 }}>Visitor Logs: {gate._count.visitorLogs}</Text>
       <Text style={{ color: 'gray', fontSize: 12, marginTop: 10 }}>
         Created: {new Date(gate.createdAt).toLocaleString()}
       </Text>
@@ -578,7 +583,7 @@ const GateDetailScreen = ({ route }) => {
 const getGateById = async (gateId) => {
   try {
     const response = await apiClient.get(`/gates/${gateId}`);
-    
+
     if (response.data.success) {
       return response.data.data.gate;
     } else {
@@ -627,9 +632,9 @@ PUT /api/v1/gates/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Gate ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Gate ID     |
 
 ### Request Body
 
@@ -643,9 +648,9 @@ All fields are optional. Only include fields you want to update.
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | No | Gate name (must be unique within society if changed) |
+| Field  | Type   | Required | Description                                          |
+| ------ | ------ | -------- | ---------------------------------------------------- |
+| `name` | string | No       | Gate name (must be unique within society if changed) |
 
 ### Success Response (200)
 
@@ -673,6 +678,7 @@ All fields are optional. Only include fields you want to update.
 ### Error Responses
 
 **400 Bad Request** - Invalid gate ID
+
 ```json
 {
   "success": false,
@@ -681,6 +687,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **400 Bad Request** - Duplicate gate name
+
 ```json
 {
   "success": false,
@@ -689,6 +696,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -697,6 +705,7 @@ All fields are optional. Only include fields you want to update.
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -843,9 +852,9 @@ DELETE /api/v1/gates/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Gate ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Gate ID     |
 
 ### Success Response (200)
 
@@ -859,6 +868,7 @@ DELETE /api/v1/gates/:id
 ### Error Responses
 
 **400 Bad Request** - Invalid gate ID
+
 ```json
 {
   "success": false,
@@ -867,6 +877,7 @@ DELETE /api/v1/gates/:id
 ```
 
 **400 Bad Request** - Gate has visitor logs
+
 ```json
 {
   "success": false,
@@ -875,6 +886,7 @@ DELETE /api/v1/gates/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -883,6 +895,7 @@ DELETE /api/v1/gates/:id
 ```
 
 **403 Forbidden** - Insufficient permissions
+
 ```json
 {
   "success": false,
@@ -959,39 +972,42 @@ const GateItem = ({ gate, onDelete }) => {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Gate',
-      `Are you sure you want to delete "${gate.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setDeleting(true);
-            try {
-              const response = await apiClient.delete(`/gates/${gate.id}`);
-              if (response.data.success) {
-                onDelete(gate.id);
-                Alert.alert('Success', 'Gate deleted successfully');
-              }
-            } catch (error) {
-              if (error.response?.status === 400) {
-                Alert.alert('Cannot Delete', error.response.data.message);
-              } else {
-                Alert.alert('Error', 'Failed to delete gate');
-              }
-            } finally {
-              setDeleting(false);
+    Alert.alert('Delete Gate', `Are you sure you want to delete "${gate.name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          setDeleting(true);
+          try {
+            const response = await apiClient.delete(`/gates/${gate.id}`);
+            if (response.data.success) {
+              onDelete(gate.id);
+              Alert.alert('Success', 'Gate deleted successfully');
             }
-          },
+          } catch (error) {
+            if (error.response?.status === 400) {
+              Alert.alert('Cannot Delete', error.response.data.message);
+            } else {
+              Alert.alert('Error', 'Failed to delete gate');
+            }
+          } finally {
+            setDeleting(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
-    <View style={{ padding: 15, borderBottomWidth: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
+    <View
+      style={{
+        padding: 15,
+        borderBottomWidth: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      }}
+    >
       <View style={{ flex: 1 }}>
         <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{gate.name}</Text>
         <Text>Visitor Logs: {gate._count.visitorLogs}</Text>
@@ -1145,14 +1161,17 @@ const handleError = (error, operation) => {
   switch (status) {
     case 400:
       if (data.errors) {
-        const errorMsg = data.errors.map(e => e.msg).join('\n');
+        const errorMsg = data.errors.map((e) => e.msg).join('\n');
         Alert.alert('Validation Error', errorMsg);
       } else {
         Alert.alert('Error', data.message || 'Invalid request');
       }
       break;
     case 403:
-      Alert.alert('Access Denied', data.message || 'You do not have permission to perform this action');
+      Alert.alert(
+        'Access Denied',
+        data.message || 'You do not have permission to perform this action'
+      );
       break;
     case 404:
       Alert.alert('Not Found', data.message || 'Resource not found');
@@ -1204,7 +1223,7 @@ const GatesScreen = () => {
   const handleDeleteGate = async (gateId) => {
     try {
       await gateService.delete(gateId);
-      setGates(gates.filter(g => g.id !== gateId));
+      setGates(gates.filter((g) => g.id !== gateId));
     } catch (error) {
       // Error already handled
     }
@@ -1218,13 +1237,13 @@ const GatesScreen = () => {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY |
-|-----------|-------------|---------------|----------|
-| Create Gate | ✅ | ✅ (own society) | ❌ |
-| Get All Gates | ✅ | ✅ (own society) | ✅ (own society) |
-| Get Gate by ID | ✅ | ✅ (own society) | ✅ (own society) |
-| Update Gate | ✅ | ✅ (own society) | ❌ |
-| Delete Gate | ✅ | ✅ (own society) | ❌ |
+| Operation      | SUPER_ADMIN | SOCIETY_ADMIN    | SECURITY         |
+| -------------- | ----------- | ---------------- | ---------------- |
+| Create Gate    | ✅          | ✅ (own society) | ❌               |
+| Get All Gates  | ✅          | ✅ (own society) | ✅ (own society) |
+| Get Gate by ID | ✅          | ✅ (own society) | ✅ (own society) |
+| Update Gate    | ✅          | ✅ (own society) | ❌               |
+| Delete Gate    | ✅          | ✅ (own society) | ❌               |
 
 ---
 
@@ -1239,13 +1258,16 @@ const GatesScreen = () => {
 ### Deleting Gates
 
 Gates cannot be deleted if they have:
+
 - Visitor logs associated with them
 
 You must:
+
 1. Delete or reassign visitor logs (if applicable)
 2. Then delete the gate
 
 **Note**: This is a safety measure to preserve visitor log history. If you need to remove a gate that has visitor logs, you may need to:
+
 - Archive or reassign the visitor logs to another gate
 - Or implement a soft delete mechanism (marking gates as inactive instead of deleting)
 
@@ -1304,4 +1326,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

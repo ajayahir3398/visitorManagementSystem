@@ -5,10 +5,11 @@ This guide provides instructions on how to integrate the Notification API into y
 ## Overview
 
 The Notification API allows you to:
--   Fetch a list of notifications for the logged-in user.
--   Get the count of unread notifications.
--   Mark individual notifications as read.
--   Mark all notifications as read.
+
+- Fetch a list of notifications for the logged-in user.
+- Get the count of unread notifications.
+- Mark individual notifications as read.
+- Mark all notifications as read.
 
 ## Base URL
 
@@ -23,8 +24,9 @@ Fetch a paginated list of notifications.
 **Endpoint:** `GET /notifications`
 
 **Query Parameters:**
--   `page` (optional): Page number (default: 1)
--   `limit` (optional): Items per page (default: 20)
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 20)
 
 **Response:**
 
@@ -69,7 +71,7 @@ import axios from 'axios';
 export const fetchNotifications = async (page = 1, limit = 20) => {
   try {
     const response = await api.get(`/notifications`, {
-      params: { page, limit }
+      params: { page, limit },
     });
     return response.data.data;
   } catch (error) {
@@ -179,14 +181,14 @@ export const markAllNotificationsAsRead = async () => {
 ## UI Integration Tips
 
 1.  **Polling vs Push:**
-    -   Use **FCM (Push Notifications)** to trigger a refresh of the notification list or increment the badge count in real-time.
-    -   When the app comes to the foreground, call `getUnreadNotificationCount` to ensure the badge is accurate.
+    - Use **FCM (Push Notifications)** to trigger a refresh of the notification list or increment the badge count in real-time.
+    - When the app comes to the foreground, call `getUnreadNotificationCount` to ensure the badge is accurate.
 
 2.  **Infinite Scroll:**
-    -   Use `FlatList` with `onEndReached` to load more pages using the `page` parameter in `fetchNotifications`.
+    - Use `FlatList` with `onEndReached` to load more pages using the `page` parameter in `fetchNotifications`.
 
 3.  **Optimistic Updates:**
-    -   When a user clicks a notification, locally mark it as read (update state) immediately while sending the API request in the background.
+    - When a user clicks a notification, locally mark it as read (update state) immediately while sending the API request in the background.
 
 ## Example Component Structure
 
@@ -208,7 +210,7 @@ const NotificationScreen = () => {
       if (page === 1) {
         setNotifications(data.notifications);
       } else {
-        setNotifications(prev => [...prev, ...data.notifications]);
+        setNotifications((prev) => [...prev, ...data.notifications]);
       }
     } finally {
       setLoading(false);
@@ -220,26 +222,22 @@ const NotificationScreen = () => {
   }, [page]);
 
   const handlePress = async (id) => {
-      // Optimistic update
-      setNotifications(prev => prev.map(n => 
-          n.id === id ? { ...n, isRead: true } : n
-      ));
-      await markNotificationAsRead(id);
+    // Optimistic update
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    await markNotificationAsRead(id);
   };
 
   return (
     <FlatList
       data={notifications}
-      keyExtractor={item => item.id.toString()}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <TouchableOpacity onPress={() => handlePress(item.id)}>
-          <Text style={{ fontWeight: item.isRead ? 'normal' : 'bold' }}>
-            {item.title}
-          </Text>
+          <Text style={{ fontWeight: item.isRead ? 'normal' : 'bold' }}>{item.title}</Text>
           <Text>{item.body}</Text>
         </TouchableOpacity>
       )}
-      onEndReached={() => setPage(p => p + 1)}
+      onEndReached={() => setPage((p) => p + 1)}
     />
   );
 };

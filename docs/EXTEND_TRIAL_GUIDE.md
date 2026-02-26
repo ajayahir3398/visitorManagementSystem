@@ -5,6 +5,7 @@ This guide explains how to extend trial periods for societies in the Visitor Man
 ## Overview
 
 You can extend trial periods in two ways:
+
 1. **By Subscription ID** - Extend a specific subscription
 2. **By Society ID** - Extend the latest subscription for a society (recommended)
 
@@ -17,6 +18,7 @@ You can extend trial periods in two ways:
 **Access**: SUPER_ADMIN only
 
 **Request Body**:
+
 ```json
 {
   "additionalDays": 30
@@ -24,6 +26,7 @@ You can extend trial periods in two ways:
 ```
 
 **Example**:
+
 ```bash
 POST /api/v1/subscriptions/society/1/extend
 Authorization: Bearer <super_admin_token>
@@ -35,6 +38,7 @@ Content-Type: application/json
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -66,6 +70,7 @@ Content-Type: application/json
 **Access**: SUPER_ADMIN only
 
 **Example**:
+
 ```bash
 POST /api/v1/subscriptions/5/extend
 Authorization: Bearer <super_admin_token>
@@ -104,12 +109,14 @@ Before extending, you can check the current subscription status:
 **Access**: SUPER_ADMIN, SOCIETY_ADMIN (own society only)
 
 **Example**:
+
 ```bash
 GET /api/v1/subscriptions/society/1
 Authorization: Bearer <token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -153,7 +160,8 @@ POST /api/v1/subscriptions/society/1/extend
 }
 ```
 
-Result: 
+Result:
+
 - Subscription reactivated (status: LOCKED → TRIAL)
 - New expiry: 30 days from today
 - Society can immediately use the system again
@@ -183,6 +191,7 @@ Result: Total extension = 45 days from original expiry (or from today if expired
 ## Error Responses
 
 ### Invalid Days
+
 ```json
 {
   "success": false,
@@ -197,6 +206,7 @@ Result: Total extension = 45 days from original expiry (or from today if expired
 ```
 
 ### Subscription Not Found
+
 ```json
 {
   "success": false,
@@ -205,6 +215,7 @@ Result: Total extension = 45 days from original expiry (or from today if expired
 ```
 
 ### Unauthorized
+
 ```json
 {
   "success": false,
@@ -215,6 +226,7 @@ Result: Total extension = 45 days from original expiry (or from today if expired
 ## Swagger Documentation
 
 Full API documentation is available at:
+
 - `http://localhost:1111/api-docs` (or your configured port)
 - Look for **"v1 - Subscriptions"** section
 
@@ -224,4 +236,3 @@ Full API documentation is available at:
 - Status is automatically recalculated after extension
 - All extensions are logged in the database (expiryDate is updated)
 - The system will continue to auto-update statuses daily via cron job
-

@@ -38,19 +38,19 @@ The Maintenance module allow residents to view available maintenance plans for t
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| **Maintenance Plans** | | | |
-| GET | `/maintenance-plans` | Get all maintenance plans | RESIDENT, SOCIETY_ADMIN |
-| GET | `/maintenance-plans/:id` | Get plan by ID | RESIDENT, SOCIETY_ADMIN |
-| POST | `/maintenance-plans` | Create a new plan | SOCIETY_ADMIN |
-| PUT | `/maintenance-plans/:id` | Update plan (amount/active) | SOCIETY_ADMIN |
-| DELETE | `/maintenance-plans/:id` | Deactivate plan | SOCIETY_ADMIN |
-| **Maintenance Operations** | | | |
-| POST | `/maintenance/custom-bill` | Create custom bill (Ad-hoc) | SOCIETY_ADMIN |
-| GET | `/maintenance/upcoming` | Get upcoming & outstanding dues | RESIDENT |
-| POST | `/maintenance/pay` | Pay bill | RESIDENT |
-| GET | `/maintenance/my-bills` | Get payment history | RESIDENT |
+| Method                     | Endpoint                   | Description                     | Required Role           |
+| -------------------------- | -------------------------- | ------------------------------- | ----------------------- |
+| **Maintenance Plans**      |                            |                                 |                         |
+| GET                        | `/maintenance-plans`       | Get all maintenance plans       | RESIDENT, SOCIETY_ADMIN |
+| GET                        | `/maintenance-plans/:id`   | Get plan by ID                  | RESIDENT, SOCIETY_ADMIN |
+| POST                       | `/maintenance-plans`       | Create a new plan               | SOCIETY_ADMIN           |
+| PUT                        | `/maintenance-plans/:id`   | Update plan (amount/active)     | SOCIETY_ADMIN           |
+| DELETE                     | `/maintenance-plans/:id`   | Deactivate plan                 | SOCIETY_ADMIN           |
+| **Maintenance Operations** |                            |                                 |                         |
+| POST                       | `/maintenance/custom-bill` | Create custom bill (Ad-hoc)     | SOCIETY_ADMIN           |
+| GET                        | `/maintenance/upcoming`    | Get upcoming & outstanding dues | RESIDENT                |
+| POST                       | `/maintenance/pay`         | Pay bill                        | RESIDENT                |
+| GET                        | `/maintenance/my-bills`    | Get payment history             | RESIDENT                |
 
 ---
 
@@ -59,6 +59,7 @@ The Maintenance module allow residents to view available maintenance plans for t
 Retrieve available maintenance plans for your society.
 
 ### Endpoint
+
 `GET /api/v1/maintenance-plans`
 
 ### Success Response (200)
@@ -95,17 +96,19 @@ Retrieve available maintenance plans for your society.
 Define a new maintenance charge structure for the society.
 
 ### Endpoint
+
 `POST /api/v1/maintenance-plans`
 
 ### Authorization
+
 - `SOCIETY_ADMIN`
 
 ### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `planType` | string | Yes | `MONTHLY` or `YEARLY` |
-| `amount` | integer | Yes | Amount in ₹ (e.g., 2500) |
+| Field      | Type    | Required | Description              |
+| ---------- | ------- | -------- | ------------------------ |
+| `planType` | string  | Yes      | `MONTHLY` or `YEARLY`    |
+| `amount`   | integer | Yes      | Amount in ₹ (e.g., 2500) |
 
 ```json
 {
@@ -139,17 +142,19 @@ Define a new maintenance charge structure for the society.
 Modify the amount or status of an existing plan.
 
 ### Endpoint
+
 `PUT /api/v1/maintenance-plans/:id`
 
 ### Authorization
+
 - `SOCIETY_ADMIN`
 
 ### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `amount` | integer | No | New amount in ₹ |
-| `isActive` | boolean | No | Set `false` to deactivate |
+| Field      | Type    | Required | Description               |
+| ---------- | ------- | -------- | ------------------------- |
+| `amount`   | integer | No       | New amount in ₹           |
+| `isActive` | boolean | No       | Set `false` to deactivate |
 
 ```json
 {
@@ -165,19 +170,21 @@ Modify the amount or status of an existing plan.
 Manually generate a bill for a specific unit (e.g., Penalty, Repair Charge).
 
 ### Endpoint
+
 `POST /api/v1/maintenance/custom-bill`
 
 ### Authorization
+
 - `SOCIETY_ADMIN`
 
 ### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `unitId` | integer | Yes | ID of the target unit |
-| `amount` | integer | Yes | Amount in ₹ |
-| `dueDate` | string | Yes | ISO 8601 Date (e.g., "2025-05-15") |
-| `description` | string | Yes | Reason for the charge |
+| Field         | Type    | Required | Description                        |
+| ------------- | ------- | -------- | ---------------------------------- |
+| `unitId`      | integer | Yes      | ID of the target unit              |
+| `amount`      | integer | Yes      | Amount in ₹                        |
+| `dueDate`     | string  | Yes      | ISO 8601 Date (e.g., "2025-05-15") |
+| `description` | string  | Yes      | Reason for the charge              |
 
 ```json
 {
@@ -213,9 +220,11 @@ Manually generate a bill for a specific unit (e.g., Penalty, Repair Charge).
 Retrieve temporary bills (Upcoming) and unpaid final bills (Outstanding) for the resident's units.
 
 ### Endpoint
+
 `GET /api/v1/maintenance/upcoming`
 
 ### Authorization
+
 - `RESIDENT`
 
 ### Success Response (200)
@@ -261,18 +270,20 @@ Retrieve temporary bills (Upcoming) and unpaid final bills (Outstanding) for the
 Pay for a specific maintenance plan (Final Bill or Temp Bill).
 
 ### Endpoint
+
 `POST /api/v1/maintenance/pay`
 
 ### Authorization
+
 - `RESIDENT`
 
 ### Request Body
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `tempBillId` | integer | Yes | ID of the upcoming temporary bill to pay |
-| `paymentMode` | string | Yes | `ONLINE`, `UPI`, `CASH` |
-| `transactionId` | string | No | External Gateway ID |
+| Field           | Type    | Required | Description                              |
+| --------------- | ------- | -------- | ---------------------------------------- |
+| `tempBillId`    | integer | Yes      | ID of the upcoming temporary bill to pay |
+| `paymentMode`   | string  | Yes      | `ONLINE`, `UPI`, `CASH`                  |
+| `transactionId` | string  | No       | External Gateway ID                      |
 
 ```json
 {
@@ -310,12 +321,15 @@ Pay for a specific maintenance plan (Final Bill or Temp Bill).
 Retrieve payment history.
 
 ### Endpoint
+
 `GET /api/v1/maintenance/my-bills`
 
 ### Authorization
+
 - `RESIDENT`
 
 ### Query Parameters
+
 - `page` (default 1)
 - `limit` (default 10)
 - `status` (optional: `PAID`, `UNPAID`)
@@ -366,67 +380,67 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const BASE_URL = 'http://YOUR_API_URL/api/v1';
 
 const getHeaders = async () => {
-    const token = await AsyncStorage.getItem('userToken');
-    return {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
+  const token = await AsyncStorage.getItem('userToken');
+  return {
+    Authorization: `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
 };
 
 export const maintenanceService = {
-    // 1. Get available society plans
-    getPlans: async () => {
-        try {
-            const headers = await getHeaders();
-            const response = await axios.get(`${BASE_URL}/maintenance-plans`, { headers });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-
-    // 2. Get upcoming and outstanding maintenance dues
-    getUpcoming: async () => {
-        try {
-            const headers = await getHeaders();
-            const response = await axios.get(`${BASE_URL}/maintenance/upcoming`, { headers });
-            return response.data.data; // Returns { upcoming: [], outstanding: [] }
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-
-    // 3. Pay an upcoming bill
-    payMaintenance: async (tempBillId, paymentMode, transactionId = null) => {
-        try {
-            const headers = await getHeaders();
-            const payload = {
-                tempBillId,
-                paymentMode,
-                transactionId
-            };
-            const response = await axios.post(`${BASE_URL}/maintenance/pay`, payload, { headers });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    },
-
-    // 4. Get payment history
-    getMyBills: async (page = 1, status = null) => {
-        try {
-            const headers = await getHeaders();
-            const params = { page, limit: 10 };
-            if (status) params.status = status;
-            
-            const response = await axios.get(`${BASE_URL}/maintenance/my-bills`, { 
-                headers, 
-                params 
-            });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
+  // 1. Get available society plans
+  getPlans: async () => {
+    try {
+      const headers = await getHeaders();
+      const response = await axios.get(`${BASE_URL}/maintenance-plans`, { headers });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
     }
+  },
+
+  // 2. Get upcoming and outstanding maintenance dues
+  getUpcoming: async () => {
+    try {
+      const headers = await getHeaders();
+      const response = await axios.get(`${BASE_URL}/maintenance/upcoming`, { headers });
+      return response.data.data; // Returns { upcoming: [], outstanding: [] }
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // 3. Pay an upcoming bill
+  payMaintenance: async (tempBillId, paymentMode, transactionId = null) => {
+    try {
+      const headers = await getHeaders();
+      const payload = {
+        tempBillId,
+        paymentMode,
+        transactionId,
+      };
+      const response = await axios.post(`${BASE_URL}/maintenance/pay`, payload, { headers });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  // 4. Get payment history
+  getMyBills: async (page = 1, status = null) => {
+    try {
+      const headers = await getHeaders();
+      const params = { page, limit: 10 };
+      if (status) params.status = status;
+
+      const response = await axios.get(`${BASE_URL}/maintenance/my-bills`, {
+        headers,
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
 };
 ```

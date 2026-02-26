@@ -26,12 +26,12 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/rules` | Create a new rule | SOCIETY_ADMIN |
-| GET | `/rules` | Get all rules | All Roles |
-| GET | `/rules/:id` | Get rule details | All Roles |
-| PUT | `/rules/:id` | Update rule | SOCIETY_ADMIN |
+| Method | Endpoint     | Description                 | Required Role |
+| ------ | ------------ | --------------------------- | ------------- |
+| POST   | `/rules`     | Create a new rule           | SOCIETY_ADMIN |
+| GET    | `/rules`     | Get all rules               | All Roles     |
+| GET    | `/rules/:id` | Get rule details            | All Roles     |
+| PUT    | `/rules/:id` | Update rule                 | SOCIETY_ADMIN |
 | DELETE | `/rules/:id` | Deactivate/Soft delete rule | SOCIETY_ADMIN |
 
 ---
@@ -39,11 +39,13 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 ## Rule Priorities & Categories
 
 ### Priority Levels
+
 - `High`
 - `Medium`
 - `Low`
 
 ### Common Categories
+
 - `Parking`
 - `General`
 - `Noise`
@@ -80,13 +82,13 @@ POST /api/v1/rules
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Rule title (max 200 chars) |
-| `description` | string | No | Detailed description |
-| `category` | string | Yes | e.g. "Parking", "General" |
-| `priority` | string | No | `High`, `Medium` (default), `Low` |
-| `violationPenalty` | string | No | Text description of penalty |
+| Field              | Type   | Required | Description                       |
+| ------------------ | ------ | -------- | --------------------------------- |
+| `title`            | string | Yes      | Rule title (max 200 chars)        |
+| `description`      | string | No       | Detailed description              |
+| `category`         | string | Yes      | e.g. "Parking", "General"         |
+| `priority`         | string | No       | `High`, `Medium` (default), `Low` |
+| `violationPenalty` | string | No       | Text description of penalty       |
 
 ### Success Response (201)
 
@@ -111,6 +113,7 @@ POST /api/v1/rules
 ### Error Responses
 
 **400 Bad Request** - Validation error
+
 ```json
 {
   "success": false,
@@ -126,6 +129,7 @@ POST /api/v1/rules
 ```
 
 **403 Forbidden** - Access denied
+
 ```json
 {
   "success": false,
@@ -147,7 +151,7 @@ const createRule = async (ruleData) => {
     }
   } catch (error) {
     if (error.response?.status === 400) {
-        Alert.alert('Validation Error', error.response.data.message);
+      Alert.alert('Validation Error', error.response.data.message);
     } else if (error.response?.status === 403) {
       Alert.alert('Access Denied', 'Only Admins can create rules');
     } else {
@@ -176,9 +180,9 @@ GET /api/v1/rules
 
 ### Query Parameters
 
-| Name | Type | Description |
-|------|------|-------------|
-| `category` | string | Filter by category |
+| Name       | Type    | Description                             |
+| ---------- | ------- | --------------------------------------- |
+| `category` | string  | Filter by category                      |
 | `isActive` | boolean | Filter by active status (default: true) |
 
 ### Success Response (200)
@@ -209,28 +213,28 @@ import apiClient from '../services/authService';
 import { useState, useEffect } from 'react';
 
 const useRules = () => {
-    const [rules, setRules] = useState([]);
-    const [loading, setLoading] = useState(false);
+  const [rules, setRules] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    const fetchRules = async () => {
-        setLoading(true);
-        try {
-            const response = await apiClient.get('/rules');
-            if (response.data.success) {
-                setRules(response.data.data.rules);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchRules = async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get('/rules');
+      if (response.data.success) {
+        setRules(response.data.data.rules);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchRules();
-    }, []);
+  useEffect(() => {
+    fetchRules();
+  }, []);
 
-    return { rules, loading, refetch: fetchRules };
+  return { rules, loading, refetch: fetchRules };
 };
 ```
 
@@ -265,6 +269,7 @@ GET /api/v1/rules/:id
 ### Error Responses
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -313,15 +318,15 @@ PUT /api/v1/rules/:id
 
 ```javascript
 const updateRule = async (id, data) => {
-    try {
-        const response = await apiClient.put(`/rules/${id}`, data);
-        return response.data;
-    } catch (error) {
-        if (error.response?.status === 404) {
-            Alert.alert('Error', 'Rule not found');
-        }
-        throw error;
+  try {
+    const response = await apiClient.put(`/rules/${id}`, data);
+    return response.data;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      Alert.alert('Error', 'Rule not found');
     }
+    throw error;
+  }
 };
 ```
 
@@ -354,8 +359,8 @@ DELETE /api/v1/rules/:id
 
 ```javascript
 const deleteRule = async (id) => {
-    const response = await apiClient.delete(`/rules/${id}`);
-    return response.data;
+  const response = await apiClient.delete(`/rules/${id}`);
+  return response.data;
 };
 ```
 
@@ -412,6 +417,6 @@ export const ruleService = {
   delete: async (id: number) => {
     const response = await apiClient.delete(`/rules/${id}`);
     return response.data;
-  }
+  },
 };
 ```

@@ -9,6 +9,7 @@ The schema was updated to add required fields `code` and `billingCycle`, but exi
 ## Solution
 
 We've made the fields **optional temporarily** so you can:
+
 1. Push the schema changes
 2. Update existing data
 3. (Optional) Make fields required again later
@@ -40,6 +41,7 @@ node scripts/migrateSubscriptionPlans.js
 ```
 
 This script will:
+
 - Find all plans without `code` or `billingCycle`
 - Auto-detect and assign appropriate values:
   - TRIAL plan → `code: 'TRIAL'`, `billingCycle: 'MONTHLY'`
@@ -84,6 +86,7 @@ npx prisma db seed
 ### Existing Data
 
 Your existing TRIAL plan will be updated with:
+
 - `code: 'TRIAL'`
 - `billingCycle: 'MONTHLY'`
 
@@ -112,6 +115,7 @@ You should see all plans with `code` and `billingCycle` populated.
 Once all existing data has `code` and `billingCycle`, you can make them required:
 
 1. Update `prisma/schema.prisma`:
+
    ```prisma
    code          String         @unique @db.VarChar(20)  // Remove ?
    billingCycle  String         @db.VarChar(20)          // Remove ?
@@ -131,10 +135,10 @@ Once all existing data has `code` and `billingCycle`, you can make them required
 If you get a unique constraint error, check for duplicate codes:
 
 ```sql
-SELECT code, COUNT(*) 
-FROM subscription_plans 
-WHERE code IS NOT NULL 
-GROUP BY code 
+SELECT code, COUNT(*)
+FROM subscription_plans
+WHERE code IS NOT NULL
+GROUP BY code
 HAVING COUNT(*) > 1;
 ```
 
@@ -162,18 +166,18 @@ If the script doesn't work, you can update manually:
 
 ```sql
 -- Update TRIAL plan
-UPDATE subscription_plans 
-SET code = 'TRIAL', billing_cycle = 'MONTHLY' 
+UPDATE subscription_plans
+SET code = 'TRIAL', billing_cycle = 'MONTHLY'
 WHERE name = 'TRIAL' OR price = 0;
 
 -- Update MONTHLY plan (if exists)
-UPDATE subscription_plans 
-SET code = 'MONTHLY', billing_cycle = 'MONTHLY' 
+UPDATE subscription_plans
+SET code = 'MONTHLY', billing_cycle = 'MONTHLY'
 WHERE duration_months = 1 AND code IS NULL;
 
 -- Update YEARLY plan (if exists)
-UPDATE subscription_plans 
-SET code = 'YEARLY', billing_cycle = 'YEARLY' 
+UPDATE subscription_plans
+SET code = 'YEARLY', billing_cycle = 'YEARLY'
 WHERE duration_months = 12 AND code IS NULL;
 ```
 
@@ -205,4 +209,3 @@ If you encounter issues:
 2. Verify database connection
 3. Check existing data in `subscription_plans` table
 4. Review migration script output
-

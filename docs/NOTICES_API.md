@@ -26,31 +26,34 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/notices` | Create a new notice | SOCIETY_ADMIN |
-| GET | `/notices` | Get all notices (scoped by audience) | All Roles |
-| GET | `/notices/:id` | Get notice details | All Roles |
-| POST | `/notices/:id/read` | Mark notice as read | All Roles |
-| PUT | `/notices/:id` | Update notice | SOCIETY_ADMIN |
-| DELETE | `/notices/:id` | Deactivate/Soft delete notice | SOCIETY_ADMIN |
+| Method | Endpoint            | Description                          | Required Role |
+| ------ | ------------------- | ------------------------------------ | ------------- |
+| POST   | `/notices`          | Create a new notice                  | SOCIETY_ADMIN |
+| GET    | `/notices`          | Get all notices (scoped by audience) | All Roles     |
+| GET    | `/notices/:id`      | Get notice details                   | All Roles     |
+| POST   | `/notices/:id/read` | Mark notice as read                  | All Roles     |
+| PUT    | `/notices/:id`      | Update notice                        | SOCIETY_ADMIN |
+| DELETE | `/notices/:id`      | Deactivate/Soft delete notice        | SOCIETY_ADMIN |
 
 ---
 
 ## Notice Types & Enums
 
 ### Notice Types
+
 - `General`
 - `Maintenance`
 - `Emergency`
 - `Event`
 
 ### Priority Levels
+
 - `High`
 - `Medium`
 - `Low`
 
 ### Audience Types
+
 - `All` - Visible to everyone
 - `Residents` - Visible to Owners and Tenants
 - `Owners` - Visible only to Owners
@@ -90,16 +93,16 @@ POST /api/v1/notices
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Notice title (max 200 chars) |
-| `description` | string | No | Detailed description |
-| `noticeType` | string | Yes | `General`, `Maintenance`, `Emergency`, `Event` |
-| `priority` | string | No | `High`, `Medium` (default), `Low` |
-| `audience` | string | Yes | `All`, `Residents`, `Owners`, `Tenants`, `Security` |
-| `startDate` | iso8601 | Yes | Start date/time of the notice |
-| `endDate` | iso8601 | Yes | End date/time (notice is hidden after this) |
-| `photoBase64` | string | No | Base64 encoded notice image |
+| Field         | Type    | Required | Description                                         |
+| ------------- | ------- | -------- | --------------------------------------------------- |
+| `title`       | string  | Yes      | Notice title (max 200 chars)                        |
+| `description` | string  | No       | Detailed description                                |
+| `noticeType`  | string  | Yes      | `General`, `Maintenance`, `Emergency`, `Event`      |
+| `priority`    | string  | No       | `High`, `Medium` (default), `Low`                   |
+| `audience`    | string  | Yes      | `All`, `Residents`, `Owners`, `Tenants`, `Security` |
+| `startDate`   | iso8601 | Yes      | Start date/time of the notice                       |
+| `endDate`     | iso8601 | Yes      | End date/time (notice is hidden after this)         |
+| `photoBase64` | string  | No       | Base64 encoded notice image                         |
 
 ### Success Response (201)
 
@@ -172,11 +175,11 @@ GET /api/v1/notices
 
 ### Query Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `noticeType` | string | Filter by type (`General`, `Maintenance`, etc.) |
-| `priority` | string | Filter by priority (`High`, `Medium`, `Low`) |
-| `isRead` | boolean | Filter by read status (`true` for already read, `false` for unread) |
+| Parameter    | Type    | Description                                                         |
+| ------------ | ------- | ------------------------------------------------------------------- |
+| `noticeType` | string  | Filter by type (`General`, `Maintenance`, etc.)                     |
+| `priority`   | string  | Filter by priority (`High`, `Medium`, `Low`)                        |
+| `isRead`     | boolean | Filter by read status (`true` for already read, `false` for unread) |
 
 ### Success Response (200)
 
@@ -210,28 +213,28 @@ import { useState, useEffect } from 'react';
 import { FlatList, View, Text } from 'react-native';
 
 const useNotices = () => {
-    const [notices, setNotices] = useState([]);
-    const [loading, setLoading] = useState(false);
+  const [notices, setNotices] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    const fetchNotices = async () => {
-        setLoading(true);
-        try {
-            const response = await apiClient.get('/notices');
-            if (response.data.success) {
-                setNotices(response.data.data.notices);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchNotices = async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get('/notices');
+      if (response.data.success) {
+        setNotices(response.data.data.notices);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchNotices();
-    }, []);
+  useEffect(() => {
+    fetchNotices();
+  }, []);
 
-    return { notices, loading, refetch: fetchNotices };
+  return { notices, loading, refetch: fetchNotices };
 };
 ```
 
@@ -271,8 +274,8 @@ GET /api/v1/notices/:id
 
 ```javascript
 const getNotice = async (id) => {
-    const response = await apiClient.get(`/notices/${id}`);
-    return response.data.data;
+  const response = await apiClient.get(`/notices/${id}`);
+  return response.data.data;
 };
 ```
 
@@ -305,18 +308,18 @@ POST /api/v1/notices/:id/read
 
 ```javascript
 const markAsRead = async (id) => {
-    try {
-        await apiClient.post(`/notices/${id}/read`);
-    } catch (error) {
-        console.error('Failed to mark read', error);
-    }
+  try {
+    await apiClient.post(`/notices/${id}/read`);
+  } catch (error) {
+    console.error('Failed to mark read', error);
+  }
 };
 
 // Usage: Call this when opening notice details
 useEffect(() => {
-    if (noticeId && !isRead) {
-        markAsRead(noticeId);
-    }
+  if (noticeId && !isRead) {
+    markAsRead(noticeId);
+  }
 }, [noticeId]);
 ```
 
@@ -360,8 +363,8 @@ Include only fields to change.
 
 ```javascript
 const updateNotice = async (id, data) => {
-    const response = await apiClient.put(`/notices/${id}`, data);
-    return response.data;
+  const response = await apiClient.put(`/notices/${id}`, data);
+  return response.data;
 };
 ```
 
@@ -394,8 +397,8 @@ DELETE /api/v1/notices/:id
 
 ```javascript
 const deleteNotice = async (id) => {
-    const response = await apiClient.delete(`/notices/${id}`);
-    return response.data;
+  const response = await apiClient.delete(`/notices/${id}`);
+  return response.data;
 };
 ```
 
@@ -403,13 +406,13 @@ const deleteNotice = async (id) => {
 
 ## Role-Based Access Summary
 
-| Operation | SOCIETY_ADMIN | RESIDENT | SECURITY |
-|-----------|---------------|----------|----------|
-| Create Notice | ✅ | ❌ | ❌ |
-| View Notices | ✅ | ✅ | ✅ |
-| Update Notice | ✅ | ❌ | ❌ |
-| Delete Notice | ✅ | ❌ | ❌ |
-| Mark Read | ✅ | ✅ | ✅ |
+| Operation     | SOCIETY_ADMIN | RESIDENT | SECURITY |
+| ------------- | ------------- | -------- | -------- |
+| Create Notice | ✅            | ❌       | ❌       |
+| View Notices  | ✅            | ✅       | ✅       |
+| Update Notice | ✅            | ❌       | ❌       |
+| Delete Notice | ✅            | ❌       | ❌       |
+| Mark Read     | ✅            | ✅       | ✅       |
 
 ---
 
@@ -448,6 +451,6 @@ export const noticeService = {
   delete: async (id: number) => {
     const response = await apiClient.delete(`/notices/${id}`);
     return response.data;
-  }
+  },
 };
 ```

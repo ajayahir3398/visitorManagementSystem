@@ -26,14 +26,14 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| POST | `/emergencies` | Raise an emergency | RESIDENT, SECURITY, SOCIETY_ADMIN |
-| GET | `/emergencies` | Get emergencies (paginated) | RESIDENT, SECURITY, SOCIETY_ADMIN |
-| GET | `/emergencies/:id` | Get emergency timeline/detail | RESIDENT, SECURITY, SOCIETY_ADMIN |
-| POST | `/emergencies/:id/acknowledge` | Acknowledge an emergency | SECURITY, SOCIETY_ADMIN |
-| POST | `/emergencies/:id/respond` | Add response action | SECURITY, SOCIETY_ADMIN |
-| POST | `/emergencies/:id/resolve` | Resolve/close emergency | SOCIETY_ADMIN |
+| Method | Endpoint                       | Description                   | Required Role                     |
+| ------ | ------------------------------ | ----------------------------- | --------------------------------- |
+| POST   | `/emergencies`                 | Raise an emergency            | RESIDENT, SECURITY, SOCIETY_ADMIN |
+| GET    | `/emergencies`                 | Get emergencies (paginated)   | RESIDENT, SECURITY, SOCIETY_ADMIN |
+| GET    | `/emergencies/:id`             | Get emergency timeline/detail | RESIDENT, SECURITY, SOCIETY_ADMIN |
+| POST   | `/emergencies/:id/acknowledge` | Acknowledge an emergency      | SECURITY, SOCIETY_ADMIN           |
+| POST   | `/emergencies/:id/respond`     | Add response action           | SECURITY, SOCIETY_ADMIN           |
+| POST   | `/emergencies/:id/resolve`     | Resolve/close emergency       | SOCIETY_ADMIN                     |
 
 ---
 
@@ -51,22 +51,22 @@ OPEN → ACKNOWLEDGED → RESOLVED
 
 ## Emergency Types
 
-| Type | Description |
-|------|-------------|
-| `Medical` | Medical emergency (health issues, injury) |
-| `Fire` | Fire or smoke related emergency |
-| `Theft` | Theft or burglary |
-| `Security` | General security threat |
-| `Other` | Any other emergency type |
+| Type       | Description                               |
+| ---------- | ----------------------------------------- |
+| `Medical`  | Medical emergency (health issues, injury) |
+| `Fire`     | Fire or smoke related emergency           |
+| `Theft`    | Theft or burglary                         |
+| `Security` | General security threat                   |
+| `Other`    | Any other emergency type                  |
 
 ## Notification Types
 
-| Type | Description |
-|------|-------------|
-| `SIREN` | Trigger siren/alarm |
-| `CALL` | Phone call notification |
-| `PUSH` | Push notification to devices |
-| `ALL` | All notification methods |
+| Type    | Description                  |
+| ------- | ---------------------------- |
+| `SIREN` | Trigger siren/alarm          |
+| `CALL`  | Phone call notification      |
+| `PUSH`  | Push notification to devices |
+| `ALL`   | All notification methods     |
 
 ---
 
@@ -98,13 +98,13 @@ POST /api/v1/emergencies
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `emergencyType` | string | Yes | Type of emergency: `Medical`, `Fire`, `Theft`, `Security`, `Other` |
-| `notificationType` | string | Yes | Notification method: `SIREN`, `CALL`, `PUSH`, `ALL` |
-| `description` | string | No | Detailed description of the emergency |
-| `location` | string | No | Location within the society |
-| `unitId` | integer | No | Unit ID if emergency is related to a specific unit |
+| Field              | Type    | Required | Description                                                        |
+| ------------------ | ------- | -------- | ------------------------------------------------------------------ |
+| `emergencyType`    | string  | Yes      | Type of emergency: `Medical`, `Fire`, `Theft`, `Security`, `Other` |
+| `notificationType` | string  | Yes      | Notification method: `SIREN`, `CALL`, `PUSH`, `ALL`                |
+| `description`      | string  | No       | Detailed description of the emergency                              |
+| `location`         | string  | No       | Location within the society                                        |
+| `unitId`           | integer | No       | Unit ID if emergency is related to a specific unit                 |
 
 ### Success Response (201)
 
@@ -140,6 +140,7 @@ POST /api/v1/emergencies
 ### Error Responses
 
 **400 Bad Request** - Missing required fields
+
 ```json
 {
   "success": false,
@@ -148,6 +149,7 @@ POST /api/v1/emergencies
 ```
 
 **401 Unauthorized**
+
 ```json
 {
   "success": false,
@@ -240,11 +242,11 @@ GET /api/v1/emergencies
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `status` | string | - | Filter by status: `OPEN`, `ACKNOWLEDGED`, `RESOLVED` |
-| `page` | integer | 1 | Page number |
-| `limit` | integer | 10 | Items per page |
+| Parameter | Type    | Default | Description                                          |
+| --------- | ------- | ------- | ---------------------------------------------------- |
+| `status`  | string  | -       | Filter by status: `OPEN`, `ACKNOWLEDGED`, `RESOLVED` |
+| `page`    | integer | 1       | Page number                                          |
+| `limit`   | integer | 10      | Items per page                                       |
 
 ### Example Request
 
@@ -322,7 +324,7 @@ const useEmergencies = (filters = {}) => {
         if (page === 1) {
           setEmergencies(response.data.data.emergencies);
         } else {
-          setEmergencies(prev => [...prev, ...response.data.data.emergencies]);
+          setEmergencies((prev) => [...prev, ...response.data.data.emergencies]);
         }
         setPagination(response.data.data.pagination);
       }
@@ -359,10 +361,14 @@ const EmergencyListScreen = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'OPEN': return '#FF4444';
-      case 'ACKNOWLEDGED': return '#FFAA00';
-      case 'RESOLVED': return '#44AA44';
-      default: return '#888888';
+      case 'OPEN':
+        return '#FF4444';
+      case 'ACKNOWLEDGED':
+        return '#FFAA00';
+      case 'RESOLVED':
+        return '#44AA44';
+      default:
+        return '#888888';
     }
   };
 
@@ -370,7 +376,7 @@ const EmergencyListScreen = () => {
     <View style={{ flex: 1 }}>
       {/* Status Filter Tabs */}
       <View style={{ flexDirection: 'row', padding: 10 }}>
-        {['OPEN', 'ACKNOWLEDGED', 'RESOLVED'].map(status => (
+        {['OPEN', 'ACKNOWLEDGED', 'RESOLVED'].map((status) => (
           <TouchableOpacity
             key={status}
             onPress={() => setStatusFilter(status)}
@@ -381,9 +387,7 @@ const EmergencyListScreen = () => {
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: statusFilter === status ? '#FFF' : '#333' }}>
-              {status}
-            </Text>
+            <Text style={{ color: statusFilter === status ? '#FFF' : '#333' }}>{status}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -406,9 +410,7 @@ const EmergencyListScreen = () => {
                   marginRight: 10,
                 }}
               />
-              <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-                {item.emergencyType}
-              </Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.emergencyType}</Text>
             </View>
             <Text style={{ marginTop: 5 }}>{item.description}</Text>
             <Text style={{ color: '#666', marginTop: 5 }}>
@@ -426,9 +428,7 @@ const EmergencyListScreen = () => {
         )}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refresh} />
-        }
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} />}
         ListEmptyComponent={
           !loading ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
@@ -461,9 +461,9 @@ GET /api/v1/emergencies/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Emergency ID |
+| Parameter | Type    | Required | Description  |
+| --------- | ------- | -------- | ------------ |
+| `id`      | integer | Yes      | Emergency ID |
 
 ### Success Response (200)
 
@@ -528,6 +528,7 @@ GET /api/v1/emergencies/:id
 ### Error Responses
 
 **403 Forbidden** - Resident trying to view another's emergency
+
 ```json
 {
   "success": false,
@@ -536,6 +537,7 @@ GET /api/v1/emergencies/:id
 ```
 
 **403 Forbidden** - Emergency from another society
+
 ```json
 {
   "success": false,
@@ -544,6 +546,7 @@ GET /api/v1/emergencies/:id
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -612,15 +615,21 @@ const EmergencyDetailScreen = ({ route }) => {
         <Text style={{ fontSize: 24, fontWeight: 'bold' }}>
           {emergency.emergencyType} Emergency
         </Text>
-        <View style={{
-          backgroundColor: emergency.status === 'OPEN' ? '#FF4444' :
-                          emergency.status === 'ACKNOWLEDGED' ? '#FFAA00' : '#44AA44',
-          paddingHorizontal: 10,
-          paddingVertical: 5,
-          borderRadius: 5,
-          alignSelf: 'flex-start',
-          marginTop: 10,
-        }}>
+        <View
+          style={{
+            backgroundColor:
+              emergency.status === 'OPEN'
+                ? '#FF4444'
+                : emergency.status === 'ACKNOWLEDGED'
+                  ? '#FFAA00'
+                  : '#44AA44',
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 5,
+            alignSelf: 'flex-start',
+            marginTop: 10,
+          }}
+        >
           <Text style={{ color: '#FFF' }}>{emergency.status}</Text>
         </View>
       </View>
@@ -634,7 +643,9 @@ const EmergencyDetailScreen = ({ route }) => {
         <Text>{emergency.location || emergency.unit?.unitNo || 'Not specified'}</Text>
 
         <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Raised by:</Text>
-        <Text>{emergency.user.name} ({emergency.user.mobile})</Text>
+        <Text>
+          {emergency.user.name} ({emergency.user.mobile})
+        </Text>
 
         <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Raised at:</Text>
         <Text>{new Date(emergency.raisedAt).toLocaleString()}</Text>
@@ -673,19 +684,19 @@ const EmergencyDetailScreen = ({ route }) => {
                 marginLeft: 5,
               }}
             >
-              <View style={{
-                position: 'absolute',
-                left: -6,
-                top: 0,
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: '#007AFF',
-              }} />
+              <View
+                style={{
+                  position: 'absolute',
+                  left: -6,
+                  top: 0,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: '#007AFF',
+                }}
+              />
               <Text style={{ fontWeight: 'bold' }}>{response.responseAction}</Text>
-              <Text style={{ color: '#666', marginTop: 5 }}>
-                {response.responseNotes}
-              </Text>
+              <Text style={{ color: '#666', marginTop: 5 }}>{response.responseNotes}</Text>
               <Text style={{ color: '#999', fontSize: 12, marginTop: 5 }}>
                 {response.responder.name} ({response.responder.role.name}) -
                 {new Date(response.responseTime).toLocaleString()}
@@ -717,9 +728,9 @@ POST /api/v1/emergencies/:id/acknowledge
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Emergency ID |
+| Parameter | Type    | Required | Description  |
+| --------- | ------- | -------- | ------------ |
+| `id`      | integer | Yes      | Emergency ID |
 
 ### Success Response (200)
 
@@ -739,6 +750,7 @@ POST /api/v1/emergencies/:id/acknowledge
 ### Error Responses
 
 **400 Bad Request** - Invalid status
+
 ```json
 {
   "success": false,
@@ -747,6 +759,7 @@ POST /api/v1/emergencies/:id/acknowledge
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -811,9 +824,9 @@ POST /api/v1/emergencies/:id/respond
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Emergency ID |
+| Parameter | Type    | Required | Description  |
+| --------- | ------- | -------- | ------------ |
+| `id`      | integer | Yes      | Emergency ID |
 
 ### Request Body
 
@@ -826,10 +839,10 @@ POST /api/v1/emergencies/:id/respond
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `responseAction` | string | Yes | Short description of the action taken |
-| `responseNotes` | string | No | Additional notes or details |
+| Field            | Type   | Required | Description                           |
+| ---------------- | ------ | -------- | ------------------------------------- |
+| `responseAction` | string | Yes      | Short description of the action taken |
+| `responseNotes`  | string | No       | Additional notes or details           |
 
 ### Success Response (201)
 
@@ -851,6 +864,7 @@ POST /api/v1/emergencies/:id/respond
 ### Error Responses
 
 **400 Bad Request** - Missing required field
+
 ```json
 {
   "success": false,
@@ -922,9 +936,7 @@ const ResponseActionButtons = ({ emergencyId, onSuccess }) => {
           }}
           onPress={() => handleQuickAction(action)}
         >
-          <Text style={{ color: '#FFF', textAlign: 'center' }}>
-            {action.action}
-          </Text>
+          <Text style={{ color: '#FFF', textAlign: 'center' }}>{action.action}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -964,9 +976,9 @@ POST /api/v1/emergencies/:id/resolve
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Emergency ID |
+| Parameter | Type    | Required | Description  |
+| --------- | ------- | -------- | ------------ |
+| `id`      | integer | Yes      | Emergency ID |
 
 ### Success Response (200)
 
@@ -986,6 +998,7 @@ POST /api/v1/emergencies/:id/resolve
 ### Error Responses
 
 **403 Forbidden** - Non-admin trying to resolve
+
 ```json
 {
   "success": false,
@@ -994,6 +1007,7 @@ POST /api/v1/emergencies/:id/resolve
 ```
 
 **404 Not Found**
+
 ```json
 {
   "success": false,
@@ -1147,14 +1161,14 @@ export default emergencyService;
 
 ## Role-Based Access Summary
 
-| Operation | RESIDENT | SECURITY | SOCIETY_ADMIN | SUPER_ADMIN |
-|-----------|----------|----------|---------------|-------------|
-| Raise Emergency | ✅ | ✅ | ✅ | ❌ |
-| Get Emergencies | ✅ (own only) | ✅ (society) | ✅ (society) | ❌ |
-| Get Emergency Detail | ✅ (own only) | ✅ (society) | ✅ (society) | ❌ |
-| Acknowledge | ❌ | ✅ | ✅ | ❌ |
-| Add Response | ❌ | ✅ | ✅ | ❌ |
-| Resolve | ❌ | ❌ | ✅ | ❌ |
+| Operation            | RESIDENT      | SECURITY     | SOCIETY_ADMIN | SUPER_ADMIN |
+| -------------------- | ------------- | ------------ | ------------- | ----------- |
+| Raise Emergency      | ✅            | ✅           | ✅            | ❌          |
+| Get Emergencies      | ✅ (own only) | ✅ (society) | ✅ (society)  | ❌          |
+| Get Emergency Detail | ✅ (own only) | ✅ (society) | ✅ (society)  | ❌          |
+| Acknowledge          | ❌            | ✅           | ✅            | ❌          |
+| Add Response         | ❌            | ✅           | ✅            | ❌          |
+| Resolve              | ❌            | ❌           | ✅            | ❌          |
 
 ---
 

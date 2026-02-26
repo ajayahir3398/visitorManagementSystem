@@ -9,16 +9,19 @@ This guide explains the difference between client-side and server-side Firebase 
 ### 1. Client-Side Configuration (React Native App)
 
 **Files:**
+
 - **Android:** `google-services.json`
 - **iOS:** `GoogleService-Info.plist`
 
 **Purpose:**
+
 - Used by your React Native mobile app
 - Allows the app to connect to Firebase
 - Used to get FCM tokens
 - Receive push notifications
 
 **Where to get it:**
+
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
 3. Click the gear icon ⚙️ → **Project Settings**
@@ -27,10 +30,12 @@ This guide explains the difference between client-side and server-side Firebase 
 6. Download `google-services.json` (Android) or `GoogleService-Info.plist` (iOS)
 
 **Where to place it:**
+
 - **Android:** `android/app/google-services.json`
 - **iOS:** `ios/GoogleService-Info.plist` (add via Xcode)
 
 **Used in:**
+
 - React Native app initialization
 - Getting FCM tokens: `messaging().getToken()`
 - Receiving notifications
@@ -40,15 +45,18 @@ This guide explains the difference between client-side and server-side Firebase 
 ### 2. Server-Side Configuration (Backend API)
 
 **File:**
+
 - **Service Account JSON** (e.g., `firebase-service-account.json`)
 
 **Purpose:**
+
 - Used by your Node.js backend API
 - Allows the server to send push notifications
 - Admin credentials (more powerful than client config)
 - Used by Firebase Admin SDK
 
 **Where to get it:**
+
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
 3. Click the gear icon ⚙️ → **Project Settings**
@@ -57,10 +65,12 @@ This guide explains the difference between client-side and server-side Firebase 
 6. Download the JSON file (e.g., `firebase-service-account.json`)
 
 **Where to place it:**
+
 - Backend: `config/firebase-service-account.json` (or any secure location)
 - **IMPORTANT:** Add to `.gitignore` - never commit this file!
 
 **Used in:**
+
 - Backend API to send notifications
 - Firebase Admin SDK initialization
 - Server-side notification sending
@@ -124,6 +134,7 @@ This guide explains the difference between client-side and server-side Firebase 
 **CRITICAL:** The Service Account JSON has admin privileges. Never commit it to version control!
 
 Add to `.gitignore`:
+
 ```
 config/firebase-service-account.json
 *.json
@@ -136,6 +147,7 @@ config/firebase-service-account.json
 ## Environment Variables
 
 ### Backend (.env)
+
 ```env
 # Option 1: Path to service account file (recommended)
 FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
@@ -145,6 +157,7 @@ FIREBASE_SERVICE_ACCOUNT_PATH=./config/firebase-service-account.json
 ```
 
 ### React Native
+
 No environment variables needed for Firebase client config. The `google-services.json` file is enough.
 
 ---
@@ -172,28 +185,31 @@ Your Project/
 
 ## Quick Reference
 
-| Feature | Client Config | Service Account |
-|---------|--------------|-----------------|
-| **File Name** | `google-services.json` | `firebase-service-account.json` |
-| **Location** | React Native app | Backend API |
-| **Purpose** | Get tokens, receive notifications | Send notifications |
-| **Permissions** | Client (limited) | Admin (full) |
-| **Used By** | React Native Firebase | Firebase Admin SDK |
-| **Security** | Can be in app | Must be secret |
+| Feature         | Client Config                     | Service Account                 |
+| --------------- | --------------------------------- | ------------------------------- |
+| **File Name**   | `google-services.json`            | `firebase-service-account.json` |
+| **Location**    | React Native app                  | Backend API                     |
+| **Purpose**     | Get tokens, receive notifications | Send notifications              |
+| **Permissions** | Client (limited)                  | Admin (full)                    |
+| **Used By**     | React Native Firebase             | Firebase Admin SDK              |
+| **Security**    | Can be in app                     | Must be secret                  |
 
 ---
 
 ## Common Mistakes
 
 ❌ **Mistake 1:** Using `google-services.json` in backend
+
 - **Why it fails:** Client config doesn't have admin permissions
 - **Fix:** Use Service Account JSON instead
 
 ❌ **Mistake 2:** Committing Service Account JSON to Git
+
 - **Why it's dangerous:** Anyone with access can send notifications
 - **Fix:** Add to `.gitignore`
 
 ❌ **Mistake 3:** Using Service Account JSON in React Native
+
 - **Why it's wrong:** Service account is for server-side only
 - **Fix:** Use `google-services.json` in React Native
 
@@ -202,6 +218,7 @@ Your Project/
 ## Verification
 
 ### Verify Client Config (React Native)
+
 ```typescript
 import messaging from '@react-native-firebase/messaging';
 const token = await messaging().getToken();
@@ -209,6 +226,7 @@ console.log('FCM Token:', token); // Should work if config is correct
 ```
 
 ### Verify Service Account (Backend)
+
 ```javascript
 // In your backend, check if Firebase initializes
 import { initializeFirebase } from './services/firebaseService.js';
@@ -223,5 +241,6 @@ await initializeFirebase(); // Should log: ✅ Firebase Admin SDK initialized su
 - **Service Account JSON** = Server-side (Backend) - Send notifications, manage tokens
 
 **You need BOTH files:**
+
 1. Client config for your React Native app
 2. Service Account for your backend API

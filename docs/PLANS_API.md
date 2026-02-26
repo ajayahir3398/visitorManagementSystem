@@ -24,15 +24,15 @@ Authorization: Bearer <access_token>
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| GET | `/plans` | Get all active plans | Public |
-| GET | `/plans/:id` | Get plan by ID | Public |
-| GET | `/plans/all` | Get all plans (active & inactive) | SUPER_ADMIN |
-| POST | `/plans` | Create a new plan | SUPER_ADMIN |
-| PUT | `/plans/:id` | Update a plan | SUPER_ADMIN |
-| POST | `/plans/:id/toggle` | Toggle plan status | SUPER_ADMIN |
-| DELETE | `/plans/:id` | Delete a plan | SUPER_ADMIN |
+| Method | Endpoint            | Description                       | Required Role |
+| ------ | ------------------- | --------------------------------- | ------------- |
+| GET    | `/plans`            | Get all active plans              | Public        |
+| GET    | `/plans/:id`        | Get plan by ID                    | Public        |
+| GET    | `/plans/all`        | Get all plans (active & inactive) | SUPER_ADMIN   |
+| POST   | `/plans`            | Create a new plan                 | SUPER_ADMIN   |
+| PUT    | `/plans/:id`        | Update a plan                     | SUPER_ADMIN   |
+| POST   | `/plans/:id/toggle` | Toggle plan status                | SUPER_ADMIN   |
+| DELETE | `/plans/:id`        | Delete a plan                     | SUPER_ADMIN   |
 
 ---
 
@@ -97,7 +97,7 @@ import apiClient from '../services/apiClient'; // Or use fetch directly if publi
 const getPublicPlans = async () => {
   try {
     const response = await apiClient.get('/plans');
-    
+
     if (response.data.success) {
       return response.data.data.plans;
     } else {
@@ -128,9 +128,9 @@ GET /api/v1/plans/:id
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Plan ID |
+| Parameter | Type    | Required | Description |
+| --------- | ------- | -------- | ----------- |
+| `id`      | integer | Yes      | Plan ID     |
 
 ### Success Response (200)
 
@@ -191,16 +191,16 @@ POST /api/v1/plans
 
 ### Field Descriptions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `code` | string | Yes | Unique plan code (1-20 chars) |
-| `name` | string | Yes | Display name (1-50 chars) |
-| `price` | integer | Yes | Price (>= 0) |
-| `durationMonths` | integer | Yes | Duration in months (>= 1) |
-| `billingCycle` | string | Yes | `MONTHLY` or `YEARLY` |
-| `visitorLimit` | integer | No | Max visitors allowed (null for unlimited) |
-| `features` | object | No | JSON object for feature flags/limits |
-| `isActive` | boolean | No | Default: `true` |
+| Field            | Type    | Required | Description                               |
+| ---------------- | ------- | -------- | ----------------------------------------- |
+| `code`           | string  | Yes      | Unique plan code (1-20 chars)             |
+| `name`           | string  | Yes      | Display name (1-50 chars)                 |
+| `price`          | integer | Yes      | Price (>= 0)                              |
+| `durationMonths` | integer | Yes      | Duration in months (>= 1)                 |
+| `billingCycle`   | string  | Yes      | `MONTHLY` or `YEARLY`                     |
+| `visitorLimit`   | integer | No       | Max visitors allowed (null for unlimited) |
+| `features`       | object  | No       | JSON object for feature flags/limits      |
+| `isActive`       | boolean | No       | Default: `true`                           |
 
 ### Success Response (201)
 

@@ -1,12 +1,14 @@
 # Login System Documentation & Implementation Guide
 
 ## Overview
+
 This document outlines the authentication mechanisms for the Visitor Management System and provides a guide for implementing the login flow in the React Native mobile application.
 
 ## Authentication Types
+
 The system supports two types of authentication based on user roles:
 
-1.  **Password Login**: 
+1.  **Password Login**:
     - **Target Users**: System Administrators (`SUPER_ADMIN`, `SOCIETY_ADMIN`).
     - **Method**: Email/Mobile + Password.
     - **Security**: Restricted to admin roles.
@@ -21,6 +23,7 @@ The system supports two types of authentication based on user roles:
 ## API Endpoints (`/api/v1/auth`)
 
 ### 1. Request OTP (Mobile Users)
+
 Initiates the login process for Residents/Security.
 
 - **Endpoint**: `POST /auth/otp`
@@ -44,6 +47,7 @@ Initiates the login process for Residents/Security.
   ```
 
 ### 2. Verify OTP & Login
+
 Completes authentication for Residents/Security.
 
 - **Endpoint**: `POST /auth/verify-otp`
@@ -73,6 +77,7 @@ Completes authentication for Residents/Security.
   ```
 
 ### 3. Admin Login (Password)
+
 Direct login for Administrators.
 
 - **Endpoint**: `POST /auth/login`
@@ -86,6 +91,7 @@ Direct login for Administrators.
 - **Response**: Similar to OTP Login (returns user + tokens).
 
 ### 4. Refresh Token
+
 Get a new access token when the old one expires.
 
 - **Endpoint**: `POST /auth/refresh-token`
@@ -97,6 +103,7 @@ Get a new access token when the old one expires.
   ```
 
 ### 5. Logout
+
 Invalidate the user's session.
 
 - **Endpoint**: `POST /auth/logout`
@@ -115,6 +122,7 @@ Invalidate the user's session.
 ### 1. User Flows
 
 #### Resident/Security Login (OTP Flow)
+
 ```mermaid
 sequenceDiagram
     participant User
@@ -133,6 +141,7 @@ sequenceDiagram
 ```
 
 #### Admin Login (Password Flow)
+
 ```mermaid
 sequenceDiagram
     participant Admin
@@ -182,11 +191,11 @@ export const verifyOtp = async (mobile, otp) => {
   try {
     const response = await axios.post(`${API_URL}/verify-otp`, { mobile, otp });
     const { accessToken, refreshToken, user } = response.data.data;
-    
+
     // Store tokens securely
     await SecureStore.setItemAsync('accessToken', accessToken);
     await SecureStore.setItemAsync('refreshToken', refreshToken);
-    
+
     return user;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -197,10 +206,10 @@ export const loginAdmin = async (email, password) => {
   try {
     const response = await axios.post(`${API_URL}/login`, { email, password });
     const { accessToken, refreshToken, user } = response.data.data;
-    
+
     await SecureStore.setItemAsync('accessToken', accessToken);
     await SecureStore.setItemAsync('refreshToken', refreshToken);
-    
+
     return user;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -209,12 +218,14 @@ export const loginAdmin = async (email, password) => {
 ```
 
 ### 4. Recommended Dependencies
+
 - `axios`: For API requests.
 - `expo-secure-store` or `react-native-keychain`: For storing sensitive tokens.
 - `@react-navigation/native`: For screen navigation.
 - `react-hook-form`: (Optional) For form management.
 
 ### 5. Error Handling Notes
+
 - **Admin attempting OTP**: API returns 403. Handle this by showing "Admins must use Password Login".
 - **Resident attempting Password**: API returns 403. Handle by showing "Please use OTP Login".
 - **Account Blocked**: API returns 403. Show "Contact Administrator".

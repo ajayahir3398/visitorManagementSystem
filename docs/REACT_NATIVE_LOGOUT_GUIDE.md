@@ -24,6 +24,7 @@ The logout system provides two options:
 2. **Logout from All Devices** - Logs out from all devices/sessions
 
 Both methods:
+
 - ✅ Invalidate refresh tokens on the server
 - ✅ Clear tokens from local storage
 - ✅ Log actions in audit logs
@@ -38,11 +39,13 @@ Both methods:
 **Endpoint:** `POST /api/v1/auth/logout`
 
 **Authentication Methods:**
+
 - **Method 1 (Recommended):** Access token in `Authorization` header
 - **Method 2 (Fallback):** Refresh token in request body
 - **Method 3:** Both (validates token ownership)
 
 **Request:**
+
 ```http
 POST /api/v1/auth/logout
 Authorization: Bearer <access_token>  (optional but recommended)
@@ -54,6 +57,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -68,12 +72,14 @@ Content-Type: application/json
 **Authentication:** Required (access token in header)
 
 **Request:**
+
 ```http
 POST /api/v1/auth/logout-all
 Authorization: Bearer <access_token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -459,31 +465,27 @@ import { authService } from '../services/authService';
 
 const LogoutButton = ({ navigation }) => {
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await authService.logout();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            });
+          } catch (error) {
+            Alert.alert('Error', 'Failed to logout');
+          }
         },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await authService.logout();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -568,58 +570,46 @@ import { authService } from '../services/authService';
 
 const SettingsScreen = ({ navigation }) => {
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await authService.logout();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await authService.logout();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+          });
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleLogoutAll = async () => {
-    Alert.alert(
-      'Logout from All Devices',
-      'This will log you out from all devices. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout All',
-          style: 'destructive',
-          onPress: async () => {
-            const result = await authService.logoutAll();
-            if (result.success) {
-              Alert.alert(
-                'Success',
-                `Logged out from ${result.sessionsInvalidated} device(s)`,
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'Login' }],
-                      });
-                    },
-                  },
-                ]
-              );
-            }
-          },
+    Alert.alert('Logout from All Devices', 'This will log you out from all devices. Continue?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout All',
+        style: 'destructive',
+        onPress: async () => {
+          const result = await authService.logoutAll();
+          if (result.success) {
+            Alert.alert('Success', `Logged out from ${result.sessionsInvalidated} device(s)`, [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Login' }],
+                  });
+                },
+              },
+            ]);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -631,9 +621,7 @@ const SettingsScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.button, styles.dangerButton]} onPress={handleLogoutAll}>
-        <Text style={[styles.buttonText, styles.dangerText]}>
-          Logout from All Devices
-        </Text>
+        <Text style={[styles.buttonText, styles.dangerText]}>Logout from All Devices</Text>
       </TouchableOpacity>
     </View>
   );
@@ -796,7 +784,7 @@ const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 const handleLogout = async () => {
   if (isLoggingOut) return; // Prevent multiple calls
-  
+
   setIsLoggingOut(true);
   try {
     await authService.logout();
@@ -814,14 +802,7 @@ const handleLogout = async () => {
 ```javascript
 // screens/ProfileScreen.js
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { authService } from '../services/authService';
 
 const ProfileScreen = ({ navigation }) => {
@@ -845,31 +826,27 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            try {
-              await authService.logout();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-            } finally {
-              setIsLoggingOut(false);
-            }
-          },
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          setIsLoggingOut(true);
+          try {
+            await authService.logout();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Login' }],
+            });
+          } catch (error) {
+            Alert.alert('Error', 'Failed to logout');
+          } finally {
+            setIsLoggingOut(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleLogoutAll = async () => {
@@ -886,21 +863,17 @@ const ProfileScreen = ({ navigation }) => {
             try {
               const result = await authService.logoutAll();
               if (result.success) {
-                Alert.alert(
-                  'Success',
-                  `Logged out from ${result.sessionsInvalidated} device(s)`,
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () => {
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: 'Login' }],
-                        });
-                      },
+                Alert.alert('Success', `Logged out from ${result.sessionsInvalidated} device(s)`, [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Login' }],
+                      });
                     },
-                  ]
-                );
+                  },
+                ]);
               }
             } catch (error) {
               Alert.alert('Error', 'Failed to logout from all devices');
@@ -1014,10 +987,10 @@ export default ProfileScreen;
 
 ## API Reference Summary
 
-| Endpoint | Method | Auth Required | Description |
-|----------|--------|---------------|-------------|
-| `/auth/logout` | POST | Optional | Logout from current device |
-| `/auth/logout-all` | POST | Yes | Logout from all devices |
+| Endpoint           | Method | Auth Required | Description                |
+| ------------------ | ------ | ------------- | -------------------------- |
+| `/auth/logout`     | POST   | Optional      | Logout from current device |
+| `/auth/logout-all` | POST   | Yes           | Logout from all devices    |
 
 ---
 
@@ -1041,4 +1014,3 @@ export default ProfileScreen;
 ---
 
 **Happy Coding! 🚀**
-
