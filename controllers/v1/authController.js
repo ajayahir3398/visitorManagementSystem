@@ -105,7 +105,7 @@ export const login = async (req, res) => {
       action: AUDIT_ACTIONS.LOGIN,
       entity: AUDIT_ENTITIES.USER,
       entityId: user.id,
-      description: `User logged in via password (${email || mobile})`,
+      description: `User logged in via password (${email})`,
       req,
     });
 
@@ -186,13 +186,14 @@ export const requestOTP = async (req, res) => {
     if (adminRoles.includes(user.role.name)) {
       return res.status(403).json({
         success: false,
-        message: 'OTP login is not available for administrator roles. Please use email and password login.',
+        message:
+          'OTP login is not available for administrator roles. Please use email and password login.',
       });
     }
 
     // Generate and store OTP
     const otpCode = generateOTP();
-    const otp = await storeOTP(mobile, otpCode, 10); // 10 minutes expiry
+    await storeOTP(mobile, otpCode, 10); // 10 minutes expiry
 
     // Log OTP sent action
     await logAction({
@@ -464,7 +465,7 @@ export const refreshToken = async (req, res) => {
  * Logout user (invalidate refresh token)
  * POST /auth/logout
  * Access: Authenticated users (via Bearer token) OR refreshToken in body
- * 
+ *
  * Supports two methods:
  * 1. Using access token in Authorization header (recommended)
  * 2. Using refreshToken in request body (fallback)
@@ -511,7 +512,7 @@ export const logout = async (req, res) => {
               message: 'Refresh token not found or already invalidated',
             });
           }
-        } catch (error) {
+        } catch {
           // Token is invalid, but we can still log the logout attempt
           // Don't fail - user might have already logged out
         }
@@ -529,7 +530,7 @@ export const logout = async (req, res) => {
       try {
         decoded = verifyRefreshToken(token);
         userId = decoded.userId;
-      } catch (error) {
+      } catch {
         return res.status(401).json({
           success: false,
           message: 'Invalid refresh token. Please provide a valid access token or refresh token.',
@@ -575,7 +576,8 @@ export const logout = async (req, res) => {
       // Neither access token nor refreshToken provided
       return res.status(400).json({
         success: false,
-        message: 'Either provide Authorization header with access token, or refreshToken in request body',
+        message:
+          'Either provide Authorization header with access token, or refreshToken in request body',
       });
     }
 
@@ -721,4 +723,3 @@ export const changePassword = async (req, res) => {
     });
   }
 };
-

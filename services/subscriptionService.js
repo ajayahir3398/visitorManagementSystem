@@ -96,49 +96,44 @@ export const updateSubscriptionStatus = async (subscription) => {
  * This should be called periodically (e.g., via cron job)
  */
 export const updateAllSubscriptionStatuses = async () => {
-  try {
-    // Get all subscriptions that are not SUSPENDED
-    const subscriptions = await prisma.subscription.findMany({
-      where: {
-        status: {
-          not: 'SUSPENDED', // Don't auto-update suspended subscriptions
-        },
-        expiryDate: {
-          not: null,
-        },
+  // Get all subscriptions that are not SUSPENDED
+  const subscriptions = await prisma.subscription.findMany({
+    where: {
+      status: {
+        not: 'SUSPENDED', // Don't auto-update suspended subscriptions
       },
-      include: {
-        plan: true,
+      expiryDate: {
+        not: null,
       },
-    });
+    },
+    include: {
+      plan: true,
+    },
+  });
 
-    let updatedCount = 0;
+  let updatedCount = 0;
 
-    for (const subscription of subscriptions) {
-      try {
-        const newStatus = calculateSubscriptionStatus(subscription);
+  for (const subscription of subscriptions) {
+    try {
+      const newStatus = calculateSubscriptionStatus(subscription);
 
-        if (newStatus !== subscription.status) {
-          await prisma.subscription.update({
-            where: { id: subscription.id },
-            data: { status: newStatus },
-          });
-          updatedCount++;
-        }
-      } catch (updateError) {
-        // Log individual update errors but continue with other subscriptions
-        console.error(`Error updating subscription ${subscription.id}:`, updateError.message);
+      if (newStatus !== subscription.status) {
+        await prisma.subscription.update({
+          where: { id: subscription.id },
+          data: { status: newStatus },
+        });
+        updatedCount++;
       }
+    } catch (updateError) {
+      // Log individual update errors but continue with other subscriptions
+      console.error(`Error updating subscription ${subscription.id}:`, updateError.message);
     }
-
-    return {
-      total: subscriptions.length,
-      updated: updatedCount,
-    };
-  } catch (error) {
-    // Re-throw to let caller handle (they'll check for connection errors)
-    throw error;
   }
+
+  return {
+    total: subscriptions.length,
+    updated: updatedCount,
+  };
 };
 
 /**
@@ -274,9 +269,12 @@ export const extendSubscription = async (subscriptionId, additionalDays) => {
       data: {
         expiryDate: newExpiryDate,
         // If subscription was LOCKED or GRACE, reactivate it
-        status: subscription.status === 'LOCKED' || subscription.status === 'GRACE'
-          ? (subscription.plan.name === 'TRIAL' ? 'TRIAL' : 'ACTIVE')
-          : subscription.status,
+        status:
+          subscription.status === 'LOCKED' || subscription.status === 'GRACE'
+            ? subscription.plan.name === 'TRIAL'
+              ? 'TRIAL'
+              : 'ACTIVE'
+            : subscription.status,
       },
       include: {
         plan: true,
@@ -329,11 +327,11 @@ export const checkSubscriptionExpiryAndNotify = async () => {
     const subscriptions = await prisma.subscription.findMany({
       where: {
         status: { in: ['ACTIVE', 'TRIAL', 'GRACE'] },
-        expiryDate: { not: null }
+        expiryDate: { not: null },
       },
       include: {
-        society: true
-      }
+        society: true,
+      },
     });
 
     for (const subscription of subscriptions) {
@@ -359,8 +357,7 @@ export const checkSubscriptionExpiryAndNotify = async () => {
       else if (daysUntilExpiry === 0) {
         notificationTitle = 'Subscription Expires Today';
         notificationBody = `Your society's subscription expires today. Please renew immediately.`;
-      }
-      else if (daysUntilExpiry === -1) {
+      } else if (daysUntilExpiry === -1) {
         notificationTitle = 'Subscription Expired';
         notificationBody = `Your society's subscription has expired. You may be in a grace period. Please renew now.`;
       }
@@ -375,36 +372,34 @@ export const checkSubscriptionExpiryAndNotify = async () => {
           where: {
             societyId: subscription.societyId,
             role: { name: 'SOCIETY_ADMIN' },
-            status: 'active'
+            status: 'active',
           },
-          select: { id: true }
+          select: { id: true },
         });
 
-        const adminIds = admins.map(a => a.id);
+        const adminIds = admins.map((a) => a.id);
 
         if (adminIds.length > 0) {
-          console.log(`🔔 Sending subscription alert to ${adminIds.length} admins of society ${subscription.society.name} (Days: ${daysUntilExpiry})`);
+          console.log(
+            `🔔 Sending subscription alert to ${adminIds.length} admins of society ${subscription.society.name} (Days: ${daysUntilExpiry})`
+          );
           try {
-            await sendNotificationToUsers(
-              adminIds,
-              notificationTitle,
-              notificationBody,
-              {
-                type: 'subscription_alert',
-                subscriptionId: subscription.id.toString(),
-                daysRemaining: daysUntilExpiry.toString()
-              }
-            );
+            await sendNotificationToUsers(adminIds, notificationTitle, notificationBody, {
+              type: 'subscription_alert',
+              subscriptionId: subscription.id.toString(),
+              daysRemaining: daysUntilExpiry.toString(),
+            });
           } catch (notifError) {
-            console.error(`Failed to send subscription alert for society ${subscription.societyId}:`, notifError);
+            console.error(
+              `Failed to send subscription alert for society ${subscription.societyId}:`,
+              notifError
+            );
           }
         }
       }
     }
     console.log('--- Subscription Expiry Check Completed ---');
-
   } catch (error) {
     console.error('Error in checkSubscriptionExpiryAndNotify:', error);
   }
 };
-
