@@ -1,4 +1,3 @@
-
 // verify-bulk-upload.js
 import fs from 'fs';
 import axios from 'axios';
@@ -10,25 +9,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function testUpload() {
-    const form = new FormData();
-    form.append('file', fs.createReadStream('test_residents.csv'));
+  const form = new FormData();
+  form.append('file', fs.createReadStream('test_residents.csv'));
 
-    try {
-        // NOTE: This assumes you have a valid token. 
-        // For this test script to work without manual token input, we would need to login first.
-        // However, since we can't easily do full login flow here without credentials, 
-        // We should focus on unit testing or manual testing using Postman/Swagger.
-        // BUT, for the sake of this agent task, I will rely on the unit test logic (mocking req/res) or 
-        // Assume the user will test it via Swagger UI.
-        // 
-        // Alternatively, I can write a small script that imports the controller directly 
-        // and mocks the request/response objects. This bypasses authentication but tests the logic.
+  try {
+    // NOTE: This assumes you have a valid token.
+    // For this test script to work without manual token input, we would need to login first.
+    // However, since we can't easily do full login flow here without credentials,
+    // We should focus on unit testing or manual testing using Postman/Swagger.
+    // BUT, for the sake of this agent task, I will rely on the unit test logic (mocking req/res) or
+    // Assume the user will test it via Swagger UI.
+    //
+    // Alternatively, I can write a small script that imports the controller directly
+    // and mocks the request/response objects. This bypasses authentication but tests the logic.
 
-        console.log("To verify, please use Swagger UI or Postman with the created CSV file.");
-
-    } catch (error) {
-        console.error(error.response?.data || error.message);
-    }
+    console.log('To verify, please use Swagger UI or Postman with the created CSV file.');
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+  }
 }
 
 // Mock test directly calling controller logic (skipping auth/route)

@@ -86,7 +86,7 @@ export const approveVisitor = async (req, res) => {
       });
 
       const hasMatchingUnit = userUnits.some(
-        um => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
+        (um) => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
       );
 
       if (!hasMatchingUnit) {
@@ -203,7 +203,9 @@ export const approveVisitor = async (req, res) => {
         const residentName = req.user.name || 'Resident';
         const securityUserId = updatedLog.createdBy;
 
-        console.log(`🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+        console.log(
+          `🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`
+        );
         const notifResult = await sendNotificationToUser(
           securityUserId,
           'Visitor Approved',
@@ -214,7 +216,10 @@ export const approveVisitor = async (req, res) => {
             type: 'visitor_approved',
           }
         );
-        console.log(`📨 [Approval] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
+        console.log(
+          `📨 [Approval] Notification result for security userId ${securityUserId}:`,
+          JSON.stringify(notifResult)
+        );
       } catch (notificationError) {
         // Don't fail the request if notification fails
         console.error('❌ [Approval] Error sending notification to security:', notificationError);
@@ -321,7 +326,9 @@ export const approveVisitor = async (req, res) => {
       const residentName = req.user.name || 'Resident';
       const securityUserId = updatedLog.createdBy;
 
-      console.log(`🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+      console.log(
+        `🔔 [Approval] Sending approval notification to security userId: ${securityUserId} (visitor: ${visitorName})`
+      );
       const notifResult = await sendNotificationToUser(
         securityUserId,
         'Visitor Approved',
@@ -332,7 +339,10 @@ export const approveVisitor = async (req, res) => {
           type: 'visitor_approved',
         }
       );
-      console.log(`📨 [Approval] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
+      console.log(
+        `📨 [Approval] Notification result for security userId ${securityUserId}:`,
+        JSON.stringify(notifResult)
+      );
     } catch (notificationError) {
       // Don't fail the request if notification fails
       console.error('❌ [Approval] Error sending notification to security:', notificationError);
@@ -439,7 +449,7 @@ export const rejectVisitor = async (req, res) => {
       });
 
       const hasMatchingUnit = userUnits.some(
-        um => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
+        (um) => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
       );
 
       if (!hasMatchingUnit) {
@@ -559,7 +569,9 @@ export const rejectVisitor = async (req, res) => {
         const residentName = req.user.name || 'Resident';
         const securityUserId = updatedLog.createdBy;
 
-        console.log(`🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+        console.log(
+          `🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`
+        );
         const notifResult = await sendNotificationToUser(
           securityUserId,
           'Visitor Rejected',
@@ -570,7 +582,10 @@ export const rejectVisitor = async (req, res) => {
             type: 'visitor_rejected',
           }
         );
-        console.log(`📨 [Rejection] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
+        console.log(
+          `📨 [Rejection] Notification result for security userId ${securityUserId}:`,
+          JSON.stringify(notifResult)
+        );
       } catch (notificationError) {
         // Don't fail the request if notification fails
         console.error('❌ [Rejection] Error sending notification to security:', notificationError);
@@ -674,7 +689,9 @@ export const rejectVisitor = async (req, res) => {
       const residentName = req.user.name || 'Resident';
       const securityUserId = updatedLog.createdBy;
 
-      console.log(`🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`);
+      console.log(
+        `🔔 [Rejection] Sending rejection notification to security userId: ${securityUserId} (visitor: ${visitorName})`
+      );
       const notifResult = await sendNotificationToUser(
         securityUserId,
         'Visitor Rejected',
@@ -685,7 +702,10 @@ export const rejectVisitor = async (req, res) => {
           type: 'visitor_rejected',
         }
       );
-      console.log(`📨 [Rejection] Notification result for security userId ${securityUserId}:`, JSON.stringify(notifResult));
+      console.log(
+        `📨 [Rejection] Notification result for security userId ${securityUserId}:`,
+        JSON.stringify(notifResult)
+      );
     } catch (notificationError) {
       // Don't fail the request if notification fails
       console.error('❌ [Rejection] Error sending notification to security:', notificationError);
@@ -734,7 +754,7 @@ export const getPendingApprovals = async (req, res) => {
       },
     });
 
-    const unitIds = userUnits.map(um => um.unitId);
+    const unitIds = userUnits.map((um) => um.unitId);
 
     if (unitIds.length === 0) {
       return res.json({
