@@ -61,11 +61,13 @@ npm run db:init
 ```
 
 This will:
+
 - Generate Prisma Client
 - Run database migrations to create all tables
 - Seed `roles` table with: SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT
 
 **Alternative commands:**
+
 - `npm run db:migrate` - Run migrations only
 - `npm run db:generate` - Generate Prisma Client
 - `npm run db:seed` - Seed database only
@@ -74,11 +76,13 @@ This will:
 ### 4. Start the Server
 
 Development mode (with auto-reload):
+
 ```bash
 npm run dev
 ```
 
 Production mode:
+
 ```bash
 npm start
 ```
@@ -88,11 +92,13 @@ Server will run on `http://localhost:1111` (or your configured PORT)
 ### 5. Access API Documentation
 
 Once the server is running, access Swagger UI at:
+
 ```
 http://localhost:1111/api-docs
 ```
 
 The Swagger documentation provides:
+
 - Interactive API testing
 - Request/response schemas
 - Authentication examples
@@ -116,6 +122,7 @@ For React Native developers, comprehensive API documentation is available:
 ### Authentication
 
 #### 1. Login (Password-based - for Admins)
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -127,6 +134,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -148,6 +156,7 @@ Content-Type: application/json
 ```
 
 #### 2. Request OTP
+
 ```http
 POST /auth/otp
 Content-Type: application/json
@@ -158,19 +167,21 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "message": "OTP sent successfully",
   "data": {
     "mobile": "1234567890",
-    "otp": "123456",  // Only in development mode
+    "otp": "123456", // Only in development mode
     "expiresIn": "10 minutes"
   }
 }
 ```
 
 #### 3. Verify OTP and Login
+
 ```http
 POST /auth/verify-otp
 Content-Type: application/json
@@ -182,6 +193,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -202,6 +214,7 @@ Content-Type: application/json
 ```
 
 #### 4. Refresh Access Token
+
 ```http
 POST /auth/refresh-token
 Content-Type: application/json
@@ -212,6 +225,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -232,6 +246,7 @@ Content-Type: application/json
 ## Database Schema
 
 ### Users Table
+
 - `id` (PK)
 - `society_id` (FK, nullable)
 - `name`
@@ -244,6 +259,7 @@ Content-Type: application/json
 - `updated_at`
 
 ### Roles Table
+
 - `id` (PK)
 - `name` (SUPER_ADMIN, SOCIETY_ADMIN, SECURITY, RESIDENT)
 - `created_at`
@@ -312,4 +328,3 @@ visitor-api/
 - [ ] Add logging and monitoring
 - [ ] Add rate limiting
 - [ ] Add API documentation (Swagger/OpenAPI)
-

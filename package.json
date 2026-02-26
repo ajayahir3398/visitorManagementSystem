@@ -8,6 +8,8 @@
     "dev": "nodemon server.js",
     "debug": "node --inspect server.js",
     "dev:debug": "nodemon --exec \"node --inspect\" server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
     "db:push": "prisma db push --accept-data-loss",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
@@ -19,7 +21,8 @@
     "db:add-fcm-tokens": "node scripts/addFcmTokensTable.js",
     "create:superadmin": "node scripts/createSuperAdmin.js",
     "create:superadmin:quick": "node scripts/createSuperAdminQuick.js",
-    "fix:sequences": "node scripts/fixSequences.js"
+    "fix:sequences": "node scripts/fixSequences.js",
+    "prepare": "husky"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -38,9 +41,11 @@
     "csv-parser": "^3.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "express-validator": "^7.3.1",
     "firebase-admin": "^13.6.0",
     "form-data": "^4.0.5",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "node-cron": "^4.2.1",
@@ -51,6 +56,12 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "nodemon": "^3.1.11",
+    "prettier": "^3.8.1"
   }
 }

@@ -5,8 +5,16 @@ import swaggerUi from 'swagger-ui-express';
 import apiRoutes from './routes/index.js';
 import swaggerSpec from './swagger/index.js';
 import { healthCheck } from './controllers/v1/healthController.js';
+import helmet from 'helmet';
 
 const app = express();
+
+// Security Middleware
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Disabled to ensure Swagger UI works
+  })
+);
 
 // Middleware
 app.use(cors());
@@ -15,10 +23,14 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Swagger Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Visitor Management API Documentation',
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Visitor Management API Documentation',
+  })
+);
 
 // Health check (version-independent)
 app.get('/health', (req, res) => {
