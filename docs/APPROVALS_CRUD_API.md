@@ -26,11 +26,11 @@ See [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md) for authenticat
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Required Role |
-|--------|----------|-------------|---------------|
-| GET | `/approvals/pending` | Get pending visitor entries waiting for approval | RESIDENT |
-| POST | `/approvals/visitor-logs/:id/approve` | Approve a visitor entry | RESIDENT |
-| POST | `/approvals/visitor-logs/:id/reject` | Reject a visitor entry | RESIDENT |
+| Method | Endpoint                              | Description                                      | Required Role |
+| ------ | ------------------------------------- | ------------------------------------------------ | ------------- |
+| GET    | `/approvals/pending`                  | Get pending visitor entries waiting for approval | RESIDENT      |
+| POST   | `/approvals/visitor-logs/:id/approve` | Approve a visitor entry                          | RESIDENT      |
+| POST   | `/approvals/visitor-logs/:id/reject`  | Reject a visitor entry                           | RESIDENT      |
 
 ---
 
@@ -51,10 +51,10 @@ GET /api/v1/approvals/pending
 
 ### Query Parameters
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `page` | integer | No | 1 | Page number for pagination |
-| `limit` | integer | No | 10 | Number of items per page |
+| Parameter | Type    | Required | Default | Description                |
+| --------- | ------- | -------- | ------- | -------------------------- |
+| `page`    | integer | No       | 1       | Page number for pagination |
+| `limit`   | integer | No       | 10      | Number of items per page   |
 
 ### Success Response (200)
 
@@ -113,18 +113,18 @@ GET /api/v1/approvals/pending
 
 ### Response Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `visitorLogs` | array | Array of pending visitor log entries |
-| `visitorLogs[].id` | integer | Visitor log ID |
-| `visitorLogs[].status` | string | Status: "pending" |
-| `visitorLogs[].visitor` | object | Visitor information (id, name, mobile, photoBase64) |
-| `visitorLogs[].unit` | object | Unit information (id, unitNo, unitType) |
-| `visitorLogs[].gate` | object | Gate information (id, name) |
-| `visitorLogs[].purpose` | string | Purpose of visit |
-| `visitorLogs[].entryTime` | string (ISO 8601) | Entry time |
-| `visitorLogs[]._count.approvals` | integer | Number of approvals for this log |
-| `pagination` | object | Pagination information |
+| Field                            | Type              | Description                                         |
+| -------------------------------- | ----------------- | --------------------------------------------------- |
+| `visitorLogs`                    | array             | Array of pending visitor log entries                |
+| `visitorLogs[].id`               | integer           | Visitor log ID                                      |
+| `visitorLogs[].status`           | string            | Status: "pending"                                   |
+| `visitorLogs[].visitor`          | object            | Visitor information (id, name, mobile, photoBase64) |
+| `visitorLogs[].unit`             | object            | Unit information (id, unitNo, unitType)             |
+| `visitorLogs[].gate`             | object            | Gate information (id, name)                         |
+| `visitorLogs[].purpose`          | string            | Purpose of visit                                    |
+| `visitorLogs[].entryTime`        | string (ISO 8601) | Entry time                                          |
+| `visitorLogs[]._count.approvals` | integer           | Number of approvals for this log                    |
+| `pagination`                     | object            | Pagination information                              |
 
 ### Empty Response (200) - No Units
 
@@ -149,6 +149,7 @@ If the resident is not a member of any units:
 ### Error Responses
 
 **401 Unauthorized** - Missing or invalid token
+
 ```json
 {
   "success": false,
@@ -157,6 +158,7 @@ If the resident is not a member of any units:
 ```
 
 **403 Forbidden** - Not a RESIDENT role
+
 ```json
 {
   "success": false,
@@ -165,6 +167,7 @@ If the resident is not a member of any units:
 ```
 
 **500 Internal Server Error**
+
 ```json
 {
   "success": false,
@@ -192,9 +195,9 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor log ID |
+| Parameter | Type    | Required | Description    |
+| --------- | ------- | -------- | -------------- |
+| `id`      | integer | Yes      | Visitor log ID |
 
 ### Success Response (200)
 
@@ -264,16 +267,17 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 
 ### Response Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `visitorLog` | object | Updated visitor log with status "approved" |
-| `visitorLog.status` | string | Status: "approved" |
-| `visitorLog.approvals` | array | Array of approval records (ordered by decisionTime desc) |
-| `approval` | object | The approval record created/updated by this request |
+| Field                  | Type   | Description                                              |
+| ---------------------- | ------ | -------------------------------------------------------- |
+| `visitorLog`           | object | Updated visitor log with status "approved"               |
+| `visitorLog.status`    | string | Status: "approved"                                       |
+| `visitorLog.approvals` | array  | Array of approval records (ordered by decisionTime desc) |
+| `approval`             | object | The approval record created/updated by this request      |
 
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor log ID
+
 ```json
 {
   "success": false,
@@ -282,39 +286,49 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **400 Bad Request** - Visitor already approved
+
 ```json
 {
   "success": false,
   "message": "Visitor entry is already approved",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - Visitor already rejected
+
 ```json
 {
   "success": false,
   "message": "Visitor entry is already rejected",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - Visitor already exited
+
 ```json
 {
   "success": false,
   "message": "Visitor has already exited. Cannot approve/reject.",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - No valid unit or flat number
+
 ```json
 {
   "success": false,
@@ -323,6 +337,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **401 Unauthorized** - Missing or invalid token
+
 ```json
 {
   "success": false,
@@ -331,6 +346,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **403 Forbidden** - Not a RESIDENT role
+
 ```json
 {
   "success": false,
@@ -339,6 +355,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **403 Forbidden** - Not a member of the unit
+
 ```json
 {
   "success": false,
@@ -347,6 +364,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **403 Forbidden** - Visitor log belongs to different society
+
 ```json
 {
   "success": false,
@@ -355,6 +373,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **404 Not Found** - Visitor log not found
+
 ```json
 {
   "success": false,
@@ -363,6 +382,7 @@ POST /api/v1/approvals/visitor-logs/:id/approve
 ```
 
 **500 Internal Server Error**
+
 ```json
 {
   "success": false,
@@ -390,9 +410,9 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 
 ### Path Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | integer | Yes | Visitor log ID |
+| Parameter | Type    | Required | Description    |
+| --------- | ------- | -------- | -------------- |
+| `id`      | integer | Yes      | Visitor log ID |
 
 ### Success Response (200)
 
@@ -462,16 +482,17 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 
 ### Response Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `visitorLog` | object | Updated visitor log with status "rejected" |
-| `visitorLog.status` | string | Status: "rejected" |
-| `visitorLog.approvals` | array | Array of approval records (ordered by decisionTime desc) |
-| `approval` | object | The approval record created/updated by this request |
+| Field                  | Type   | Description                                              |
+| ---------------------- | ------ | -------------------------------------------------------- |
+| `visitorLog`           | object | Updated visitor log with status "rejected"               |
+| `visitorLog.status`    | string | Status: "rejected"                                       |
+| `visitorLog.approvals` | array  | Array of approval records (ordered by decisionTime desc) |
+| `approval`             | object | The approval record created/updated by this request      |
 
 ### Error Responses
 
 **400 Bad Request** - Invalid visitor log ID
+
 ```json
 {
   "success": false,
@@ -480,39 +501,49 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **400 Bad Request** - Visitor already approved
+
 ```json
 {
   "success": false,
   "message": "Visitor entry is already approved",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - Visitor already rejected
+
 ```json
 {
   "success": false,
   "message": "Visitor entry is already rejected",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - Visitor already exited
+
 ```json
 {
   "success": false,
   "message": "Visitor has already exited. Cannot approve/reject.",
   "data": {
-    "visitorLog": { /* visitor log object */ }
+    "visitorLog": {
+      /* visitor log object */
+    }
   }
 }
 ```
 
 **400 Bad Request** - No valid unit or flat number
+
 ```json
 {
   "success": false,
@@ -521,6 +552,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **401 Unauthorized** - Missing or invalid token
+
 ```json
 {
   "success": false,
@@ -529,6 +561,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **403 Forbidden** - Not a RESIDENT role
+
 ```json
 {
   "success": false,
@@ -537,6 +570,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **403 Forbidden** - Not a member of the unit
+
 ```json
 {
   "success": false,
@@ -545,6 +579,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **403 Forbidden** - Visitor log belongs to different society
+
 ```json
 {
   "success": false,
@@ -553,6 +588,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **404 Not Found** - Visitor log not found
+
 ```json
 {
   "success": false,
@@ -561,6 +597,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ```
 
 **500 Internal Server Error**
+
 ```json
 {
   "success": false,
@@ -576,6 +613,7 @@ POST /api/v1/approvals/visitor-logs/:id/reject
 ### Setup
 
 1. Install required dependencies (if not already installed):
+
 ```bash
 npm install axios
 # or
@@ -657,7 +695,9 @@ const approvalService = {
         if (status === 401) {
           throw new Error('Session expired. Please login again.');
         } else if (status === 403) {
-          throw new Error(data.message || 'Access denied. You can only approve visitors for your units.');
+          throw new Error(
+            data.message || 'Access denied. You can only approve visitors for your units.'
+          );
         } else if (status === 400) {
           throw new Error(data.message || 'Cannot approve this visitor entry.');
         } else if (status === 404) {
@@ -696,7 +736,9 @@ const approvalService = {
         if (status === 401) {
           throw new Error('Session expired. Please login again.');
         } else if (status === 403) {
-          throw new Error(data.message || 'Access denied. You can only reject visitors for your units.');
+          throw new Error(
+            data.message || 'Access denied. You can only reject visitors for your units.'
+          );
         } else if (status === 400) {
           throw new Error(data.message || 'Cannot reject this visitor entry.');
         } else if (status === 404) {
@@ -750,11 +792,11 @@ const PendingApprovalsScreen = () => {
       }
 
       const result = await approvalService.getPendingApprovals(pageNum, 10);
-      
+
       if (refresh || pageNum === 1) {
         setPendingApprovals(result.visitorLogs);
       } else {
-        setPendingApprovals(prev => [...prev, ...result.visitorLogs]);
+        setPendingApprovals((prev) => [...prev, ...result.visitorLogs]);
       }
 
       setPagination(result.pagination);
@@ -769,50 +811,42 @@ const PendingApprovalsScreen = () => {
   };
 
   const handleApprove = async (visitorLogId) => {
-    Alert.alert(
-      'Approve Visitor',
-      'Are you sure you want to approve this visitor entry?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Approve',
-          onPress: async () => {
-            try {
-              await approvalService.approveVisitor(visitorLogId);
-              Alert.alert('Success', 'Visitor entry approved successfully');
-              // Refresh the list
-              loadPendingApprovals(1, true);
-            } catch (error) {
-              Alert.alert('Error', error.message);
-            }
-          },
+    Alert.alert('Approve Visitor', 'Are you sure you want to approve this visitor entry?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Approve',
+        onPress: async () => {
+          try {
+            await approvalService.approveVisitor(visitorLogId);
+            Alert.alert('Success', 'Visitor entry approved successfully');
+            // Refresh the list
+            loadPendingApprovals(1, true);
+          } catch (error) {
+            Alert.alert('Error', error.message);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleReject = async (visitorLogId) => {
-    Alert.alert(
-      'Reject Visitor',
-      'Are you sure you want to reject this visitor entry?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reject',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await approvalService.rejectVisitor(visitorLogId);
-              Alert.alert('Success', 'Visitor entry rejected successfully');
-              // Refresh the list
-              loadPendingApprovals(1, true);
-            } catch (error) {
-              Alert.alert('Error', error.message);
-            }
-          },
+    Alert.alert('Reject Visitor', 'Are you sure you want to reject this visitor entry?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reject',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await approvalService.rejectVisitor(visitorLogId);
+            Alert.alert('Success', 'Visitor entry rejected successfully');
+            // Refresh the list
+            loadPendingApprovals(1, true);
+          } catch (error) {
+            Alert.alert('Error', error.message);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const loadMore = () => {
@@ -832,9 +866,7 @@ const PendingApprovalsScreen = () => {
         <Text style={styles.visitorMobile}>{item.visitor.mobile}</Text>
         <Text style={styles.unitInfo}>Unit: {item.unit.unitNo}</Text>
         <Text style={styles.purpose}>Purpose: {item.purpose || 'N/A'}</Text>
-        <Text style={styles.entryTime}>
-          Entry: {new Date(item.entryTime).toLocaleString()}
-        </Text>
+        <Text style={styles.entryTime}>Entry: {new Date(item.entryTime).toLocaleString()}</Text>
       </View>
       <View style={styles.actions}>
         <TouchableOpacity
@@ -866,12 +898,10 @@ const PendingApprovalsScreen = () => {
       <FlatList
         data={pendingApprovals}
         renderItem={renderApprovalItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListEmptyComponent={
           <View style={styles.center}>
             <Text style={styles.emptyText}>No pending approvals</Text>
@@ -1012,11 +1042,11 @@ const rejectVisitor = async (visitorLogId) => {
 
 ## Role-Based Access Summary
 
-| Operation | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT |
-|-----------|-------------|---------------|----------|----------|
-| Get Pending Approvals | ❌ | ❌ | ❌ | ✅ (own units only) |
-| Approve Visitor | ❌ | ❌ | ❌ | ✅ (own units only) |
-| Reject Visitor | ❌ | ❌ | ❌ | ✅ (own units only) |
+| Operation             | SUPER_ADMIN | SOCIETY_ADMIN | SECURITY | RESIDENT            |
+| --------------------- | ----------- | ------------- | -------- | ------------------- |
+| Get Pending Approvals | ❌          | ❌            | ❌       | ✅ (own units only) |
+| Approve Visitor       | ❌          | ❌            | ❌       | ✅ (own units only) |
+| Reject Visitor        | ❌          | ❌            | ❌       | ✅ (own units only) |
 
 ---
 
@@ -1128,4 +1158,3 @@ You can test all endpoints using Swagger UI:
 - **API Base URL**: `http://localhost:1111/api/v1`
 - **Authentication Docs**: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - **React Native Setup**: [REACT_NATIVE_QUICK_START.md](./REACT_NATIVE_QUICK_START.md)
-

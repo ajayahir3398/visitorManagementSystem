@@ -37,11 +37,12 @@ npm run db:seed       # Seed the database
 ## Troubleshooting
 
 ### Error: "permission denied to create database"
+
 - Use `db push` instead of `migrate`
 - Or configure a shadow database URL in `prisma.config.ts`
 
 ### Error: "Can't reach database server"
+
 - Check your `DATABASE_URL` in `.env`
 - Verify database server is running
 - Check firewall/network settings
-

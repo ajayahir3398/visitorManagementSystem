@@ -11,6 +11,7 @@ This guide provides code examples and best practices for implementing the "Chang
 - **Role Required**: Any authenticated user.
 
 ### Request Body
+
 ```json
 {
   "currentPassword": "old_password_here",
@@ -31,9 +32,10 @@ const API_URL = 'http://your-api-domain.com/api/v1';
 export const changeUserPassword = async (currentPassword, newPassword) => {
   try {
     const token = await AsyncStorage.getItem('accessToken');
-    
-    const response = await axios.put(`${API_URL}/auth/change-password`, 
-      { currentPassword, newPassword }, 
+
+    const response = await axios.put(
+      `${API_URL}/auth/change-password`,
+      { currentPassword, newPassword },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -126,7 +128,7 @@ const ChangePasswordScreen = ({ navigation }) => {
       />
 
       <Button
-        title={loading ? "Updating..." : "Update Password"}
+        title={loading ? 'Updating...' : 'Update Password'}
         onPress={handleSubmit}
         disabled={loading}
       />
@@ -137,7 +139,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { padding: 20 },
   label: { marginBottom: 5 },
-  input: { borderBottomWidth: 1, marginBottom: 20, padding: 5 }
+  input: { borderBottomWidth: 1, marginBottom: 20, padding: 5 },
 });
 
 export default ChangePasswordScreen;

@@ -12,16 +12,20 @@ This document provides comprehensive API documentation for the Authentication en
 ## Base Configuration
 
 ### Base URL
+
 ```
 Development: http://localhost:1111
 Production: https://your-api-domain.com
 ```
 
 ### API Version
+
 All authentication endpoints are under `/api/v1/auth`
 
 ### Headers
+
 All requests should include:
+
 ```json
 {
   "Content-Type": "application/json"
@@ -29,6 +33,7 @@ All requests should include:
 ```
 
 For authenticated requests, include:
+
 ```json
 {
   "Authorization": "Bearer <access_token>"
@@ -46,20 +51,23 @@ For authenticated requests, include:
 **Description:** Login for admin users (`SUPER_ADMIN`, `SOCIETY_ADMIN`) using **email** and password. Mobile-based password login is disabled. Non-admin users (Residents/Security) are not allowed to use this endpoint.
 
 **Request Body:**
+
 ```json
 {
-  "email": "admin@example.com",  // Required
-  "password": "password123"       // Required
+  "email": "admin@example.com", // Required
+  "password": "password123" // Required
 }
 ```
 
 **Validation Rules:**
+
 - `password`: Required, minimum 6 characters
 - `email`: Required, must be valid email format
 - Only `SUPER_ADMIN` and `SOCIETY_ADMIN` roles can use this method.
 - `RESIDENT` and `SECURITY` roles will receive a `403 Forbidden` error.
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -83,14 +91,15 @@ For authenticated requests, include:
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 400 | Validation error or missing credentials | `{ "success": false, "message": "Validation failed", "errors": [...] }` |
-| 401 | Invalid credentials | `{ "success": false, "message": "Invalid credentials" }` |
-| 403 | Account blocked | `{ "success": false, "message": "Account is blocked. Please contact administrator." }` |
-| 500 | Internal server error | `{ "success": false, "message": "Internal server error" }` |
+| Status Code | Description                             | Response                                                                               |
+| ----------- | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| 400         | Validation error or missing credentials | `{ "success": false, "message": "Validation failed", "errors": [...] }`                |
+| 401         | Invalid credentials                     | `{ "success": false, "message": "Invalid credentials" }`                               |
+| 403         | Account blocked                         | `{ "success": false, "message": "Account is blocked. Please contact administrator." }` |
+| 500         | Internal server error                   | `{ "success": false, "message": "Internal server error" }`                             |
 
 **React Native Example:**
+
 ```javascript
 import axios from 'axios';
 
@@ -100,7 +109,7 @@ const login = async (emailOrMobile, password, isEmail = true) => {
   try {
     const requestBody = {
       password,
-      ...(isEmail ? { email: emailOrMobile } : { mobile: emailOrMobile })
+      ...(isEmail ? { email: emailOrMobile } : { mobile: emailOrMobile }),
     };
 
     const response = await axios.post(`${BASE_URL}/auth/login`, requestBody, {
@@ -114,7 +123,7 @@ const login = async (emailOrMobile, password, isEmail = true) => {
       await AsyncStorage.setItem('accessToken', response.data.data.accessToken);
       await AsyncStorage.setItem('refreshToken', response.data.data.refreshToken);
       await AsyncStorage.setItem('user', JSON.stringify(response.data.data.user));
-      
+
       return {
         success: true,
         user: response.data.data.user,
@@ -158,23 +167,26 @@ if (result.success) {
 **Description:** Request OTP for mobile-based login for `RESIDENT` and `SECURITY` roles. OTP login is not available for administrator roles. OTP is valid for 10 minutes.
 
 **Request Body:**
+
 ```json
 {
-  "mobile": "1234567890"  // Required, exactly 10 digits
+  "mobile": "1234567890" // Required, exactly 10 digits
 }
 ```
 
 **Validation Rules:**
+
 - `mobile`: Required, must be exactly 10 digits (numeric only)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
   "message": "OTP sent successfully",
   "data": {
     "mobile": "1234567890",
-    "otp": "123456",        // Only in development mode
+    "otp": "123456", // Only in development mode
     "expiresIn": "10 minutes"
   }
 }
@@ -184,14 +196,15 @@ if (result.success) {
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 400 | Invalid mobile format | `{ "success": false, "message": "Mobile must be 10 digits" }` |
-| 403 | Account blocked | `{ "success": false, "message": "Account is blocked. Please contact administrator." }` |
-| 404 | User not found | `{ "success": false, "message": "User not found. Please contact administrator to register." }` |
-| 500 | Failed to send OTP | `{ "success": false, "message": "Failed to send OTP" }` |
+| Status Code | Description           | Response                                                                                       |
+| ----------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| 400         | Invalid mobile format | `{ "success": false, "message": "Mobile must be 10 digits" }`                                  |
+| 403         | Account blocked       | `{ "success": false, "message": "Account is blocked. Please contact administrator." }`         |
+| 404         | User not found        | `{ "success": false, "message": "User not found. Please contact administrator to register." }` |
+| 500         | Failed to send OTP    | `{ "success": false, "message": "Failed to send OTP" }`                                        |
 
 **React Native Example:**
+
 ```javascript
 const requestOTP = async (mobile) => {
   try {
@@ -217,7 +230,7 @@ const requestOTP = async (mobile) => {
       // In development, OTP is returned in response
       // In production, OTP is sent via SMS
       const otp = response.data.data.otp; // Only in dev mode
-      
+
       return {
         success: true,
         message: response.data.message,
@@ -257,18 +270,21 @@ if (result.success) {
 **Description:** Verify OTP code and complete login. Returns access token and refresh token.
 
 **Request Body:**
+
 ```json
 {
-  "mobile": "1234567890",  // Required, exactly 10 digits
-  "otp": "123456"          // Required, exactly 6 digits
+  "mobile": "1234567890", // Required, exactly 10 digits
+  "otp": "123456" // Required, exactly 6 digits
 }
 ```
 
 **Validation Rules:**
+
 - `mobile`: Required, must be exactly 10 digits
 - `otp`: Required, must be exactly 6 digits (numeric only)
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -292,14 +308,15 @@ if (result.success) {
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 400 | Invalid or expired OTP | `{ "success": false, "message": "Invalid or expired OTP" }` |
-| 403 | Account blocked | `{ "success": false, "message": "Account is blocked. Please contact administrator." }` |
-| 404 | User not found | `{ "success": false, "message": "User not found" }` |
-| 500 | Failed to verify OTP | `{ "success": false, "message": "Failed to verify OTP" }` |
+| Status Code | Description            | Response                                                                               |
+| ----------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| 400         | Invalid or expired OTP | `{ "success": false, "message": "Invalid or expired OTP" }`                            |
+| 403         | Account blocked        | `{ "success": false, "message": "Account is blocked. Please contact administrator." }` |
+| 404         | User not found         | `{ "success": false, "message": "User not found" }`                                    |
+| 500         | Failed to verify OTP   | `{ "success": false, "message": "Failed to verify OTP" }`                              |
 
 **React Native Example:**
+
 ```javascript
 const verifyOTP = async (mobile, otp) => {
   try {
@@ -333,7 +350,7 @@ const verifyOTP = async (mobile, otp) => {
       await AsyncStorage.setItem('accessToken', response.data.data.accessToken);
       await AsyncStorage.setItem('refreshToken', response.data.data.refreshToken);
       await AsyncStorage.setItem('user', JSON.stringify(response.data.data.user));
-      
+
       return {
         success: true,
         user: response.data.data.user,
@@ -374,16 +391,19 @@ if (result.success) {
 **Description:** Refresh the access token using a valid refresh token. Access tokens expire after a certain period, but refresh tokens are valid for 7 days.
 
 **Request Body:**
+
 ```json
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  // Required
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // Required
 }
 ```
 
 **Validation Rules:**
+
 - `refreshToken`: Required
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -396,21 +416,22 @@ if (result.success) {
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 400 | Refresh token is required | `{ "success": false, "message": "Refresh token is required" }` |
-| 401 | Invalid or expired refresh token | `{ "success": false, "message": "Invalid or expired refresh token" }` |
-| 403 | Account blocked | `{ "success": false, "message": "Account is blocked" }` |
-| 404 | User not found | `{ "success": false, "message": "User not found" }` |
+| Status Code | Description                      | Response                                                              |
+| ----------- | -------------------------------- | --------------------------------------------------------------------- |
+| 400         | Refresh token is required        | `{ "success": false, "message": "Refresh token is required" }`        |
+| 401         | Invalid or expired refresh token | `{ "success": false, "message": "Invalid or expired refresh token" }` |
+| 403         | Account blocked                  | `{ "success": false, "message": "Account is blocked" }`               |
+| 404         | User not found                   | `{ "success": false, "message": "User not found" }`                   |
 
 **React Native Example:**
+
 ```javascript
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const refreshAccessToken = async () => {
   try {
     const refreshToken = await AsyncStorage.getItem('refreshToken');
-    
+
     if (!refreshToken) {
       return {
         success: false,
@@ -432,7 +453,7 @@ const refreshAccessToken = async () => {
     if (response.data.success) {
       // Update stored access token
       await AsyncStorage.setItem('accessToken', response.data.data.accessToken);
-      
+
       return {
         success: true,
         accessToken: response.data.data.accessToken,
@@ -449,7 +470,7 @@ const refreshAccessToken = async () => {
           shouldLogout: true,
         };
       }
-      
+
       return {
         success: false,
         message: error.response.data.message || 'Failed to refresh token',
@@ -471,6 +492,7 @@ const refreshAccessToken = async () => {
 **Endpoint:** `POST /api/v1/auth/logout`
 
 **Description:** Logout user and invalidate refresh token on the server. Supports two authentication methods:
+
 1. **Using access token** in Authorization header (recommended)
 2. **Using refreshToken** in request body (fallback)
 
@@ -479,11 +501,13 @@ If access token is provided but no refreshToken in body, logs out from all devic
 **Authentication:** Optional (can use access token OR refreshToken)
 
 **Request Headers (Optional but recommended):**
+
 ```
 Authorization: Bearer <access_token>
 ```
 
 **Request Body (Optional):**
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -491,6 +515,7 @@ Authorization: Bearer <access_token>
 ```
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -500,15 +525,16 @@ Authorization: Bearer <access_token>
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 400 | Missing required fields | `{ "success": false, "message": "Either provide Authorization header with access token, or refreshToken in request body" }` |
-| 401 | Invalid refresh token | `{ "success": false, "message": "Invalid refresh token. Please provide a valid access token or refresh token." }` |
-| 403 | Token ownership mismatch | `{ "success": false, "message": "Refresh token does not belong to authenticated user" }` |
-| 404 | Refresh token not found | `{ "success": false, "message": "Refresh token not found or already invalidated" }` |
-| 500 | Internal server error | `{ "success": false, "message": "Failed to logout" }` |
+| Status Code | Description              | Response                                                                                                                    |
+| ----------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| 400         | Missing required fields  | `{ "success": false, "message": "Either provide Authorization header with access token, or refreshToken in request body" }` |
+| 401         | Invalid refresh token    | `{ "success": false, "message": "Invalid refresh token. Please provide a valid access token or refresh token." }`           |
+| 403         | Token ownership mismatch | `{ "success": false, "message": "Refresh token does not belong to authenticated user" }`                                    |
+| 404         | Refresh token not found  | `{ "success": false, "message": "Refresh token not found or already invalidated" }`                                         |
+| 500         | Internal server error    | `{ "success": false, "message": "Failed to logout" }`                                                                       |
 
 **React Native Example:**
+
 ```javascript
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -558,7 +584,7 @@ const logout = async () => {
   } catch (error) {
     // Ensure storage is cleared even if there's an error
     await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
-    
+
     return {
       success: false,
       message: error.message || 'Failed to logout',
@@ -585,6 +611,7 @@ if (result.success) {
 **Authentication:** Required (access token in Authorization header)
 
 **Request Headers:**
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -592,6 +619,7 @@ Authorization: Bearer <access_token>
 **Request Body:** None
 
 **Success Response (200):**
+
 ```json
 {
   "success": true,
@@ -604,12 +632,13 @@ Authorization: Bearer <access_token>
 
 **Error Responses:**
 
-| Status Code | Description | Response |
-|------------|------------|----------|
-| 401 | Authentication required | `{ "success": false, "message": "Authentication required" }` |
-| 500 | Internal server error | `{ "success": false, "message": "Failed to logout from all devices" }` |
+| Status Code | Description             | Response                                                               |
+| ----------- | ----------------------- | ---------------------------------------------------------------------- |
+| 401         | Authentication required | `{ "success": false, "message": "Authentication required" }`           |
+| 500         | Internal server error   | `{ "success": false, "message": "Failed to logout from all devices" }` |
 
 **React Native Example:**
+
 ```javascript
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -668,11 +697,9 @@ const logoutAll = async () => {
 // Usage
 const result = await logoutAll();
 if (result.success) {
-  Alert.alert(
-    'Logged Out',
-    `Logged out from ${result.sessionsInvalidated} device(s)`,
-    [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-  );
+  Alert.alert('Logged Out', `Logged out from ${result.sessionsInvalidated} device(s)`, [
+    { text: 'OK', onPress: () => navigation.navigate('Login') },
+  ]);
 }
 ```
 
@@ -723,7 +750,7 @@ apiClient.interceptors.response.use(
 
       try {
         const refreshToken = await AsyncStorage.getItem('refreshToken');
-        
+
         if (!refreshToken) {
           // No refresh token, logout
           await logout();
@@ -738,7 +765,7 @@ apiClient.interceptors.response.use(
         if (response.data.success) {
           const { accessToken } = response.data.data;
           await AsyncStorage.setItem('accessToken', accessToken);
-          
+
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return apiClient(originalRequest);
@@ -832,7 +859,7 @@ export const authService = {
   refreshToken: async () => {
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
-      
+
       if (!refreshToken) {
         return {
           success: false,
@@ -967,7 +994,7 @@ const logoutAll = async () => {
 
     // Call logout-all API
     const response = await apiClient.post('/auth/logout-all');
-    
+
     // Clear all tokens and user data from storage
     await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
 
@@ -987,6 +1014,7 @@ export default apiClient;
 ## Authentication Flow
 
 ### Password Login Flow
+
 ```
 1. User enters email/mobile + password
 2. App calls POST /api/v1/auth/login
@@ -997,6 +1025,7 @@ export default apiClient;
 ```
 
 ### OTP Login Flow
+
 ```
 1. User enters mobile number
 2. App calls POST /api/v1/auth/otp
@@ -1010,6 +1039,7 @@ export default apiClient;
 ```
 
 ### Token Refresh Flow
+
 ```
 1. Access token expires (401 error)
 2. App intercepts 401 response
@@ -1021,6 +1051,7 @@ export default apiClient;
 ```
 
 ### Logout Flow
+
 ```
 1. User clicks logout button
 2. App calls POST /api/v1/auth/logout (with access token and/or refreshToken)
@@ -1046,18 +1077,21 @@ The authentication system supports the following roles:
 ## Token Management
 
 ### Access Token
+
 - Used for authenticating API requests
 - Included in `Authorization` header: `Bearer <access_token>`
 - Has expiration time (check JWT configuration)
 - Automatically refreshed when expired using refresh token
 
 ### Refresh Token
+
 - Used to obtain new access tokens
 - Valid for 7 days
 - Stored securely in device storage
 - Should be cleared on logout
 
 ### Storage Recommendations
+
 - Use `@react-native-async-storage/async-storage` for token storage
 - Consider using `react-native-keychain` for enhanced security
 - Never store tokens in plain text or logs
@@ -1093,6 +1127,7 @@ The authentication system supports the following roles:
    - Display field-specific error messages
 
 ### Error Response Format
+
 ```json
 {
   "success": false,
@@ -1140,11 +1175,13 @@ The authentication system supports the following roles:
 ## Testing
 
 ### Development Mode
+
 - OTP is returned in API response for testing
 - Use test credentials provided by backend team
 - Test all error scenarios
 
 ### Production Mode
+
 - OTP is sent via SMS only
 - Ensure SMS service is configured
 - Test with real mobile numbers
@@ -1154,6 +1191,7 @@ The authentication system supports the following roles:
 ## Support
 
 For issues or questions:
+
 - Check Swagger documentation: `http://localhost:1111/api-docs`
 - Review error responses for specific error messages
 - Contact backend team for API-related issues
@@ -1163,14 +1201,15 @@ For issues or questions:
 ## Changelog
 
 ### v1.1.0
+
 - Added logout endpoint (single device)
 - Added logout-all endpoint (all devices)
 - Enhanced token management with server-side invalidation
 - Added audit logging for logout actions
 
 ### v1.0.0
+
 - Initial authentication API documentation
 - Password login support
 - OTP login support
 - Token refresh support
-

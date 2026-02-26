@@ -11,13 +11,14 @@ This guide describes how to implement the "Raise Emergency" feature for Society 
 - **Role Required**: `SOCIETY_ADMIN` (also works for `RESIDENT` and `SECURITY`)
 
 ### Request Body
+
 ```json
 {
-  "emergencyType": "FIRE",        // Options: FIRE, MEDICAL, SECURITY, SOS, OTHER
-  "notificationType": "ALL",     // Options: ALL, SECURITY, RESIDENT (defaults to ALL)
+  "emergencyType": "FIRE", // Options: FIRE, MEDICAL, SECURITY, SOS, OTHER
+  "notificationType": "ALL", // Options: ALL, SECURITY, RESIDENT (defaults to ALL)
   "description": "Fire detected in the clubhouse area",
   "location": "Clubhouse / Ground Floor",
-  "unitId": null                 // Optional for Admin
+  "unitId": null // Optional for Admin
 }
 ```
 
@@ -34,15 +35,12 @@ const API_URL = 'http://your-api-domain.com/api/v1';
 export const raiseSocietyEmergency = async (emergencyData) => {
   try {
     const token = await AsyncStorage.getItem('accessToken');
-    
-    const response = await axios.post(`${API_URL}/emergencies`, 
-      emergencyData, 
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+
+    const response = await axios.post(`${API_URL}/emergencies`, emergencyData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -60,7 +58,7 @@ export const raiseSocietyEmergency = async (emergencyData) => {
 
 1.  **Immediate Feedback**: Provide a clear "Emergency Active" state once raised.
 2.  **Notification Strategy**: While the API handles backend alerts, ensure the UI shows that an alert has been broadcast to all residents.
-3.  **Confirmation**: Since admins can notify the *entire* society, consider a "Slide to Confirm" interaction to prevent accidental triggers.
+3.  **Confirmation**: Since admins can notify the _entire_ society, consider a "Slide to Confirm" interaction to prevent accidental triggers.
 4.  **Admin Context**: Admins often raise emergencies for common areas, so ensure the `location` field is descriptive.
 
 ---

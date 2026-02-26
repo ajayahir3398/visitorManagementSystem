@@ -230,11 +230,9 @@ const handleLogout = async () => {
 const handleLogoutAll = async () => {
   try {
     const result = await authService.logoutAll();
-    Alert.alert(
-      'Logged Out',
-      `Logged out from ${result.data.sessionsInvalidated} device(s)`,
-      [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-    );
+    Alert.alert('Logged Out', `Logged out from ${result.data.sessionsInvalidated} device(s)`, [
+      { text: 'OK', onPress: () => navigation.navigate('Login') },
+    ]);
   } catch (error) {
     Alert.alert('Error', 'Failed to logout from all devices');
   }
@@ -263,14 +261,14 @@ useEffect(() => {
 
 ## API Endpoints Quick Reference
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/auth/login` | Password login | No |
-| POST | `/auth/otp` | Request OTP | No |
-| POST | `/auth/verify-otp` | Verify OTP & login | No |
-| POST | `/auth/refresh-token` | Refresh access token | No |
-| POST | `/auth/logout` | Logout (single device) | Optional |
-| POST | `/auth/logout-all` | Logout from all devices | Yes |
+| Method | Endpoint              | Description             | Auth Required |
+| ------ | --------------------- | ----------------------- | ------------- |
+| POST   | `/auth/login`         | Password login          | No            |
+| POST   | `/auth/otp`           | Request OTP             | No            |
+| POST   | `/auth/verify-otp`    | Verify OTP & login      | No            |
+| POST   | `/auth/refresh-token` | Refresh access token    | No            |
+| POST   | `/auth/logout`        | Logout (single device)  | Optional      |
+| POST   | `/auth/logout-all`    | Logout from all devices | Yes           |
 
 ## Response Format
 
@@ -298,7 +296,7 @@ try {
     // Handle API error
     if (result.errors) {
       // Validation errors
-      result.errors.forEach(err => {
+      result.errors.forEach((err) => {
         console.log(`${err.param}: ${err.msg}`);
       });
     } else {
@@ -336,4 +334,3 @@ try {
 - Swagger UI: `http://localhost:1111/api-docs`
 - Full Documentation: [API_DOCUMENTATION_V1_AUTHENTICATION.md](./API_DOCUMENTATION_V1_AUTHENTICATION.md)
 - Logout Guide: [REACT_NATIVE_LOGOUT_GUIDE.md](./REACT_NATIVE_LOGOUT_GUIDE.md)
-
