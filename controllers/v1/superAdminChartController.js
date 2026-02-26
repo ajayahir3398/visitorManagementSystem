@@ -41,7 +41,8 @@ export const getMonthlyRevenueChart = async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
 
-    const revenue = await prisma.$queryRawUnsafe(`
+    const revenue = await prisma.$queryRawUnsafe(
+      `
       SELECT
         TO_CHAR(paid_at, 'Mon') AS month,
         EXTRACT(MONTH FROM paid_at)::INT AS month_num,
@@ -51,7 +52,9 @@ export const getMonthlyRevenueChart = async (req, res) => {
         AND EXTRACT(YEAR FROM paid_at) = $1
       GROUP BY month, month_num
       ORDER BY month_num
-    `, year);
+    `,
+      year
+    );
 
     const chartData = revenue.map((item) => ({
       month: item.month,
@@ -82,7 +85,8 @@ export const getVisitorTrendChart = async (req, res) => {
   try {
     const year = parseInt(req.query.year) || new Date().getFullYear();
 
-    const visitors = await prisma.$queryRawUnsafe(`
+    const visitors = await prisma.$queryRawUnsafe(
+      `
       SELECT
         TO_CHAR(entry_time, 'Mon') AS month,
         EXTRACT(MONTH FROM entry_time)::INT AS month_num,
@@ -91,7 +95,9 @@ export const getVisitorTrendChart = async (req, res) => {
       WHERE EXTRACT(YEAR FROM entry_time) = $1
       GROUP BY month, month_num
       ORDER BY month_num
-    `, year);
+    `,
+      year
+    );
 
     const chartData = visitors.map((item) => ({
       month: item.month,

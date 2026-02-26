@@ -124,9 +124,5 @@ export const optionalAuthenticate = async (req, res, next) => {
  * Combined middleware: authenticate + authorize
  */
 export const requireAuth = (allowedRoles) => {
-  return [
-    authenticate,
-    ...(allowedRoles ? [authorize(...allowedRoles)] : []),
-  ];
+  return [authenticate, ...(allowedRoles ? [authorize(...allowedRoles)] : [])];
 };
-

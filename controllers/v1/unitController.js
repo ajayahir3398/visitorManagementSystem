@@ -194,13 +194,14 @@ export const getUnits = async (req, res) => {
     }
 
     if (search) {
-      where.OR = [
-        { unitNo: { contains: search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ unitNo: { contains: search, mode: 'insensitive' } }];
     }
 
     // If user is SOCIETY_ADMIN, SECURITY, or RESIDENT, only show units from their society
-    if (['SOCIETY_ADMIN', 'SECURITY', 'RESIDENT'].includes(req.user.role_name) && req.user.society_id) {
+    if (
+      ['SOCIETY_ADMIN', 'SECURITY', 'RESIDENT'].includes(req.user.role_name) &&
+      req.user.society_id
+    ) {
       where.societyId = req.user.society_id;
     }
 
@@ -307,7 +308,10 @@ export const getUnitById = async (req, res) => {
     }
 
     // Check access based on role
-    if (['SOCIETY_ADMIN', 'SECURITY', 'RESIDENT'].includes(req.user.role_name) && req.user.society_id !== unit.societyId) {
+    if (
+      ['SOCIETY_ADMIN', 'SECURITY', 'RESIDENT'].includes(req.user.role_name) &&
+      req.user.society_id !== unit.societyId
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only view units from your own society.',
@@ -413,15 +417,21 @@ export const updateUnit = async (req, res) => {
 
     // Build description of what changed
     const changes = [];
-    if (unitNo && unitNo.trim() !== existingUnit.unitNo) changes.push(`unitNo: "${existingUnit.unitNo}" → "${unitNo.trim()}"`);
-    if (unitType !== undefined && unitType !== existingUnit.unitType) changes.push(`unitType: "${existingUnit.unitType || 'N/A'}" → "${unitType || 'N/A'}"`);
-    if (floor !== undefined && floor !== existingUnit.floor) changes.push(`floor: "${existingUnit.floor || 'N/A'}" → "${floor || 'N/A'}"`);
-    if (block !== undefined && block !== existingUnit.block) changes.push(`block: "${existingUnit.block || 'N/A'}" → "${block || 'N/A'}"`);
-    if (status && status !== existingUnit.status) changes.push(`status: "${existingUnit.status}" → "${status}"`);
+    if (unitNo && unitNo.trim() !== existingUnit.unitNo)
+      changes.push(`unitNo: "${existingUnit.unitNo}" → "${unitNo.trim()}"`);
+    if (unitType !== undefined && unitType !== existingUnit.unitType)
+      changes.push(`unitType: "${existingUnit.unitType || 'N/A'}" → "${unitType || 'N/A'}"`);
+    if (floor !== undefined && floor !== existingUnit.floor)
+      changes.push(`floor: "${existingUnit.floor || 'N/A'}" → "${floor || 'N/A'}"`);
+    if (block !== undefined && block !== existingUnit.block)
+      changes.push(`block: "${existingUnit.block || 'N/A'}" → "${block || 'N/A'}"`);
+    if (status && status !== existingUnit.status)
+      changes.push(`status: "${existingUnit.status}" → "${status}"`);
 
-    const description = changes.length > 0
-      ? `Unit "${unit.unitNo}" updated: ${changes.join(', ')}`
-      : `Unit "${unit.unitNo}" updated`;
+    const description =
+      changes.length > 0
+        ? `Unit "${unit.unitNo}" updated: ${changes.join(', ')}`
+        : `Unit "${unit.unitNo}" updated`;
 
     // Log unit update
     await logAction({
@@ -494,7 +504,8 @@ export const deleteUnit = async (req, res) => {
     if (unit._count.members > 0 || unit._count.visitorLogs > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete unit with existing members or visitor logs. Please remove them first.',
+        message:
+          'Cannot delete unit with existing members or visitor logs. Please remove them first.',
       });
     }
 
@@ -973,4 +984,3 @@ export const bulkDeleteUnits = async (req, res) => {
     });
   }
 };
-

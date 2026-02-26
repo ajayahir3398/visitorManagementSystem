@@ -33,7 +33,10 @@ export const createVisitor = async (req, res) => {
     let normalizedPhoto = null;
     if (photoBase64 !== undefined) {
       try {
-        normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+        normalizedPhoto =
+          photoBase64 === null
+            ? null
+            : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
       } catch (error) {
         return res.status(400).json({
           success: false,
@@ -130,7 +133,7 @@ export const getVisitors = async (req, res) => {
         distinct: ['visitorId'],
       });
 
-      const visitorIds = visitorLogs.map(log => log.visitorId);
+      const visitorIds = visitorLogs.map((log) => log.visitorId);
 
       if (visitorIds.length === 0) {
         return res.json({
@@ -312,7 +315,10 @@ export const updateVisitor = async (req, res) => {
     if (mobile) updateData.mobile = mobile;
     if (photoBase64 !== undefined) {
       try {
-        updateData.photoBase64 = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+        updateData.photoBase64 =
+          photoBase64 === null
+            ? null
+            : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
       } catch (error) {
         return res.status(400).json({
           success: false,
@@ -328,15 +334,18 @@ export const updateVisitor = async (req, res) => {
 
     // Build description of what changed
     const changes = [];
-    if (name && name.trim() !== existingVisitor.name) changes.push(`name: "${existingVisitor.name}" → "${name.trim()}"`);
-    if (mobile && mobile !== existingVisitor.mobile) changes.push(`mobile: "${existingVisitor.mobile}" → "${mobile}"`);
+    if (name && name.trim() !== existingVisitor.name)
+      changes.push(`name: "${existingVisitor.name}" → "${name.trim()}"`);
+    if (mobile && mobile !== existingVisitor.mobile)
+      changes.push(`mobile: "${existingVisitor.mobile}" → "${mobile}"`);
     if (photoBase64 !== undefined && updateData.photoBase64 !== existingVisitor.photoBase64) {
       changes.push('photo updated');
     }
 
-    const description = changes.length > 0
-      ? `Visitor "${visitor.name}" updated: ${changes.join(', ')}`
-      : `Visitor "${visitor.name}" updated`;
+    const description =
+      changes.length > 0
+        ? `Visitor "${visitor.name}" updated: ${changes.join(', ')}`
+        : `Visitor "${visitor.name}" updated`;
 
     // Log visitor update
     await logAction({
@@ -401,7 +410,8 @@ export const deleteVisitor = async (req, res) => {
     if (visitor._count.visitorLogs > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete visitor with existing visitor logs. Please remove visitor logs first.',
+        message:
+          'Cannot delete visitor with existing visitor logs. Please remove visitor logs first.',
       });
     }
 
@@ -472,7 +482,7 @@ export const searchVisitors = async (req, res) => {
         distinct: ['visitorId'],
       });
 
-      const visitorIds = visitorLogs.map(log => log.visitorId);
+      const visitorIds = visitorLogs.map((log) => log.visitorId);
 
       if (visitorIds.length === 0) {
         return res.json({
@@ -512,4 +522,3 @@ export const searchVisitors = async (req, res) => {
     });
   }
 };
-

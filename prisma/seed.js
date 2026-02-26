@@ -24,9 +24,7 @@ async function main() {
 
   // First, update existing plans that might not have code/billingCycle
   const allPlans = await prisma.subscriptionPlan.findMany();
-  const existingPlans = allPlans.filter(
-    (plan) => !plan.code || !plan.billingCycle
-  );
+  const existingPlans = allPlans.filter((plan) => !plan.code || !plan.billingCycle);
 
   for (const existingPlan of existingPlans) {
     // Update existing TRIAL plan
@@ -88,10 +86,7 @@ async function main() {
     // Try to find by code first, then by name as fallback
     const existing = await prisma.subscriptionPlan.findFirst({
       where: {
-        OR: [
-          { code: plan.code },
-          { name: plan.name },
-        ],
+        OR: [{ code: plan.code }, { name: plan.name }],
       },
     });
 
@@ -123,4 +118,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-

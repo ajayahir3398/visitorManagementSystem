@@ -53,7 +53,7 @@ export const createSociety = async (req, res) => {
         data: {
           societyId: newSociety.id,
           name: 'Main Gate',
-        }
+        },
       });
 
       return newSociety;
@@ -211,7 +211,8 @@ export const updateSociety = async (req, res) => {
   try {
     const { id } = req.params;
     const societyId = parseInt(id);
-    const { name, type, address, city, state, pincode, subscriptionId, status, razorpayKey } = req.body;
+    const { name, type, address, city, state, pincode, subscriptionId, status, razorpayKey } =
+      req.body;
 
     if (isNaN(societyId)) {
       return res.status(400).json({
@@ -289,19 +290,31 @@ export const updateSociety = async (req, res) => {
 
     // Build description of what changed
     const changes = [];
-    if (name && name !== existingSociety.name) changes.push(`name: "${existingSociety.name}" → "${name}"`);
-    if (type && type.toLowerCase() !== existingSociety.type) changes.push(`type: "${existingSociety.type}" → "${type.toLowerCase()}"`);
-    if (status && status.toLowerCase() !== existingSociety.status) changes.push(`status: "${existingSociety.status}" → "${status.toLowerCase()}"`);
-    if (address !== undefined && address !== existingSociety.address) changes.push('address updated');
-    if (city !== undefined && city !== existingSociety.city) changes.push(`city: "${existingSociety.city || 'N/A'}" → "${city || 'N/A'}"`);
-    if (state !== undefined && state !== existingSociety.state) changes.push(`state: "${existingSociety.state || 'N/A'}" → "${state || 'N/A'}"`);
-    if (pincode !== undefined && pincode !== existingSociety.pincode) changes.push('pincode updated');
-    if (razorpayKey !== undefined && razorpayKey !== existingSociety.razorpayKey) changes.push('razorpayKey updated');
-    if (subscriptionId !== undefined && subscriptionId !== existingSociety.subscriptionId) changes.push(`subscriptionId: ${existingSociety.subscriptionId || 'N/A'} → ${subscriptionId || 'N/A'}`);
+    if (name && name !== existingSociety.name)
+      changes.push(`name: "${existingSociety.name}" → "${name}"`);
+    if (type && type.toLowerCase() !== existingSociety.type)
+      changes.push(`type: "${existingSociety.type}" → "${type.toLowerCase()}"`);
+    if (status && status.toLowerCase() !== existingSociety.status)
+      changes.push(`status: "${existingSociety.status}" → "${status.toLowerCase()}"`);
+    if (address !== undefined && address !== existingSociety.address)
+      changes.push('address updated');
+    if (city !== undefined && city !== existingSociety.city)
+      changes.push(`city: "${existingSociety.city || 'N/A'}" → "${city || 'N/A'}"`);
+    if (state !== undefined && state !== existingSociety.state)
+      changes.push(`state: "${existingSociety.state || 'N/A'}" → "${state || 'N/A'}"`);
+    if (pincode !== undefined && pincode !== existingSociety.pincode)
+      changes.push('pincode updated');
+    if (razorpayKey !== undefined && razorpayKey !== existingSociety.razorpayKey)
+      changes.push('razorpayKey updated');
+    if (subscriptionId !== undefined && subscriptionId !== existingSociety.subscriptionId)
+      changes.push(
+        `subscriptionId: ${existingSociety.subscriptionId || 'N/A'} → ${subscriptionId || 'N/A'}`
+      );
 
-    const description = changes.length > 0
-      ? `Society "${society.name}" updated: ${changes.join(', ')}`
-      : `Society "${society.name}" updated`;
+    const description =
+      changes.length > 0
+        ? `Society "${society.name}" updated: ${changes.join(', ')}`
+        : `Society "${society.name}" updated`;
 
     // Log society update
     await logAction({
@@ -398,4 +411,3 @@ export const deleteSociety = async (req, res) => {
     });
   }
 };
-

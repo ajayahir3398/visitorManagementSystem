@@ -11,4 +11,3 @@ import v2Routes from './v2/index.js';
 router.use('/v2', v2Routes);
 
 export default router;
-

@@ -7,33 +7,28 @@ export const getOverview = async (req, res) => {
   try {
     const societyId = req.user.societyId;
 
-    const [
-      totalUnits,
-      totalResidents,
-      activeSecurity,
-      openEmergencies,
-      pendingViolations,
-    ] = await Promise.all([
-      prisma.unit.count({
-        where: { societyId, status: 'ACTIVE' },
-      }),
+    const [totalUnits, totalResidents, activeSecurity, openEmergencies, pendingViolations] =
+      await Promise.all([
+        prisma.unit.count({
+          where: { societyId, status: 'ACTIVE' },
+        }),
 
-      prisma.unitMember.count({
-        where: { unit: { societyId } },
-      }),
+        prisma.unitMember.count({
+          where: { unit: { societyId } },
+        }),
 
-      prisma.user.count({
-        where: { societyId, status: 'active', role: { name: 'SECURITY' } },
-      }),
+        prisma.user.count({
+          where: { societyId, status: 'active', role: { name: 'SECURITY' } },
+        }),
 
-      prisma.emergencyRequest.count({
-        where: { societyId, status: { in: ['OPEN', 'ACKNOWLEDGED'] } },
-      }),
+        prisma.emergencyRequest.count({
+          where: { societyId, status: { in: ['OPEN', 'ACKNOWLEDGED'] } },
+        }),
 
-      prisma.ruleViolation.count({
-        where: { societyId, status: 'PENDING' },
-      }),
-    ]);
+        prisma.ruleViolation.count({
+          where: { societyId, status: 'PENDING' },
+        }),
+      ]);
 
     res.json({
       success: true,
@@ -61,44 +56,39 @@ export const getMaintenance = async (req, res) => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [
-      upcomingBills,
-      unpaidBills,
-      overdueBills,
-      collectedThisMonth,
-      overdueAmount,
-    ] = await Promise.all([
-      // Temp bills (preview/upcoming)
-      prisma.tempMaintenanceBill.count({
-        where: { societyId },
-      }),
+    const [upcomingBills, unpaidBills, overdueBills, collectedThisMonth, overdueAmount] =
+      await Promise.all([
+        // Temp bills (preview/upcoming)
+        prisma.tempMaintenanceBill.count({
+          where: { societyId },
+        }),
 
-      // Unpaid final bills
-      prisma.maintenanceBill.count({
-        where: { societyId, status: 'UNPAID' },
-      }),
+        // Unpaid final bills
+        prisma.maintenanceBill.count({
+          where: { societyId, status: 'UNPAID' },
+        }),
 
-      // Overdue final bills (unpaid + past due date)
-      prisma.maintenanceBill.count({
-        where: { societyId, status: { in: ['UNPAID', 'OVERDUE'] }, dueDate: { lt: now } },
-      }),
+        // Overdue final bills (unpaid + past due date)
+        prisma.maintenanceBill.count({
+          where: { societyId, status: { in: ['UNPAID', 'OVERDUE'] }, dueDate: { lt: now } },
+        }),
 
-      // Collected this month
-      prisma.maintenancePayment.aggregate({
-        _sum: { amount: true },
-        where: {
-          status: 'SUCCESS',
-          paidAt: { gte: startOfMonth },
-          bill: { societyId },
-        },
-      }),
+        // Collected this month
+        prisma.maintenancePayment.aggregate({
+          _sum: { amount: true },
+          where: {
+            status: 'SUCCESS',
+            paidAt: { gte: startOfMonth },
+            bill: { societyId },
+          },
+        }),
 
-      // Total overdue amount
-      prisma.maintenanceBill.aggregate({
-        _sum: { amount: true },
-        where: { societyId, status: { in: ['UNPAID', 'OVERDUE'] }, dueDate: { lt: now } },
-      }),
-    ]);
+        // Total overdue amount
+        prisma.maintenanceBill.aggregate({
+          _sum: { amount: true },
+          where: { societyId, status: { in: ['UNPAID', 'OVERDUE'] }, dueDate: { lt: now } },
+        }),
+      ]);
 
     res.json({
       success: true,
@@ -126,12 +116,7 @@ export const getVisitors = async (req, res) => {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
-    const [
-      todayVisitors,
-      pendingApprovals,
-      insidePremises,
-      preApprovedToday,
-    ] = await Promise.all([
+    const [todayVisitors, pendingApprovals, insidePremises, preApprovedToday] = await Promise.all([
       // Visitors who entered today
       prisma.visitorLog.count({
         where: { societyId, entryTime: { gte: startOfDay } },

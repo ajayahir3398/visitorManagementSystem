@@ -1,4 +1,8 @@
-import { getSubscription, updateSubscriptionStatus, isSubscriptionActive } from '../services/subscriptionService.js';
+import {
+  getSubscription,
+  updateSubscriptionStatus,
+  isSubscriptionActive,
+} from '../services/subscriptionService.js';
 
 /**
  * Middleware to check subscription status
@@ -73,7 +77,7 @@ export const attachSubscription = async (req, res, next) => {
 
     if (societyId) {
       let subscription = await getSubscription(societyId);
-      
+
       if (subscription) {
         // Auto-update status
         subscription = await updateSubscriptionStatus(subscription);
@@ -89,4 +93,3 @@ export const attachSubscription = async (req, res, next) => {
     next();
   }
 };
-

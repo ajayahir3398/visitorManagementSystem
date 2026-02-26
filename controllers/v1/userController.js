@@ -147,9 +147,10 @@ export const createUser = async (req, res) => {
     delete user.passwordHash;
 
     // Determine action type based on role
-    const action = role.name === 'SOCIETY_ADMIN'
-      ? AUDIT_ACTIONS.CREATE_SOCIETY_ADMIN
-      : AUDIT_ACTIONS.CREATE_USER;
+    const action =
+      role.name === 'SOCIETY_ADMIN'
+        ? AUDIT_ACTIONS.CREATE_SOCIETY_ADMIN
+        : AUDIT_ACTIONS.CREATE_USER;
 
     // Log user creation
     await logAction({
@@ -329,7 +330,10 @@ export const getUserById = async (req, res) => {
     }
 
     // If user is RESIDENT or SECURITY, only allow access to their own profile
-    if ((req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') && req.user.id !== user.id) {
+    if (
+      (req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') &&
+      req.user.id !== user.id
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only view your own profile.',
@@ -390,7 +394,10 @@ export const updateUser = async (req, res) => {
     }
 
     // If user is RESIDENT or SECURITY, only allow updating their own profile
-    if ((req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') && req.user.id !== existingUser.id) {
+    if (
+      (req.user.role_name === 'RESIDENT' || req.user.role_name === 'SECURITY') &&
+      req.user.id !== existingUser.id
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. You can only update your own profile.',
@@ -519,11 +526,15 @@ export const updateUser = async (req, res) => {
 
     // Build description of what changed
     const changes = [];
-    if (name && name !== existingUser.name) changes.push(`name: "${existingUser.name}" → "${name}"`);
-    if (email !== undefined && email !== existingUser.email) changes.push(`email: "${existingUser.email || 'N/A'}" → "${email || 'N/A'}"`);
-    if (mobile && mobile !== existingUser.mobile) changes.push(`mobile: "${existingUser.mobile}" → "${mobile}"`);
+    if (name && name !== existingUser.name)
+      changes.push(`name: "${existingUser.name}" → "${name}"`);
+    if (email !== undefined && email !== existingUser.email)
+      changes.push(`email: "${existingUser.email || 'N/A'}" → "${email || 'N/A'}"`);
+    if (mobile && mobile !== existingUser.mobile)
+      changes.push(`mobile: "${existingUser.mobile}" → "${mobile}"`);
     if (password) changes.push('password updated');
-    if (societyId !== undefined && societyId !== existingUser.societyId) changes.push(`societyId: ${existingUser.societyId || 'N/A'} → ${societyId || 'N/A'}`);
+    if (societyId !== undefined && societyId !== existingUser.societyId)
+      changes.push(`societyId: ${existingUser.societyId || 'N/A'} → ${societyId || 'N/A'}`);
     if (roleId && roleId !== existingUser.roleId) {
       const oldRole = await prisma.role.findUnique({ where: { id: existingUser.roleId } });
       const newRole = await prisma.role.findUnique({ where: { id: roleId } });
@@ -553,12 +564,17 @@ export const updateUser = async (req, res) => {
       }
     }
 
-    const description = changes.length > 0
-      ? `User "${user.name}" updated: ${changes.join(', ')}`
-      : `User "${user.name}" updated`;
+    const description =
+      changes.length > 0
+        ? `User "${user.name}" updated: ${changes.join(', ')}`
+        : `User "${user.name}" updated`;
 
     // Log user update (unless it was a block/unblock which was already logged)
-    if (!status || status === existingUser.status || (status !== 'blocked' && status !== 'active')) {
+    if (
+      !status ||
+      status === existingUser.status ||
+      (status !== 'blocked' && status !== 'active')
+    ) {
       await logAction({
         user: req.user,
         action: AUDIT_ACTIONS.UPDATE_USER,
@@ -694,7 +710,8 @@ export const deleteUser = async (req, res) => {
     if (error.code === 'P2003') {
       return res.status(400).json({
         success: false,
-        message: 'Cannot delete user. This user has related records in the system. Please remove or reassign related records first.',
+        message:
+          'Cannot delete user. This user has related records in the system. Please remove or reassign related records first.',
       });
     }
 
@@ -876,7 +893,6 @@ export const bulkUploadResidents = async (req, res) => {
                 mobile: user.mobile,
                 status: 'Added',
               });
-
             } catch (err) {
               console.error('Row processing error:', err);
               results.failed.push({
@@ -907,7 +923,6 @@ export const bulkUploadResidents = async (req, res) => {
     });
 
     req.pipe(bb);
-
   } catch (error) {
     console.error('Bulk upload residents error:', error);
     if (!res.headersSent) {
@@ -919,5 +934,3 @@ export const bulkUploadResidents = async (req, res) => {
     }
   }
 };
-
-

@@ -1,7 +1,10 @@
 import prisma from '../../lib/prisma.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import { fixSequence } from '../../utils/sequenceFix.js';
-import { sendNotificationToUnitResidents, sendNotificationToUnitResidentsByFlatNo } from '../../utils/notificationHelper.js';
+import {
+  sendNotificationToUnitResidents,
+  sendNotificationToUnitResidentsByFlatNo,
+} from '../../utils/notificationHelper.js';
 import { normalizeBase64Image } from '../../utils/image.js';
 
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
@@ -54,7 +57,10 @@ export const createVisitorEntry = async (req, res) => {
     // Update visitor photo if base64 is provided
     if (photoBase64 !== undefined) {
       try {
-        const normalizedPhoto = photoBase64 === null ? null : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
+        const normalizedPhoto =
+          photoBase64 === null
+            ? null
+            : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
         await prisma.visitor.update({
           where: { id: parseInt(visitorId) },
           data: { photoBase64: normalizedPhoto },
@@ -424,7 +430,7 @@ export const getVisitorLogs = async (req, res) => {
         },
       });
 
-      const unitIds = userUnits.map(um => um.unitId);
+      const unitIds = userUnits.map((um) => um.unitId);
 
       if (unitIds.length === 0) {
         // User is not a member of any unit, return empty result
@@ -723,7 +729,7 @@ export const getVisitorLogById = async (req, res) => {
           });
 
           const hasMatchingUnit = userUnits.some(
-            um => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
+            (um) => um.unit.unitNo.toLowerCase() === visitorLog.flatNo?.toLowerCase()
           );
 
           if (!hasMatchingUnit) {

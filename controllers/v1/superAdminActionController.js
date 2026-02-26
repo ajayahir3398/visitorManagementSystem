@@ -94,8 +94,8 @@ export const unlockSociety = async (req, res) => {
       where: { id: societyId },
       include: {
         subscriptions: {
-          include: { plan: true }
-        }
+          include: { plan: true },
+        },
       },
     });
 
@@ -186,7 +186,7 @@ export const extendSubscription = async (req, res) => {
       where: { societyId },
       include: {
         society: true,
-        plan: true
+        plan: true,
       },
     });
 
@@ -224,9 +224,10 @@ export const extendSubscription = async (req, res) => {
     }
 
     // Audit log
-    const actionDesc = subscription.plan?.code === 'TRIAL'
-      ? `Trial extended by ${days} days`
-      : `Subscription extended by ${days} days`;
+    const actionDesc =
+      subscription.plan?.code === 'TRIAL'
+        ? `Trial extended by ${days} days`
+        : `Subscription extended by ${days} days`;
 
     await logAction({
       user: req.user,

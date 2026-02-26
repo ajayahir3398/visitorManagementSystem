@@ -293,7 +293,7 @@ export const getCurrentSubscription = async (req, res) => {
  * Buy/Activate a subscription plan
  * POST /api/v1/subscriptions/buy
  * Access: SOCIETY_ADMIN only
- * 
+ *
  * Note: This is MVP version without payment gateway integration.
  * Payment gateway (Razorpay) can be integrated later.
  */
@@ -354,11 +354,15 @@ export const buySubscription = async (req, res) => {
 
     // Check for existing active subscription to carry over days
     const existingSubscription = await prisma.subscription.findUnique({
-      where: { societyId }
+      where: { societyId },
     });
 
     let carriedOverDays = 0;
-    if (existingSubscription && existingSubscription.status === 'ACTIVE' && existingSubscription.expiryDate > new Date()) {
+    if (
+      existingSubscription &&
+      existingSubscription.status === 'ACTIVE' &&
+      existingSubscription.expiryDate > new Date()
+    ) {
       const remainingTime = existingSubscription.expiryDate.getTime() - new Date().getTime();
       carriedOverDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
 
@@ -377,8 +381,8 @@ export const buySubscription = async (req, res) => {
         paymentMode: mode,
         transactionId: txId,
         status: 'SUCCESS', // Assume success for this flow
-        paidAt: new Date()
-      }
+        paidAt: new Date(),
+      },
     });
 
     // 2. Upsert Subscription
@@ -415,8 +419,8 @@ export const buySubscription = async (req, res) => {
         societyId: societyId,
         paymentId: payment.id,
         invoiceNo: invoiceNo,
-        amount: plan.price
-      }
+        amount: plan.price,
+      },
     });
 
     // Log subscription purchase
@@ -465,4 +469,3 @@ export const buySubscription = async (req, res) => {
     });
   }
 };
-
