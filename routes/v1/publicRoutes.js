@@ -49,8 +49,8 @@ const validateRegisterSociety = [
   body('societyType')
     .notEmpty()
     .withMessage('Society type is required')
-    .isIn(['apartment', 'office', 'APARTMENT', 'OFFICE'])
-    .withMessage('Society type must be either "apartment" or "office"'),
+    .isIn(['APARTMENT', 'OFFICE', 'APARTMENT', 'OFFICE'])
+    .withMessage('Society type must be either "APARTMENT" or "OFFICE"'),
   body('adminName')
     .notEmpty()
     .withMessage('Admin name is required')

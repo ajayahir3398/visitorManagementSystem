@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, query, param, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import {
   createUser,
@@ -42,8 +42,8 @@ const validateCreateUser = [
   body('roleId').optional().isInt().withMessage('Invalid role ID'),
   body('status')
     .optional()
-    .isIn(['active', 'blocked'])
-    .withMessage('Status must be either "active" or "blocked"'),
+    .isIn(['ACTIVE', 'BLOCKED'])
+    .withMessage('Status must be either "ACTIVE" or "BLOCKED"'),
   handleValidationErrors,
 ];
 
@@ -62,8 +62,8 @@ const validateUpdateUser = [
   body('roleId').optional().isInt().withMessage('Invalid role ID'),
   body('status')
     .optional()
-    .isIn(['active', 'blocked'])
-    .withMessage('Status must be either "active" or "blocked"'),
+    .isIn(['ACTIVE', 'BLOCKED'])
+    .withMessage('Status must be either "ACTIVE" or "BLOCKED"'),
   handleValidationErrors,
 ];
 

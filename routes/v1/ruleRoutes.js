@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, query, param, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import {
   createRule,
@@ -34,8 +34,8 @@ const validateCreateRule = [
   body('category').notEmpty().withMessage('Category is required'),
   body('priority')
     .optional()
-    .isIn(['Low', 'Medium', 'High'])
-    .withMessage('Priority must be Low, Medium, or High'),
+    .isIn(['LOW', 'MEDIUM', 'HIGH', 'low', 'medium', 'high', 'Low', 'Medium', 'High'])
+    .withMessage('Priority must be LOW, MEDIUM, or HIGH'),
   body('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),
   handleValidationErrors,
 ];
@@ -49,8 +49,8 @@ const validateUpdateRule = [
     .withMessage('Title too long'),
   body('priority')
     .optional()
-    .isIn(['Low', 'Medium', 'High'])
-    .withMessage('Priority must be Low, Medium, or High'),
+    .isIn(['LOW', 'MEDIUM', 'HIGH', 'low', 'medium', 'high', 'Low', 'Medium', 'High'])
+    .withMessage('Priority must be LOW, MEDIUM, or HIGH'),
   body('isActive').optional().isBoolean().withMessage('isActive must be a boolean'),
   handleValidationErrors,
 ];

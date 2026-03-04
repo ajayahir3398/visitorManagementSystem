@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, query, validationResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import {
   payMaintenance,

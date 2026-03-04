@@ -36,7 +36,7 @@ const validateRegisterToken = [
   body('deviceId').optional().isString().withMessage('Device ID must be a string'),
   body('platform')
     .optional()
-    .isIn(['android', 'ios'])
+    .isIn(['ANDROID', 'IOS', 'android', 'ios'])
     .withMessage('Platform must be android or ios'),
   handleValidationErrors,
 ];

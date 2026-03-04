@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, query, param, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
 import { authenticate, authorize } from '../../middleware/auth.js';
 import {
   createSociety,
@@ -30,8 +30,8 @@ const validateCreateSociety = [
   body('type')
     .notEmpty()
     .withMessage('Type is required')
-    .isIn(['apartment', 'office'])
-    .withMessage('Type must be either "apartment" or "office"'),
+    .isIn(['APARTMENT', 'OFFICE', 'apartment', 'office'])
+    .withMessage('Type must be either "APARTMENT" or "OFFICE"'),
   body('address').optional().isString(),
   body('city').optional().isString(),
   body('state').optional().isString(),
@@ -44,12 +44,12 @@ const validateUpdateSociety = [
   body('name').optional().notEmpty().withMessage('Name cannot be empty'),
   body('type')
     .optional()
-    .isIn(['apartment', 'office'])
-    .withMessage('Type must be either "apartment" or "office"'),
+    .isIn(['APARTMENT', 'OFFICE'])
+    .withMessage('Type must be either "APARTMENT" or "OFFICE"'),
   body('status')
     .optional()
-    .isIn(['active', 'expired'])
-    .withMessage('Status must be either "active" or "expired"'),
+    .isIn(['ACTIVE', 'EXPIRED', 'active', 'expired'])
+    .withMessage('Status must be either "ACTIVE" or "EXPIRED"'),
   handleValidationErrors,
 ];
 

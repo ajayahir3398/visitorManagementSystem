@@ -22,7 +22,7 @@ export const authenticate = async (req, res, next) => {
     const user = await prisma.user.findUnique({
       where: {
         id: decoded.userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
       include: {
         role: true,
@@ -96,7 +96,7 @@ export const optionalAuthenticate = async (req, res, next) => {
     const user = await prisma.user.findUnique({
       where: {
         id: decoded.userId,
-        status: 'active',
+        status: 'ACTIVE',
       },
       include: {
         role: true,
@@ -114,7 +114,7 @@ export const optionalAuthenticate = async (req, res, next) => {
 
     // Continue even if user not found (token might be invalid, but that's OK for optional auth)
     next();
-  } catch (error) {
+  } catch (_error) {
     // Token is invalid, but continue anyway (optional auth)
     next();
   }

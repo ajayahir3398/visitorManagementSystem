@@ -9,6 +9,172 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SocietyType {
+  APARTMENT
+  OFFICE
+}
+
+enum SocietySource {
+  MANUAL
+  SELF_REGISTERED
+}
+
+enum SocietyStatus {
+  ACTIVE
+  EXPIRED
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  GRACE
+  LOCKED
+  SUSPENDED
+}
+
+enum PaymentMode {
+  ONLINE
+  UPI
+  CASH
+  CHEQUE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum VisitorLogStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXITED
+}
+
+enum ApprovalDecision {
+  APPROVED
+  REJECTED
+}
+
+enum UnitType {
+  FLAT
+  OFFICE
+  SHOP
+}
+
+enum UnitStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum UnitMemberRole {
+  OWNER
+  TENANT
+  EMPLOYEE
+}
+
+enum PreApprovedGuestStatus {
+  ACTIVE
+  EXPIRED
+  USED
+  REVOKED
+}
+
+enum RulePriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ViolationStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+  PAID
+}
+
+enum NoticeType {
+  GENERAL
+  MAINTENANCE
+  EMERGENCY
+  EVENT
+}
+
+enum NoticePriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum NoticeAudience {
+  ALL
+  OWNERS
+  TENANTS
+  SECURITY
+  RESIDENTS
+}
+
+enum EmergencyType {
+  MEDICAL
+  FIRE
+  THEFT
+  SECURITY
+  OTHER
+}
+
+enum EmergencyNotificationType {
+  SIREN
+  CALL
+  PUSH
+  ALL
+}
+
+enum EmergencyStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum EmergencyPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum BillCycleType {
+  MONTHLY
+  YEARLY
+  SPECIAL
+}
+
+enum MaintenanceBillStatus {
+  UNPAID
+  PAID
+  OVERDUE
+}
+
+enum Platform {
+  ANDROID
+  IOS
+}
+
+enum NotificationType {
+  VISITOR
+  SYSTEM
+  EMERGENCY
+}
+
 model Role {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(50)
@@ -19,19 +185,19 @@ model Role {
 }
 
 model Society {
-  id                Int                      @id @default(autoincrement())
-  name              String                   @db.VarChar(255)
-  type              String                   @db.VarChar(50) // apartment / office
-  source            String                   @default("MANUAL") @db.VarChar(20) // MANUAL / SELF_REGISTERED
-  address           String?                  @db.VarChar(500)
-  city              String?                  @db.VarChar(100)
-  state             String?                  @db.VarChar(100)
-  pincode           String?                  @db.VarChar(10)
-  razorpayKey       String?                  @map("razorpay_key") @db.VarChar(255) // Razorpay key for society maintenance account
-  subscriptionId    Int?                     @map("subscription_id")
-  status            String                   @default("active") @db.VarChar(20) // active / expired
-  createdAt         DateTime                 @default(now()) @map("created_at")
-  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  id                Int                @id @default(autoincrement())
+  name              String             @db.VarChar(255)
+  type              SocietyType
+  source            SocietySource      @default(MANUAL)
+  address           String?            @db.VarChar(500)
+  city              String?            @db.VarChar(100)
+  state             String?            @db.VarChar(100)
+  pincode           String?            @db.VarChar(10)
+  razorpayKey       String?            @map("razorpay_key") @db.VarChar(255) // Razorpay key for society maintenance account
+  subscriptionId    Int?               @map("subscription_id")
+  status            SocietyStatus      @default(ACTIVE)
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
   users             User[]
   subscriptions     Subscription[]
   payments          Payment[]
@@ -58,28 +224,28 @@ model Society {
 }
 
 model User {
-  id                      Int                  @id @default(autoincrement())
-  societyId               Int?                 @map("society_id")
-  name                    String               @db.VarChar(255)
-  mobile                  String               @unique @db.VarChar(20)
-  email                   String?              @unique @db.VarChar(255)
-  passwordHash            String?              @map("password_hash") @db.VarChar(255)
-  roleId                  Int                  @map("role_id")
-  status                  String               @default("active") @db.VarChar(20)
-  photoBase64             String?              @map("photo_base64") @db.Text
-  createdAt               DateTime             @default(now()) @map("created_at")
-  updatedAt               DateTime             @updatedAt @map("updated_at")
-  role                    Role                 @relation(fields: [roleId], references: [id])
-  society                 Society?             @relation(fields: [societyId], references: [id])
+  id                      Int                 @id @default(autoincrement())
+  societyId               Int?                @map("society_id")
+  name                    String              @db.VarChar(255)
+  mobile                  String              @unique @db.VarChar(20)
+  email                   String?             @unique @db.VarChar(255)
+  passwordHash            String?             @map("password_hash") @db.VarChar(255)
+  roleId                  Int                 @map("role_id")
+  status                  UserStatus          @default(ACTIVE)
+  photoBase64             String?             @map("photo_base64") @db.Text
+  createdAt               DateTime            @default(now()) @map("created_at")
+  updatedAt               DateTime            @updatedAt @map("updated_at")
+  role                    Role                @relation(fields: [roleId], references: [id])
+  society                 Society?            @relation(fields: [societyId], references: [id])
   refreshTokens           RefreshToken[]
-  visitorLogsCreated      VisitorLog[]         @relation("VisitorLogCreatedBy")
+  visitorLogsCreated      VisitorLog[]        @relation("VisitorLogCreatedBy")
   approvals               Approval[]
   unitMembers             UnitMember[]
-  preApprovedGuests       PreApprovedGuest[]   @relation("PreApprovedGuestResident")
+  preApprovedGuests       PreApprovedGuest[]  @relation("PreApprovedGuestResident")
   auditLogs               AuditLog[]
   rulesCreated            Rule[]
-  violations              RuleViolation[]      @relation("Violator")
-  reportedViolations      RuleViolation[]      @relation("Reporter")
+  violations              RuleViolation[]     @relation("Violator")
+  reportedViolations      RuleViolation[]     @relation("Reporter")
   noticesCreated          Notice[]
   noticeReads             NoticeRead[]
   emergencyRequestsRaised EmergencyRequest[]
@@ -91,7 +257,7 @@ model User {
   maintenancePaymentsMade     MaintenancePayment[]
 
   // FCM Tokens
-  fcmTokens FcmToken[]
+  fcmTokens     FcmToken[]
   notifications Notification[]
 
   @@index([societyId], map: "idx_users_society_id")
@@ -135,7 +301,7 @@ model SubscriptionPlan {
   name           String         @db.VarChar(50)
   price          Int // Store in smallest unit (₹800 → 800)
   durationMonths Int            @map("duration_months")
-  billingCycle   String?        @db.VarChar(20) // MONTHLY, YEARLY
+  billingCycle   BillingCycle?
   visitorLimit   Int?           @map("visitor_limit")
   features       Json? // JSONB for features
   isActive       Boolean        @default(true) @map("is_active")
@@ -148,16 +314,16 @@ model SubscriptionPlan {
 }
 
 model Subscription {
-  id         Int              @id @default(autoincrement())
-  societyId  Int              @map("society_id")
-  planId     Int              @map("plan_id")
-  status     String           @db.VarChar(20) // TRIAL / ACTIVE / GRACE / LOCKED / SUSPENDED
-  startDate  DateTime         @map("start_date") @db.Date
-  expiryDate DateTime?        @map("expiry_date") @db.Date
-  graceDays  Int              @default(3) @map("grace_days")
-  createdAt  DateTime         @default(now()) @map("created_at")
-  society    Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  plan       SubscriptionPlan @relation(fields: [planId], references: [id])
+  id         Int                @id @default(autoincrement())
+  societyId  Int                @map("society_id")
+  planId     Int                @map("plan_id")
+  status     SubscriptionStatus
+  startDate  DateTime           @map("start_date") @db.Date
+  expiryDate DateTime?          @map("expiry_date") @db.Date
+  graceDays  Int                @default(3) @map("grace_days")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  society    Society            @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  plan       SubscriptionPlan   @relation(fields: [planId], references: [id])
 
   @@unique([societyId], map: "uq_subscriptions_society_id")
   @@index([societyId], map: "idx_subscriptions_society_id")
@@ -168,15 +334,15 @@ model Subscription {
 }
 
 model Payment {
-  id            Int       @id @default(autoincrement())
-  societyId     Int       @map("society_id")
-  amount        Decimal   @db.Decimal(10, 2)
-  gateway       String?   @db.VarChar(20)
-  paymentMode   String?   @map("payment_mode") @db.VarChar(50)
-  transactionId String?   @map("transaction_id") @db.VarChar(100)
-  status        String    @db.VarChar(20)
-  paidAt        DateTime? @map("paid_at")
-  society       Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  id            Int           @id @default(autoincrement())
+  societyId     Int           @map("society_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  gateway       String?       @db.VarChar(20)
+  paymentMode   PaymentMode?  @map("payment_mode")
+  transactionId String?       @map("transaction_id") @db.VarChar(100)
+  status        PaymentStatus
+  paidAt        DateTime?     @map("paid_at")
+  society       Society       @relation(fields: [societyId], references: [id], onDelete: Cascade)
   invoices      Invoice[]
 
   @@index([societyId], map: "idx_payments_society_id")
@@ -240,7 +406,7 @@ model VisitorLog {
   preApprovalId Int?              @map("pre_approval_id")
   entryTime     DateTime?         @map("entry_time")
   exitTime      DateTime?         @map("exit_time")
-  status        String            @default("pending") @db.VarChar(20) // pending / approved / rejected / exited
+  status        VisitorLogStatus  @default(PENDING)
   createdBy     Int               @map("created_by") // security user_id
   createdAt     DateTime          @default(now()) @map("created_at")
   society       Society           @relation(fields: [societyId], references: [id], onDelete: Cascade)
@@ -265,13 +431,13 @@ model VisitorLog {
 }
 
 model Approval {
-  id           Int        @id @default(autoincrement())
-  visitorLogId Int        @map("visitor_log_id")
-  residentId   Int        @map("resident_id")
-  decision     String     @db.VarChar(20) // approved / rejected
-  decisionTime DateTime   @default(now()) @map("decision_time")
-  visitorLog   VisitorLog @relation(fields: [visitorLogId], references: [id], onDelete: Cascade)
-  resident     User       @relation(fields: [residentId], references: [id])
+  id           Int              @id @default(autoincrement())
+  visitorLogId Int              @map("visitor_log_id")
+  residentId   Int              @map("resident_id")
+  decision     ApprovalDecision
+  decisionTime DateTime         @default(now()) @map("decision_time")
+  visitorLog   VisitorLog       @relation(fields: [visitorLogId], references: [id], onDelete: Cascade)
+  resident     User             @relation(fields: [residentId], references: [id])
 
   @@index([visitorLogId], map: "idx_approvals_visitor_log_id")
   @@index([residentId], map: "idx_approvals_resident_id")
@@ -284,10 +450,10 @@ model Unit {
   id                Int                @id @default(autoincrement())
   societyId         Int                @map("society_id")
   unitNo            String             @map("unit_no") @db.VarChar(20) // A-302 / 201 / HR-01
-  unitType          String?            @map("unit_type") @db.VarChar(20) // FLAT / OFFICE / SHOP
+  unitType          UnitType?          @map("unit_type")
   floor             Int?
   block             String             @db.VarChar(20)
-  status            String             @default("ACTIVE") @db.VarChar(20) // ACTIVE / INACTIVE
+  status            UnitStatus         @default(ACTIVE)
   createdAt         DateTime           @default(now()) @map("created_at")
   updatedAt         DateTime           @updatedAt @map("updated_at")
   society           Society            @relation(fields: [societyId], references: [id], onDelete: Cascade)
@@ -299,7 +465,7 @@ model Unit {
   // Maintenance Module
   tempMaintenanceBills TempMaintenanceBill[]
   maintenanceBills     MaintenanceBill[]
-  emergencyRequests EmergencyRequest[]
+  emergencyRequests    EmergencyRequest[]
 
   @@unique([societyId, unitNo, block], map: "uq_units_society_unit_no_block")
   @@index([societyId], map: "idx_units_society_id")
@@ -309,15 +475,15 @@ model Unit {
 }
 
 model UnitMember {
-  id        Int      @id @default(autoincrement())
-  unitId    Int      @map("unit_id")
-  userId    Int      @map("user_id")
-  role      String   @db.VarChar(20) // OWNER / TENANT / EMPLOYEE
-  isPrimary Boolean  @default(false) @map("is_primary")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  unit      Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int            @id @default(autoincrement())
+  unitId    Int            @map("unit_id")
+  userId    Int            @map("user_id")
+  role      UnitMemberRole
+  isPrimary Boolean        @default(false) @map("is_primary")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  unit      Unit           @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([unitId, userId], map: "uq_unit_members_unit_user")
   @@index([unitId], map: "idx_unit_members_unit_id")
@@ -327,24 +493,24 @@ model UnitMember {
 }
 
 model PreApprovedGuest {
-  id          Int          @id @default(autoincrement())
-  societyId   Int          @map("society_id")
-  unitId      Int          @map("unit_id")
-  residentId  Int          @map("resident_id")
-  guestName   String?      @map("guest_name") @db.VarChar(255)
-  guestMobile String?      @map("guest_mobile") @db.VarChar(20)
-  photoBase64 String?      @map("photo_base64") @db.Text
-  accessCode  String       @unique @map("access_code") @db.VarChar(20)
-  validFrom   DateTime     @map("valid_from")
-  validTill   DateTime     @map("valid_till")
-  maxUses     Int          @default(1) @map("max_uses")
-  usedCount   Int          @default(0) @map("used_count")
-  status      String       @default("ACTIVE") @db.VarChar(20) // ACTIVE / EXPIRED / USED / REVOKED
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  society     Society      @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  unit        Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  resident    User         @relation("PreApprovedGuestResident", fields: [residentId], references: [id], onDelete: Cascade)
+  id          Int                    @id @default(autoincrement())
+  societyId   Int                    @map("society_id")
+  unitId      Int                    @map("unit_id")
+  residentId  Int                    @map("resident_id")
+  guestName   String?                @map("guest_name") @db.VarChar(255)
+  guestMobile String?                @map("guest_mobile") @db.VarChar(20)
+  photoBase64 String?                @map("photo_base64") @db.Text
+  accessCode  String                 @unique @map("access_code") @db.VarChar(20)
+  validFrom   DateTime               @map("valid_from")
+  validTill   DateTime               @map("valid_till")
+  maxUses     Int                    @default(1) @map("max_uses")
+  usedCount   Int                    @default(0) @map("used_count")
+  status      PreApprovedGuestStatus @default(ACTIVE)
+  createdAt   DateTime               @default(now()) @map("created_at")
+  updatedAt   DateTime               @updatedAt @map("updated_at")
+  society     Society                @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  unit        Unit                   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  resident    User                   @relation("PreApprovedGuestResident", fields: [residentId], references: [id], onDelete: Cascade)
   visitorLogs VisitorLog[]
 
   @@index([societyId], map: "idx_pre_approved_guests_society_id")
@@ -382,17 +548,17 @@ model AuditLog {
 }
 
 model Rule {
-  id               Int      @id @default(autoincrement())
-  societyId        Int      @map("society_id")
+  id               Int          @id @default(autoincrement())
+  societyId        Int          @map("society_id")
   title            String
   description      String?
   category         String
-  priority         String   @default("Medium")
-  isActive         Boolean  @default(true)
-  violationPenalty String?  @map("violation_penalty")
-  createdBy        Int?     @map("created_by")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  priority         RulePriority @default(MEDIUM)
+  isActive         Boolean      @default(true)
+  violationPenalty String?      @map("violation_penalty")
+  createdBy        Int?         @map("created_by")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
 
   society    Society         @relation(fields: [societyId], references: [id])
   creator    User?           @relation(fields: [createdBy], references: [id])
@@ -404,18 +570,18 @@ model Rule {
 }
 
 model RuleViolation {
-  id               Int      @id @default(autoincrement())
-  societyId        Int      @map("society_id")
-  ruleId           Int      @map("rule_id")
-  violatorUserId   Int?     @map("violator_user_id")
-  violatorUnitId   Int?     @map("violator_unit_id")
-  reportedByUserId Int      @map("reported_by_user_id")
+  id               Int             @id @default(autoincrement())
+  societyId        Int             @map("society_id")
+  ruleId           Int             @map("rule_id")
+  violatorUserId   Int?            @map("violator_user_id")
+  violatorUnitId   Int?            @map("violator_unit_id")
+  reportedByUserId Int             @map("reported_by_user_id")
   description      String?
-  photoBase64      String?  @map("photo_base64") @db.Text
-  status           String   @default("PENDING")
-  penaltyAmount    Decimal? @map("penalty_amount") @db.Decimal(10, 2)
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  photoBase64      String?         @map("photo_base64") @db.Text
+  status           ViolationStatus @default(PENDING)
+  penaltyAmount    Decimal?        @map("penalty_amount") @db.Decimal(10, 2)
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
 
   society  Society @relation(fields: [societyId], references: [id])
   rule     Rule    @relation(fields: [ruleId], references: [id])
@@ -433,13 +599,13 @@ model Notice {
   societyId Int @map("society_id")
   createdBy Int @map("created_by")
 
-  title         String
-  description   String?
-  photoBase64   String? @map("photo_base64") @db.Text
+  title       String
+  description String?
+  photoBase64 String? @map("photo_base64") @db.Text
 
-  noticeType String @map("notice_type") // General / Maintenance / Emergency / Event
-  priority   String @default("Medium") // High / Medium / Low
-  audience   String // All / Owners / Tenants / Security
+  noticeType NoticeType     @map("notice_type")
+  priority   NoticePriority @default(MEDIUM)
+  audience   NoticeAudience
 
   startDate DateTime @map("start_date")
   endDate   DateTime @map("end_date")
@@ -472,23 +638,21 @@ model NoticeRead {
   @@map("notice_reads")
 }
 
-
-
 model EmergencyRequest {
-  id               Int       @id @default(autoincrement())
-  societyId        Int       @map("society_id")
-  raisedBy         Int       @map("raised_by")
-  unitId           Int?      @map("unit_id")
-  emergencyType    String    @map("emergency_type") @db.VarChar(50) // Medical / Fire / Theft / Security / Other
-  notificationType String    @map("notification_type") @db.VarChar(20) // SIREN / CALL / PUSH / ALL
-  description      String?   @db.VarChar(500)
-  location         String?   @db.VarChar(255)
-  status           String    @default("OPEN") @db.VarChar(20) // OPEN / ACKNOWLEDGED / RESOLVED
-  priority         String    @default("HIGH") @db.VarChar(20)
-  raisedAt         DateTime  @default(now()) @map("raised_at")
-  acknowledgedAt   DateTime? @map("acknowledged_at")
-  resolvedAt       DateTime? @map("resolved_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id               Int                       @id @default(autoincrement())
+  societyId        Int                       @map("society_id")
+  raisedBy         Int                       @map("raised_by")
+  unitId           Int?                      @map("unit_id")
+  emergencyType    EmergencyType             @map("emergency_type")
+  notificationType EmergencyNotificationType @map("notification_type")
+  description      String?                   @db.VarChar(500)
+  location         String?                   @db.VarChar(255)
+  status           EmergencyStatus           @default(OPEN)
+  priority         EmergencyPriority         @default(HIGH)
+  raisedAt         DateTime                  @default(now()) @map("raised_at")
+  acknowledgedAt   DateTime?                 @map("acknowledged_at")
+  resolvedAt       DateTime?                 @map("resolved_at")
+  updatedAt        DateTime                  @updatedAt @map("updated_at")
 
   society   Society             @relation(fields: [societyId], references: [id], onDelete: Cascade)
   user      User                @relation(fields: [raisedBy], references: [id])
@@ -521,17 +685,17 @@ model EmergencyResponse {
 
 // 1️⃣ Society Maintenance Plan (Defines MONTHLY / YEARLY amount for a society)
 model SocietyMaintenancePlan {
-  id        Int      @id @default(autoincrement())
-  societyId Int      @map("society_id")
+  id        Int @id @default(autoincrement())
+  societyId Int @map("society_id")
 
-  planType  String   @db.VarChar(20) // MONTHLY / YEARLY
-  amount    Int                      // amount in ₹
-  isActive  Boolean  @default(true)
+  planType BillingCycle
+  amount   Int // amount in ₹
+  isActive Boolean      @default(true)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  society   Society  @relation(fields: [societyId], references: [id])
+  society Society @relation(fields: [societyId], references: [id])
 
   @@unique([societyId, planType])
   @@index([societyId])
@@ -540,22 +704,22 @@ model SocietyMaintenancePlan {
 
 // 2️⃣ Temp Maintenance Bill (Preview before final generation)
 model TempMaintenanceBill {
-  id        Int      @id @default(autoincrement())
-  societyId Int      @map("society_id")
-  unitId    Int      @map("unit_id")
+  id        Int @id @default(autoincrement())
+  societyId Int @map("society_id")
+  unitId    Int @map("unit_id")
 
-  billCycle String   @db.VarChar(20) // MONTHLY / YEARLY
-  period    String   @db.VarChar(20) // 2025-03 / 2025
-  amount    Int
-  dueDate   DateTime @map("due_date")
-  description String? @db.VarChar(500)
+  billCycle   BillCycleType
+  period      String       @db.VarChar(20) // 2025-03 / 2025
+  amount      Int
+  dueDate     DateTime     @map("due_date")
+  description String?      @db.VarChar(500)
 
   createdBy Int      @map("created_by")
   createdAt DateTime @default(now()) @map("created_at")
 
-  society   Society  @relation(fields: [societyId], references: [id])
-  unit      Unit     @relation(fields: [unitId], references: [id])
-  admin     User     @relation(fields: [createdBy], references: [id])
+  society Society @relation(fields: [societyId], references: [id])
+  unit    Unit    @relation(fields: [unitId], references: [id])
+  admin   User    @relation(fields: [createdBy], references: [id])
 
   @@index([societyId])
   @@index([unitId])
@@ -564,26 +728,26 @@ model TempMaintenanceBill {
 
 // 3️⃣ Maintenance Bill (FINAL BILL - Official payable bill)
 model MaintenanceBill {
-  id        Int      @id @default(autoincrement())
-  societyId Int      @map("society_id")
-  unitId    Int      @map("unit_id")
+  id        Int @id @default(autoincrement())
+  societyId Int @map("society_id")
+  unitId    Int @map("unit_id")
 
-  billCycle String   @db.VarChar(20) // MONTHLY / YEARLY / SPECIAL
-  period    String   @db.VarChar(20) // 2025-03 / 2025 / SPECIAL
-  amount    Int
-  dueDate   DateTime @map("due_date")
-  description String? @db.VarChar(500)
+  billCycle   BillCycleType
+  period      String        @db.VarChar(20) // 2025-03 / 2025 / SPECIAL
+  amount      Int
+  dueDate     DateTime      @map("due_date")
+  description String?       @db.VarChar(500)
 
-  status    String   @default("UNPAID") @db.VarChar(20) // UNPAID / PAID / OVERDUE
+  status MaintenanceBillStatus @default(UNPAID)
 
   createdBy Int      @map("created_by")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  society   Society  @relation(fields: [societyId], references: [id])
-  unit      Unit     @relation(fields: [unitId], references: [id])
-  admin     User     @relation(fields: [createdBy], references: [id])
-  payments  MaintenancePayment[]
+  society  Society              @relation(fields: [societyId], references: [id])
+  unit     Unit                 @relation(fields: [unitId], references: [id])
+  admin    User                 @relation(fields: [createdBy], references: [id])
+  payments MaintenancePayment[]
 
   @@unique([unitId, billCycle, period])
   @@index([societyId])
@@ -594,20 +758,20 @@ model MaintenanceBill {
 
 // 4️⃣ Maintenance Payment (Tracks money received)
 model MaintenancePayment {
-  id            Int      @id @default(autoincrement())
-  billId        Int      @map("bill_id")
-  paidBy        Int      @map("paid_by")
+  id     Int @id @default(autoincrement())
+  billId Int @map("bill_id")
+  paidBy Int @map("paid_by")
 
-  amount        Int
-  paymentMode   String   @db.VarChar(20) // ONLINE / UPI / CASH / CHEQUE
+  amount      Int
+  paymentMode PaymentMode
 
-  transactionId String?  @map("transaction_id")
-  status        String   @db.VarChar(20) // SUCCESS / FAILED
+  transactionId String?       @map("transaction_id")
+  status        PaymentStatus
 
-  paidAt        DateTime @default(now()) @map("paid_at")
+  paidAt DateTime @default(now()) @map("paid_at")
 
-  bill          MaintenanceBill @relation(fields: [billId], references: [id])
-  resident      User            @relation(fields: [paidBy], references: [id])
+  bill     MaintenanceBill @relation(fields: [billId], references: [id])
+  resident User            @relation(fields: [paidBy], references: [id])
 
   @@index([billId])
   @@index([paidBy])
@@ -619,15 +783,15 @@ model MaintenancePayment {
 // ═══════════════════════════════════════════════════════════════════════════
 
 model FcmToken {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  token     String   @unique @db.VarChar(500) // FCM token
-  deviceId  String?  @map("device_id") @db.VarChar(255) // Optional device identifier
-  platform  String?  @db.VarChar(20) // android / ios
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  token     String    @unique @db.VarChar(500) // FCM token
+  deviceId  String?   @map("device_id") @db.VarChar(255) // Optional device identifier
+  platform  Platform?
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "idx_fcm_tokens_user_id")
   @@index([token], map: "idx_fcm_tokens_token")
@@ -637,16 +801,16 @@ model FcmToken {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
+  id        Int               @id @default(autoincrement())
+  userId    Int               @map("user_id")
   title     String
   body      String
   data      Json?
-  isRead    Boolean  @default(false) @map("is_read")
-  type      String?  @db.VarChar(50) // e.g., VISITOR, SYSTEM, EMERGENCY
-  createdAt DateTime @default(now()) @map("created_at")
+  isRead    Boolean           @default(false) @map("is_read")
+  type      NotificationType?
+  createdAt DateTime          @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "idx_notifications_user_id")
   @@index([isRead], map: "idx_notifications_is_read")
