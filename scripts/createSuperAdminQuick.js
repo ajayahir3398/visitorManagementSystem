@@ -65,14 +65,14 @@ async function createSuperAdminQuick() {
 
     await fixSequence('users');
     // Create super admin user
-    const user = await prisma.user.create({
+    const _user = await prisma.user.create({
       data: {
         name: defaultAdmin.name,
         email: defaultAdmin.email,
         mobile: defaultAdmin.mobile,
         passwordHash,
         roleId: superAdminRole.id,
-        status: 'active',
+        status: 'ACTIVE',
         societyId: null, // Super admin doesn't belong to any society
       },
       include: {

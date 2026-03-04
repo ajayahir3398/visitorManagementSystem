@@ -1,6 +1,15 @@
 import prisma from '../lib/prisma.js';
 import { sendMulticastNotification } from '../services/firebaseService.js';
 
+const getValidNotificationType = (type) => {
+  if (!type) return 'SYSTEM';
+  const upperType = type.toUpperCase();
+  if (['VISITOR', 'SYSTEM', 'EMERGENCY'].includes(upperType)) return upperType;
+  if (upperType.includes('VISITOR')) return 'VISITOR';
+  if (upperType.includes('EMERGENCY')) return 'EMERGENCY';
+  return 'SYSTEM';
+};
+
 /**
  * Send notification to a single user
  * @param {number} userId - User ID to send notification to
@@ -29,7 +38,7 @@ export const sendNotificationToUser = async (userId, title, body, data = {}) => 
           title,
           body,
           data: data || {},
-          type: data.type || 'SYSTEM',
+          type: getValidNotificationType(data.type),
           isRead: false,
         },
       });
@@ -121,7 +130,7 @@ export const sendNotificationToUsers = async (userIds, title, body, data = {}) =
         title,
         body,
         data: data || {},
-        type: data.type || 'SYSTEM',
+        type: getValidNotificationType(data.type),
         isRead: false,
       }));
 

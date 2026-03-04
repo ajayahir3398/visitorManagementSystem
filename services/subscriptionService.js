@@ -1,37 +1,16 @@
 import prisma from '../lib/prisma.js';
 import { fixSequence } from '../utils/sequenceFix.js';
 
-/**
- * Get subscription for a society
- */
 export const getSubscription = async (societyId) => {
-  if (!societyId) {
-    return null;
-  }
+  if (!societyId) return null;
 
-  const subscription = await prisma.subscription.findFirst({
-    where: {
-      societyId,
-    },
-    include: {
-      plan: true,
-    },
-    orderBy: {
-      createdAt: 'desc', // Get the latest subscription
-    },
+  return await prisma.subscription.findFirst({
+    where: { societyId },
+    include: { plan: true },
+    orderBy: { createdAt: 'desc' },
   });
-
-  return subscription;
 };
 
-/**
- * Calculate subscription status based on expiry date
- * Logic:
- * - If today > expiryDate:
- *   - If daysSinceExpiry <= graceDays: GRACE
- *   - Else: LOCKED
- * - If today <= expiryDate: Keep current status (TRIAL/ACTIVE)
- */
 export const calculateSubscriptionStatus = (subscription) => {
   if (!subscription || !subscription.expiryDate) {
     return subscription?.status || 'LOCKED';
@@ -43,72 +22,35 @@ export const calculateSubscriptionStatus = (subscription) => {
   const expiryDate = new Date(subscription.expiryDate);
   expiryDate.setHours(0, 0, 0, 0);
 
-  // If subscription is manually SUSPENDED, don't auto-update
-  if (subscription.status === 'SUSPENDED') {
-    return 'SUSPENDED';
-  }
+  if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
+  if (today <= expiryDate) return subscription.status;
 
-  // If not expired yet, keep current status
-  if (today <= expiryDate) {
-    return subscription.status;
-  }
-
-  // Calculate days since expiry
   const daysSinceExpiry = Math.floor((today - expiryDate) / (1000 * 60 * 60 * 24));
+  if (daysSinceExpiry <= subscription.graceDays) return 'GRACE';
 
-  // If within grace period
-  if (daysSinceExpiry <= subscription.graceDays) {
-    return 'GRACE';
-  }
-
-  // Beyond grace period
   return 'LOCKED';
 };
 
-/**
- * Update subscription status based on expiry date
- */
 export const updateSubscriptionStatus = async (subscription) => {
-  if (!subscription) {
-    return null;
-  }
+  if (!subscription) return null;
 
   const newStatus = calculateSubscriptionStatus(subscription);
 
-  // Only update if status changed
   if (newStatus !== subscription.status) {
-    const updated = await prisma.subscription.update({
+    return await prisma.subscription.update({
       where: { id: subscription.id },
       data: { status: newStatus },
-      include: {
-        plan: true,
-      },
+      include: { plan: true },
     });
-
-    return updated;
   }
 
   return subscription;
 };
 
-/**
- * Auto-update all subscription statuses
- * This should be called periodically (e.g., via cron job)
- */
 export const updateAllSubscriptionStatuses = async () => {
-  // Get all subscriptions that are not SUSPENDED
   const subscriptions = await prisma.subscription.findMany({
-    where: {
-      status: {
-        not: 'SUSPENDED', // Don't auto-update suspended subscriptions
-      },
-      expiryDate: {
-        not: null,
-      },
-    },
-    include: {
-      plan: true,
-    },
+    where: { status: { not: 'SUSPENDED' }, expiryDate: { not: null } },
+    include: { plan: true },
   });
 
   let updatedCount = 0;
@@ -116,7 +58,6 @@ export const updateAllSubscriptionStatuses = async () => {
   for (const subscription of subscriptions) {
     try {
       const newStatus = calculateSubscriptionStatus(subscription);
-
       if (newStatus !== subscription.status) {
         await prisma.subscription.update({
           where: { id: subscription.id },
@@ -125,236 +66,132 @@ export const updateAllSubscriptionStatuses = async () => {
         updatedCount++;
       }
     } catch (updateError) {
-      // Log individual update errors but continue with other subscriptions
       console.error(`Error updating subscription ${subscription.id}:`, updateError.message);
     }
   }
 
-  return {
-    total: subscriptions.length,
-    updated: updatedCount,
-  };
+  return { total: subscriptions.length, updated: updatedCount };
 };
 
-/**
- * Create a TRIAL subscription for a society
- * Default: 60 days trial
- */
 export const createTrialSubscription = async (societyId, durationDays = 60) => {
-  try {
-    // Find or create TRIAL plan
-    let trialPlan = await prisma.subscriptionPlan.findFirst({
-      where: {
-        name: 'TRIAL',
+  let trialPlan = await prisma.subscriptionPlan.findFirst({
+    where: {
+      OR: [{ code: 'TRIAL' }, { name: 'TRIAL' }, { name: 'Trial Plan' }],
+      isActive: true,
+    },
+  });
+
+  await fixSequence('subscription_plans');
+
+  if (!trialPlan) {
+    trialPlan = await prisma.subscriptionPlan.create({
+      data: {
+        code: 'TRIAL',
+        name: 'Trial Plan',
+        price: 0,
+        durationMonths: 0,
+        visitorLimit: null,
+        features: { trial: true, duration_days: durationDays },
         isActive: true,
+        billingCycle: 'MONTHLY',
       },
     });
-
-    await fixSequence('subscription_plans');
-
-    if (!trialPlan) {
-      // Create default TRIAL plan if it doesn't exist
-      trialPlan = await prisma.subscriptionPlan.create({
-        data: {
-          name: 'TRIAL',
-          price: 0,
-          durationMonths: 0, // Trial is in days, not months
-          visitorLimit: null, // Unlimited for trial
-          features: {
-            trial: true,
-            duration_days: durationDays,
-          },
-          isActive: true,
-        },
-      });
-    }
-
-    // Calculate dates
-    const startDate = new Date();
-    startDate.setHours(0, 0, 0, 0);
-
-    const expiryDate = new Date(startDate);
-    expiryDate.setDate(expiryDate.getDate() + durationDays);
-    expiryDate.setHours(23, 59, 59, 999);
-
-    // Create subscription
-    await fixSequence('subscriptions');
-    const subscription = await prisma.subscription.create({
-      data: {
-        societyId,
-        planId: trialPlan.id,
-        status: 'TRIAL',
-        startDate,
-        expiryDate,
-        graceDays: 3,
-      },
-      include: {
-        plan: true,
-      },
-    });
-
-    return subscription;
-  } catch (error) {
-    console.error('Error creating trial subscription:', error);
-    throw error;
   }
+
+  const startDate = new Date();
+  startDate.setHours(0, 0, 0, 0);
+  const expiryDate = new Date(startDate);
+  expiryDate.setDate(expiryDate.getDate() + durationDays);
+  expiryDate.setHours(23, 59, 59, 999);
+
+  await fixSequence('subscriptions');
+  return await prisma.subscription.create({
+    data: { societyId, planId: trialPlan.id, status: 'TRIAL', startDate, expiryDate, graceDays: 3 },
+    include: { plan: true },
+  });
 };
 
-/**
- * Check if subscription allows access
- */
 export const isSubscriptionActive = (subscription) => {
-  if (!subscription) {
-    return false;
-  }
-
-  const allowedStatuses = ['TRIAL', 'ACTIVE', 'GRACE'];
-  return allowedStatuses.includes(subscription.status);
+  if (!subscription) return false;
+  return ['TRIAL', 'ACTIVE', 'GRACE'].includes(subscription.status);
 };
 
-/**
- * Extend subscription period
- * Can extend trial or any active subscription
- */
 export const extendSubscription = async (subscriptionId, additionalDays) => {
-  try {
-    if (!subscriptionId || !additionalDays || additionalDays <= 0) {
-      throw new Error('Invalid subscription ID or extension days');
-    }
-
-    // Get current subscription
-    const subscription = await prisma.subscription.findUnique({
-      where: { id: subscriptionId },
-      include: {
-        plan: true,
-        society: true,
-      },
-    });
-
-    if (!subscription) {
-      throw new Error('Subscription not found');
-    }
-
-    // Calculate new expiry date
-    let newExpiryDate;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // If subscription is already expired, extend from today
-    // Otherwise, extend from current expiry date
-    if (subscription.expiryDate) {
-      const currentExpiry = new Date(subscription.expiryDate);
-      currentExpiry.setHours(0, 0, 0, 0);
-
-      if (currentExpiry < today) {
-        // Expired - extend from today
-        newExpiryDate = new Date(today);
-        newExpiryDate.setDate(newExpiryDate.getDate() + additionalDays);
-      } else {
-        // Not expired - extend from current expiry
-        newExpiryDate = new Date(currentExpiry);
-        newExpiryDate.setDate(newExpiryDate.getDate() + additionalDays);
-      }
-    } else {
-      // No expiry date - extend from today
-      newExpiryDate = new Date(today);
-      newExpiryDate.setDate(newExpiryDate.getDate() + additionalDays);
-    }
-
-    newExpiryDate.setHours(23, 59, 59, 999);
-
-    // Update subscription
-    const updated = await prisma.subscription.update({
-      where: { id: subscriptionId },
-      data: {
-        expiryDate: newExpiryDate,
-        // If subscription was LOCKED or GRACE, reactivate it
-        status:
-          subscription.status === 'LOCKED' || subscription.status === 'GRACE'
-            ? subscription.plan.name === 'TRIAL'
-              ? 'TRIAL'
-              : 'ACTIVE'
-            : subscription.status,
-      },
-      include: {
-        plan: true,
-        society: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return updated;
-  } catch (error) {
-    console.error('Error extending subscription:', error);
-    throw error;
+  if (!subscriptionId || !additionalDays || additionalDays <= 0) {
+    throw { status: 400, message: 'Invalid subscription ID or extension days' };
   }
+
+  const subscription = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+    include: { plan: true, society: true },
+  });
+
+  if (!subscription) throw { status: 404, message: 'Subscription not found' };
+
+  let newExpiryDate;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (subscription.expiryDate) {
+    const currentExpiry = new Date(subscription.expiryDate);
+    currentExpiry.setHours(0, 0, 0, 0);
+    newExpiryDate = new Date(currentExpiry < today ? today : currentExpiry);
+  } else {
+    newExpiryDate = new Date(today);
+  }
+
+  newExpiryDate.setDate(newExpiryDate.getDate() + additionalDays);
+  newExpiryDate.setHours(23, 59, 59, 999);
+
+  return await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      expiryDate: newExpiryDate,
+      status:
+        subscription.status === 'LOCKED' || subscription.status === 'GRACE'
+          ? subscription.plan.name === 'TRIAL'
+            ? 'TRIAL'
+            : 'ACTIVE'
+          : subscription.status,
+    },
+    include: { plan: true, society: { select: { id: true, name: true } } },
+  });
 };
 
-/**
- * Extend subscription by society ID (extends latest subscription)
- */
 export const extendSubscriptionBySociety = async (societyId, additionalDays) => {
-  try {
-    // Get latest subscription for society
-    const subscription = await getSubscription(societyId);
-
-    if (!subscription) {
-      throw new Error('No subscription found for this society');
-    }
-
-    return await extendSubscription(subscription.id, additionalDays);
-  } catch (error) {
-    console.error('Error extending subscription by society:', error);
-    throw error;
-  }
+  const subscription = await getSubscription(societyId);
+  if (!subscription) throw { status: 404, message: 'No subscription found for this society' };
+  return await extendSubscription(subscription.id, additionalDays);
 };
 
-/**
- * Check for expiring/expired subscriptions and notify Society Admins
- * Should be called daily via cron
- */
 export const checkSubscriptionExpiryAndNotify = async () => {
   console.log('--- Starting Subscription Expiry Check ---');
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Get all active subscriptions (including GRACE/TRIAL)
     const subscriptions = await prisma.subscription.findMany({
-      where: {
-        status: { in: ['ACTIVE', 'TRIAL', 'GRACE'] },
-        expiryDate: { not: null },
-      },
-      include: {
-        society: true,
-      },
+      where: { status: { in: ['ACTIVE', 'TRIAL', 'GRACE'] }, expiryDate: { not: null } },
+      include: { society: true },
     });
 
     for (const subscription of subscriptions) {
+      // Implementation from existing code remains same
       if (!subscription.expiryDate) continue;
 
       const expiryDate = new Date(subscription.expiryDate);
       expiryDate.setHours(0, 0, 0, 0);
 
       const timeDiff = expiryDate.getTime() - today.getTime();
-      const daysUntilExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24)); // Can be negative if expired
+      const daysUntilExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
       let notificationTitle = null;
       let notificationBody = null;
 
-      // 1. Check for upcoming expiry (7, 3, 1 days)
       if (daysUntilExpiry === 7 || daysUntilExpiry === 3 || daysUntilExpiry === 1) {
         notificationTitle = 'Subscription Expiring Soon';
         notificationBody = `Your society's subscription will expire in ${daysUntilExpiry} days. Please renew to avoid service interruption.`;
-      }
-      // 2. Check for just expired (0 days or -1 days for "yesterday")
-      // Note: Status update job runs separately, so status might change to LOCKED/GRACE.
-      // We want to alert on day 0 (expiry day) and maybe day -1 (first day expired)
-      else if (daysUntilExpiry === 0) {
+      } else if (daysUntilExpiry === 0) {
         notificationTitle = 'Subscription Expires Today';
         notificationBody = `Your society's subscription expires today. Please renew immediately.`;
       } else if (daysUntilExpiry === -1) {
@@ -363,16 +200,13 @@ export const checkSubscriptionExpiryAndNotify = async () => {
       }
 
       if (notificationTitle && notificationBody) {
-        // Find Society Admins
-        // We need to import sendNotificationToUsers dynamically or move it to a service to avoid circular deps if any
-        // Since we are in a service, we can import notificationHelper.js
         const { sendNotificationToUsers } = await import('../utils/notificationHelper.js');
 
         const admins = await prisma.user.findMany({
           where: {
             societyId: subscription.societyId,
             role: { name: 'SOCIETY_ADMIN' },
-            status: 'active',
+            status: 'ACTIVE',
           },
           select: { id: true },
         });
@@ -402,4 +236,113 @@ export const checkSubscriptionExpiryAndNotify = async () => {
   } catch (error) {
     console.error('Error in checkSubscriptionExpiryAndNotify:', error);
   }
+};
+
+export const getSocietySubscription = async ({ societyId, reqUser }) => {
+  const societyIdInt = parseInt(societyId);
+  if (isNaN(societyIdInt)) throw { status: 400, message: 'Invalid society ID' };
+
+  if (reqUser.role_name === 'SOCIETY_ADMIN' && reqUser.society_id !== societyIdInt) {
+    throw {
+      status: 403,
+      message: 'Access denied. You can only view your own society subscription.',
+    };
+  }
+
+  let subscription = await getSubscription(societyIdInt);
+  if (!subscription) throw { status: 404, message: 'No subscription found for this society' };
+
+  subscription = await updateSubscriptionStatus(subscription);
+  return subscription;
+};
+
+export const getAllSubscriptions = async ({ page = 1, limit = 10, status, societyId, planId }) => {
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  const where = {};
+  if (status) where.status = status;
+  if (societyId) where.societyId = parseInt(societyId);
+  if (planId) where.planId = parseInt(planId);
+
+  const [subscriptions, total] = await Promise.all([
+    prisma.subscription.findMany({
+      where,
+      skip,
+      take: parseInt(limit),
+      orderBy: { createdAt: 'desc' },
+      include: { plan: true, society: { select: { id: true, name: true, type: true } } },
+    }),
+    prisma.subscription.count({ where }),
+  ]);
+
+  return { subscriptions, total };
+};
+
+export const getCurrentSubscription = async ({ reqUser }) => {
+  const societyId = reqUser.society_id;
+  if (!societyId) throw { status: 400, message: 'User is not associated with a society' };
+
+  let subscription = await getSubscription(societyId);
+  if (!subscription) throw { status: 404, message: 'No subscription found for your society' };
+
+  subscription = await updateSubscriptionStatus(subscription);
+  return subscription;
+};
+
+export const buySubscription = async ({ planId, paymentMode, transactionId, reqUser }) => {
+  const societyId = reqUser.society_id;
+  if (!societyId) throw { status: 400, message: 'User is not associated with a society' };
+  if (!planId) throw { status: 400, message: 'planId is required' };
+
+  const mode = paymentMode || 'OFFLINE';
+  const txId = transactionId || `TXN-REF-${Date.now()}`;
+  const planIdInt = parseInt(planId);
+
+  if (isNaN(planIdInt)) throw { status: 400, message: 'Invalid planId' };
+
+  const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planIdInt } });
+  if (!plan) throw { status: 404, message: 'Plan not found' };
+  if (!plan.isActive) throw { status: 400, message: 'This plan is not available for purchase' };
+
+  const startDate = new Date();
+  let expiryDate = new Date();
+  expiryDate.setMonth(expiryDate.getMonth() + plan.durationMonths);
+
+  const existingSubscription = await prisma.subscription.findUnique({ where: { societyId } });
+
+  let carriedOverDays = 0;
+  if (
+    existingSubscription &&
+    existingSubscription.status === 'ACTIVE' &&
+    existingSubscription.expiryDate > new Date()
+  ) {
+    const remainingTime = existingSubscription.expiryDate.getTime() - new Date().getTime();
+    carriedOverDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
+    if (carriedOverDays > 0) expiryDate.setDate(expiryDate.getDate() + carriedOverDays);
+  }
+
+  const payment = await prisma.payment.create({
+    data: {
+      societyId: societyId,
+      amount: plan.price,
+      gateway: 'MANUAL',
+      paymentMode: mode,
+      transactionId: txId,
+      status: 'SUCCESS',
+      paidAt: new Date(),
+    },
+  });
+
+  const subscription = await prisma.subscription.upsert({
+    where: { societyId },
+    update: { planId: plan.id, status: 'ACTIVE', startDate, expiryDate },
+    create: { societyId, planId: plan.id, status: 'ACTIVE', startDate, expiryDate },
+    include: { plan: true, society: { select: { id: true, name: true } } },
+  });
+
+  const invoiceNo = `INV-${societyId}-${Date.now()}`;
+  await prisma.invoice.create({
+    data: { societyId: societyId, paymentId: payment.id, invoiceNo: invoiceNo, amount: plan.price },
+  });
+
+  return { subscription, payment, plan, txId, existingSubscription };
 };

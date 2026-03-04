@@ -43,7 +43,7 @@ export const maintenanceBillingService = {
 
       // 1. Get all societies with active maintenance plans
       const societies = await prisma.society.findMany({
-        where: { status: 'active' },
+        where: { status: 'ACTIVE' },
         include: {
           maintenancePlans: {
             where: { isActive: true },

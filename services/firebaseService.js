@@ -1,6 +1,5 @@
 import admin from 'firebase-admin';
 import { readFileSync } from 'fs';
-import { createRequire } from 'module';
 
 /**
  * Initialize Firebase Admin SDK
@@ -70,7 +69,7 @@ export const sendNotification = async (token, notification, data = {}) => {
         return acc;
       }, {}),
       android: {
-        priority: 'high',
+        priority: 'HIGH',
         notification: {
           sound: 'default',
           channelId: 'default',
@@ -146,7 +145,7 @@ export const sendMulticastNotification = async (tokens, notification, data = {})
           return acc;
         }, {}),
         android: {
-          priority: 'high',
+          priority: 'HIGH',
           notification: {
             sound: 'default',
             channelId: 'default',
@@ -209,7 +208,7 @@ export const sendTopicNotification = async (topic, notification, data = {}) => {
         }, {}),
       },
       android: {
-        priority: 'high',
+        priority: 'HIGH',
         notification: {
           sound: 'default',
           channelId: 'default',

@@ -1,9 +1,9 @@
-import axios from 'axios';
+import _axios from 'axios';
 import 'dotenv/config';
 
-const API_URL = `http://localhost:${process.env.PORT || 1111}/api/v1`;
+const _API_URL = `http://localhost:${process.env.PORT || 1111}/api/v1`;
 
-async function testMandatoryBlock() {
+async function _testMandatoryBlock() {
   console.log('Testing mandatory block field...');
 
   // 1. Login to get token (assuming a superadmin or society admin exists)
@@ -36,7 +36,7 @@ async function verifyDbConstraint() {
       },
     });
     console.error('FAIL: Unit created without block!');
-  } catch (error) {
+  } catch (_error) {
     console.log('SUCCESS: Prisma blocked creation without block field.');
     // console.log('Error message:', error.message);
   }
@@ -54,8 +54,8 @@ async function verifyDbConstraint() {
 
     // Clean up
     await prisma.unit.delete({ where: { id: unit.id } });
-  } catch (error) {
-    console.error('FAIL: Failed to create unit with block!', error.message);
+  } catch (_error) {
+    console.error('FAIL: Failed to create unit with block!', _error.message);
   }
 }
 

@@ -69,7 +69,7 @@ async function createSuperAdmin() {
         mobile,
         passwordHash,
         roleId: superAdminRole.id,
-        status: 'active',
+        status: 'ACTIVE',
         societyId: null, // Super admin doesn't belong to any society
       },
       include: {
