@@ -42,7 +42,7 @@ export const login = async (req, res) => {
     }
 
     // Check if user is active
-    if (user.status !== 'active') {
+    if (user.status !== 'ACTIVE') {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
@@ -157,7 +157,7 @@ export const requestOTP = async (req, res) => {
       });
     }
 
-    if (user.status !== 'active') {
+    if (user.status !== 'ACTIVE') {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
@@ -166,7 +166,7 @@ export const requestOTP = async (req, res) => {
 
     // Generate and store OTP
     const otpCode = generateOTP();
-    const otp = await storeOTP(mobile, otpCode, 10); // 10 minutes expiry
+    const _otp = await storeOTP(mobile, otpCode, 10); // 10 minutes expiry
 
     // TODO: Send OTP via SMS service (Twilio, AWS SNS, etc.)
     // For now, we'll return it in development (remove in production)
@@ -232,7 +232,7 @@ export const verifyOTPLogin = async (req, res) => {
       });
     }
 
-    if (user.status !== 'active') {
+    if (user.status !== 'ACTIVE') {
       return res.status(403).json({
         success: false,
         message: 'Account is blocked. Please contact administrator.',
@@ -331,7 +331,7 @@ export const refreshToken = async (req, res) => {
     }
 
     // Check if user is still active
-    if (tokenRecord.user.status !== 'active') {
+    if (tokenRecord.user.status !== 'ACTIVE') {
       // Delete all refresh tokens for this user
       await prisma.refreshToken.deleteMany({
         where: { userId: decoded.userId },
