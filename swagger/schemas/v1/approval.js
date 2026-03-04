@@ -16,8 +16,8 @@ export default {
       },
       decision: {
         type: 'string',
-        enum: ['approved', 'rejected'],
-        example: 'approved',
+        enum: ['APPROVED', 'REJECTED'],
+        example: 'APPROVED',
       },
       decisionTime: {
         type: 'string',

@@ -12,8 +12,8 @@ export default {
       },
       type: {
         type: 'string',
-        enum: ['apartment', 'office'],
-        example: 'apartment',
+        enum: ['APARTMENT', 'OFFICE'],
+        example: 'APARTMENT',
       },
       address: {
         type: 'string',
@@ -48,8 +48,8 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['active', 'expired'],
-        example: 'active',
+        enum: ['ACTIVE', 'expired'],
+        example: 'ACTIVE',
       },
       createdAt: {
         type: 'string',
@@ -73,8 +73,8 @@ export default {
       },
       type: {
         type: 'string',
-        enum: ['apartment', 'office'],
-        example: 'apartment',
+        enum: ['APARTMENT', 'OFFICE'],
+        example: 'APARTMENT',
       },
       address: {
         type: 'string',
@@ -118,8 +118,8 @@ export default {
       },
       type: {
         type: 'string',
-        enum: ['apartment', 'office'],
-        example: 'apartment',
+        enum: ['APARTMENT', 'OFFICE'],
+        example: 'APARTMENT',
       },
       address: {
         type: 'string',
@@ -154,8 +154,8 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['active', 'expired'],
-        example: 'active',
+        enum: ['ACTIVE', 'expired'],
+        example: 'ACTIVE',
       },
     },
   },

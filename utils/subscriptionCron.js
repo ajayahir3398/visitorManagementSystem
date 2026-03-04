@@ -70,7 +70,7 @@ export const scheduleSubscriptionUpdates = () => {
     setTimeout(async () => {
       try {
         await runSubscriptionStatusUpdate();
-      } catch (error) {
+      } catch (_error) {
         // Silently handle errors - database might not be ready yet
         // The scheduled cron job will handle updates once database is available
       }

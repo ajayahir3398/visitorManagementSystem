@@ -55,8 +55,8 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['pending', 'approved', 'rejected', 'exited'],
-        example: 'pending',
+        enum: ['PENDING', 'APPROVED', 'REJECTED', 'EXITED'],
+        example: 'PENDING',
       },
       createdBy: {
         type: 'integer',

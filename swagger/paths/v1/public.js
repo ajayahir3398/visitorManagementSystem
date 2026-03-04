@@ -70,7 +70,7 @@ export default {
               mobile: '9876543210',
               otp: '123456',
               societyName: 'Green Valley Apartments',
-              societyType: 'apartment',
+              societyType: 'APARTMENT',
               adminName: 'Ramesh Patel',
               password: 'securePass123',
               email: 'admin@greenvalley.com',

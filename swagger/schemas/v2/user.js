@@ -30,8 +30,8 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['active', 'blocked'],
-        example: 'active',
+        enum: ['ACTIVE', 'BLOCKED'],
+        example: 'ACTIVE',
       },
       photoBase64: {
         type: 'string',

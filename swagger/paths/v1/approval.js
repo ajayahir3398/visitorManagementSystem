@@ -57,7 +57,7 @@ export default {
     post: {
       summary: 'Approve visitor entry',
       description:
-        'Resident approves a pending visitor entry. Updates visitor log status to "approved" and creates/updates approval record.',
+        'Resident approves a pending visitor entry. Updates visitor log status to "APPROVED" and creates/updates approval record.',
       tags: ['v1 - Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -127,7 +127,7 @@ export default {
     post: {
       summary: 'Reject visitor entry',
       description:
-        'Resident rejects a pending visitor entry. Updates visitor log status to "rejected" and creates/updates approval record.',
+        'Resident rejects a pending visitor entry. Updates visitor log status to "REJECTED" and creates/updates approval record.',
       tags: ['v1 - Approvals'],
       security: [{ bearerAuth: [] }],
       parameters: [

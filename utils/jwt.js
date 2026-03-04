@@ -28,7 +28,7 @@ export const generateRefreshToken = (payload) => {
 export const verifyAccessToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid or expired token');
   }
 };
@@ -39,7 +39,7 @@ export const verifyAccessToken = (token) => {
 export const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid or expired refresh token');
   }
 };

@@ -32,8 +32,8 @@ export default {
       },
       type: {
         type: 'string',
-        example: 'apartment',
-        enum: ['apartment', 'office'],
+        example: 'APARTMENT',
+        enum: ['APARTMENT', 'OFFICE'],
       },
       address: {
         type: 'string',
@@ -228,68 +228,32 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['pending', 'approved', 'rejected'],
-        example: 'approved',
+        enum: ['PENDING', 'APPROVED', 'REJECTED'],
+        example: 'APPROVED',
       },
     },
   },
-  SecurityDashboardResponse: {
+  SecurityDashboardActivity: {
     type: 'object',
     properties: {
-      success: {
-        type: 'boolean',
-        example: true,
-      },
-      message: {
-        type: 'string',
-        example: 'Security dashboard data retrieved successfully',
-      },
-      data: {
-        type: 'object',
-        properties: {
-          systemStatus: {
-            type: 'string',
-            enum: ['ACTIVE', 'GRACE', 'LOCKED'],
-            example: 'ACTIVE',
-            description: 'System status based on subscription',
-          },
-          systemStatusMessage: {
-            type: 'string',
-            nullable: true,
-            example: null,
-            description: 'Optional message shown when status is GRACE or LOCKED',
-          },
-          society: {
-            $ref: '#/components/schemas/SecurityDashboardSociety',
-          },
-          gates: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/SecurityDashboardGate',
-            },
-          },
-          guard: {
-            $ref: '#/components/schemas/SecurityDashboardGuard',
-          },
-          stats: {
-            $ref: '#/components/schemas/SecurityDashboardStats',
-          },
-          pendingApprovals: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/SecurityDashboardPendingApproval',
-            },
-            description: 'Top 10 pending approvals (most recent first)',
-          },
-          activeVisitors: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/SecurityDashboardActiveVisitor',
-            },
-            description: 'Top 10 active visitors currently inside (most recent entry first)',
-          },
-        },
-      },
+      id: { type: 'integer', example: 1 },
+      action: { type: 'string', example: 'Visitor entered' },
+      subject: { type: 'string', example: 'Rahul' },
+      target: { type: 'string', example: 'A-302' },
+      time: { type: 'string', format: 'date-time' },
+      type: { type: 'string', example: 'APPROVED' },
+    },
+  },
+  SecurityDashboardEmergency: {
+    type: 'object',
+    properties: {
+      active: { type: 'boolean', example: true },
+      id: { type: 'integer', example: 1, nullable: true },
+      type: { type: 'string', example: 'MEDICAL', nullable: true },
+      location: { type: 'string', example: 'B-205', nullable: true },
+      raisedBy: { type: 'string', example: 'Amit Shah', nullable: true },
+      time: { type: 'string', format: 'date-time', nullable: true },
+      status: { type: 'string', example: 'OPEN', nullable: true },
     },
   },
 };

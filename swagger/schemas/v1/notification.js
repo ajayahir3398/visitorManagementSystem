@@ -15,9 +15,9 @@ export default {
       },
       platform: {
         type: 'string',
-        enum: ['android', 'ios'],
+        enum: ['ANDROID', 'IOS'],
         description: 'Platform type',
-        example: 'android',
+        example: 'ANDROID',
       },
     },
   },
@@ -45,7 +45,7 @@ export default {
           },
           platform: {
             type: 'string',
-            example: 'android',
+            example: 'ANDROID',
           },
           isActive: {
             type: 'boolean',
@@ -88,7 +88,7 @@ export default {
                 },
                 platform: {
                   type: 'string',
-                  example: 'android',
+                  example: 'ANDROID',
                 },
                 isActive: {
                   type: 'boolean',
@@ -287,7 +287,7 @@ export default {
           type: 'string',
         },
         example: {
-          screen: 'emergency',
+          screen: 'EMERGENCY',
           emergencyId: '789',
         },
       },

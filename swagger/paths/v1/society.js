@@ -87,13 +87,13 @@ export default {
         {
           name: 'status',
           in: 'query',
-          schema: { type: 'string', enum: ['active', 'expired'] },
+          schema: { type: 'string', enum: ['ACTIVE', 'expired'] },
           description: 'Filter by status',
         },
         {
           name: 'type',
           in: 'query',
-          schema: { type: 'string', enum: ['apartment', 'office'] },
+          schema: { type: 'string', enum: ['APARTMENT', 'OFFICE'] },
           description: 'Filter by type',
         },
         {

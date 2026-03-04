@@ -38,9 +38,9 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['active', 'blocked'],
-        default: 'active',
-        example: 'active',
+        enum: ['ACTIVE', 'BLOCKED'],
+        default: 'ACTIVE',
+        example: 'ACTIVE',
       },
     },
   },
@@ -80,8 +80,8 @@ export default {
       },
       status: {
         type: 'string',
-        enum: ['active', 'blocked'],
-        example: 'active',
+        enum: ['ACTIVE', 'BLOCKED'],
+        example: 'ACTIVE',
       },
     },
   },
@@ -127,13 +127,13 @@ export default {
         properties: {
           id: { type: 'integer', example: 1 },
           name: { type: 'string', example: 'Green Valley Apartments' },
-          type: { type: 'string', example: 'apartment' },
+          type: { type: 'string', example: 'APARTMENT' },
         },
       },
       status: {
         type: 'string',
-        enum: ['active', 'blocked'],
-        example: 'active',
+        enum: ['ACTIVE', 'BLOCKED'],
+        example: 'ACTIVE',
       },
       createdAt: {
         type: 'string',

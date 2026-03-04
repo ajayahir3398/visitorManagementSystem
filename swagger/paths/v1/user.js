@@ -18,7 +18,7 @@ export default {
               password: 'password123',
               societyId: 1,
               roleId: 2,
-              status: 'active',
+              status: 'ACTIVE',
               photoBase64: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
             },
           },
@@ -97,7 +97,7 @@ export default {
         {
           name: 'status',
           in: 'query',
-          schema: { type: 'string', enum: ['active', 'blocked'] },
+          schema: { type: 'string', enum: ['ACTIVE', 'BLOCKED'] },
           description: 'Filter by status',
         },
         {

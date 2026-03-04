@@ -29,7 +29,7 @@ export default {
         properties: {
           id: { type: 'integer', example: 1 },
           name: { type: 'string', example: 'Green Valley Apartments' },
-          type: { type: 'string', example: 'apartment' },
+          type: { type: 'string', example: 'APARTMENT' },
         },
       },
     },

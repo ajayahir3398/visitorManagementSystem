@@ -1,147 +1,250 @@
 export default {
-  '/api/v1/security/dashboard': {
+  '/api/v1/security/dashboard/overview': {
     get: {
-      summary: 'Get security dashboard data',
-      description:
-        'Retrieve comprehensive dashboard data for security guards including system status, society info, gates, statistics, pending approvals, and active visitors.',
+      summary: 'Get dashboard summary statistics',
       tags: ['v1 - Security'],
       security: [{ bearerAuth: [] }],
       responses: {
         200: {
-          description: 'Security dashboard data retrieved successfully',
+          description: 'Dashboard overview statistics',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/SecurityDashboardResponse',
-              },
-              example: {
-                success: true,
-                message: 'Security dashboard data retrieved successfully',
-                data: {
-                  systemStatus: 'ACTIVE',
-                  systemStatusMessage: null,
-                  society: {
-                    id: 1,
-                    name: 'Green Valley Apartments',
-                    type: 'apartment',
-                    address: '123 Main Street',
-                    city: 'Mumbai',
-                    state: 'Maharashtra',
-                  },
-                  gates: [
-                    {
-                      id: 1,
-                      name: 'Main Gate',
-                    },
-                    {
-                      id: 2,
-                      name: 'Back Gate',
-                    },
-                  ],
-                  guard: {
-                    id: 5,
-                    name: 'Security Guard Name',
-                  },
-                  stats: {
-                    todayVisitors: 42,
-                    pendingApprovals: 3,
-                    insidePremises: 18,
-                  },
-                  pendingApprovals: [
-                    {
-                      id: 1,
-                      visitor: {
-                        id: 1,
-                        name: 'Rahul',
-                        mobile: '9876543210',
-                        photoBase64: null,
-                      },
-                      unit: {
-                        id: 1,
-                        unitNo: 'A-302',
-                        unitType: 'FLAT',
-                      },
-                      gate: {
-                        id: 1,
-                        name: 'Main Gate',
-                      },
-                      waitTime: 15,
-                      waitTimeBadge: '15m ago',
-                      purpose: 'Delivery',
-                      createdAt: '2024-01-01T10:00:00.000Z',
-                    },
-                  ],
-                  activeVisitors: [
-                    {
-                      id: 2,
-                      visitor: {
-                        id: 2,
-                        name: 'Ramesh',
-                        mobile: '9876543211',
-                        photoBase64: null,
-                      },
-                      unit: {
-                        id: 2,
-                        unitNo: 'A-201',
-                        unitType: 'FLAT',
-                      },
-                      gate: {
-                        id: 1,
-                        name: 'Main Gate',
-                      },
-                      entryTime: '2024-01-01T11:00:00.000Z',
-                      status: 'approved',
-                    },
-                  ],
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: { $ref: '#/components/schemas/SecurityDashboardStats' },
                 },
               },
             },
           },
         },
-        401: {
-          description: 'Unauthorized - No token provided or invalid token',
+      },
+    },
+  },
+  '/api/v1/security/dashboard/pending-approvals': {
+    get: {
+      summary: 'Get list of visitors waiting for approval',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'List of pending approvals',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Error',
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: {
+                    type: 'object',
+                    properties: {
+                      notices: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/SecurityDashboardPendingApproval' },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         },
-        403: {
-          description:
-            'Forbidden - SECURITY role required, or security guard must be associated with a society',
+      },
+    },
+  },
+  '/api/v1/security/dashboard/inside-visitors': {
+    get: {
+      summary: 'Get list of visitors currently inside',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'List of inside visitors',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Error',
-              },
-              example: {
-                success: false,
-                message: 'Security guard must be associated with a society',
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: {
+                    type: 'object',
+                    properties: {
+                      visitors: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/SecurityDashboardActiveVisitor' },
+                      },
+                    },
+                  },
+                },
               },
             },
           },
         },
-        404: {
-          description: 'Society not found',
+      },
+    },
+  },
+  '/api/v1/security/dashboard/recent-activity': {
+    get: {
+      summary: 'Get latest security activity logs',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Latest activity logs',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Error',
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/SecurityDashboardActivity' },
+                  },
+                },
               },
             },
           },
         },
-        500: {
-          description: 'Internal server error',
+      },
+    },
+  },
+  '/api/v1/security/dashboard/emergency': {
+    get: {
+      summary: 'Get active emergency status',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: 'Emergency status',
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/Error',
+                type: 'object',
+                properties: {
+                  success: { type: 'boolean' },
+                  data: { $ref: '#/components/schemas/SecurityDashboardEmergency' },
+                },
               },
             },
           },
+        },
+      },
+    },
+  },
+  '/api/v1/security/verify-guest-code': {
+    post: {
+      summary: 'Verify pre-approved guest access code',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['code', 'gateId'],
+              properties: {
+                code: { type: 'string', example: 'GV-123456' },
+                gateId: { type: 'integer', example: 1 },
+                visitorId: { type: 'integer', example: null, nullable: true },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Code verified and entry approved',
+        },
+      },
+    },
+  },
+  '/api/v1/security/visitor-entry': {
+    post: {
+      summary: 'Register a new visitor entry request',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['gateId'],
+              properties: {
+                visitorId: {
+                  type: 'integer',
+                  description: 'Required if name and mobile are not provided',
+                },
+                name: { type: 'string', description: 'Required if visitorId is not provided' },
+                mobile: { type: 'string', description: 'Required if visitorId is not provided' },
+                gateId: { type: 'integer' },
+                unitId: { type: 'integer' },
+                purpose: { type: 'string' },
+                photoBase64: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Entry requested',
+        },
+      },
+    },
+  },
+  '/api/v1/security/visitor-exit': {
+    post: {
+      summary: 'Mark a visitor as exited',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['visitorLogId'],
+              properties: {
+                visitorLogId: { type: 'integer' },
+                exitTime: { type: 'string', format: 'date-time' },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Visitor marked as exited',
+        },
+      },
+    },
+  },
+  '/api/v1/security/emergency': {
+    post: {
+      summary: 'Raise a new emergency alert',
+      tags: ['v1 - Security'],
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['emergencyType', 'notificationType'],
+              properties: {
+                emergencyType: { type: 'string', example: 'MEDICAL' },
+                notificationType: { type: 'string', example: 'PANIC_ALARM' },
+                description: { type: 'string' },
+                location: { type: 'string' },
+                unitId: { type: 'integer' },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Emergency raised',
         },
       },
     },

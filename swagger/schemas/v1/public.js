@@ -61,8 +61,8 @@ export default {
       },
       societyType: {
         type: 'string',
-        enum: ['apartment', 'office'],
-        example: 'apartment',
+        enum: ['APARTMENT', 'OFFICE'],
+        example: 'APARTMENT',
         description: 'Type of society (apartment or office)',
       },
       city: {
@@ -109,7 +109,7 @@ export default {
             properties: {
               id: { type: 'integer', example: 1 },
               name: { type: 'string', example: 'Green Valley Apartments' },
-              type: { type: 'string', example: 'apartment' },
+              type: { type: 'string', example: 'APARTMENT' },
               city: { type: 'string', example: 'Ahmedabad' },
               source: { type: 'string', example: 'SELF_REGISTERED' },
             },
@@ -123,7 +123,7 @@ export default {
               email: { type: 'string', example: 'admin@greenvalley.com' },
               society_id: { type: 'integer', example: 1 },
               role: { type: 'string', example: 'SOCIETY_ADMIN' },
-              status: { type: 'string', example: 'active' },
+              status: { type: 'string', example: 'ACTIVE' },
             },
           },
           subscription: {

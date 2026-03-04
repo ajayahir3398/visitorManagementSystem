@@ -89,7 +89,7 @@ export default {
           in: 'query',
           schema: {
             type: 'string',
-            enum: ['pending', 'approved', 'rejected', 'exited'],
+            enum: ['PENDING', 'APPROVED', 'REJECTED', 'EXITED'],
           },
           description: 'Filter by status',
         },
@@ -269,7 +269,7 @@ export default {
   '/api/v1/visitor-logs/{id}/exit': {
     put: {
       summary: 'Mark visitor exit',
-      description: 'Security guard marks a visitor exit. Updates exit time and status to "exited".',
+      description: 'Security guard marks a visitor exit. Updates exit time and status to "EXITED".',
       tags: ['v1 - Visitor Logs'],
       security: [{ bearerAuth: [] }],
       parameters: [

@@ -15,7 +15,7 @@ export default {
             example: {
               token: 'fcm_token_here',
               deviceId: 'device_unique_id',
-              platform: 'android',
+              platform: 'ANDROID',
             },
           },
         },
@@ -302,7 +302,7 @@ export default {
               title: 'Emergency Alert',
               body: 'Please evacuate the building immediately',
               data: {
-                screen: 'emergency',
+                screen: 'EMERGENCY',
                 emergencyId: '789',
               },
             },
