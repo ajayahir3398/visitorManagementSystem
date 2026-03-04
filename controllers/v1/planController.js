@@ -1,408 +1,109 @@
-import prisma from '../../lib/prisma.js';
+import { PlanService } from '../../services/planService.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
-import { fixSequence } from '../../utils/sequenceFix.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 
-/**
- * Get all available subscription plans (Public)
- * GET /api/v1/plans
- * Access: Public (no authentication required)
- */
-export const getPlans = async (req, res) => {
-  try {
-    const plans = await prisma.subscriptionPlan.findMany({
-      where: {
-        isActive: true,
-        code: { not: null }, // Only return plans with code
-      },
-      select: {
-        id: true,
-        code: true,
-        name: true,
-        price: true,
-        durationMonths: true,
-        billingCycle: true,
-        visitorLimit: true,
-        features: true,
-      },
-      orderBy: { price: 'asc' },
-    });
+export const getPlans = asyncHandler(async (req, res) => {
+  const plans = await PlanService.getPlans();
+  res.json({
+    success: true,
+    message: 'Plans retrieved successfully',
+    data: { plans },
+  });
+});
 
-    res.json({
-      success: true,
-      message: 'Plans retrieved successfully',
-      data: { plans },
-    });
-  } catch (error) {
-    console.error('Get plans error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve plans',
-      error: error.message,
-    });
-  }
-};
+export const getPlanById = asyncHandler(async (req, res) => {
+  const plan = await PlanService.getPlanById(parseInt(req.params.id));
+  res.json({
+    success: true,
+    message: 'Plan retrieved successfully',
+    data: { plan },
+  });
+});
 
-/**
- * Get plan by ID (Public)
- * GET /api/v1/plans/:id
- * Access: Public
- */
-export const getPlanById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const planId = parseInt(id);
+export const createPlan = asyncHandler(async (req, res) => {
+  const plan = await PlanService.createPlan(req.body);
 
-    if (isNaN(planId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid plan ID',
-      });
-    }
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.CREATED,
+    entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
+    entityId: plan.id,
+    description: `Created subscription plan: ${plan.name} (${plan.code})`,
+    req,
+  });
 
-    const plan = await prisma.subscriptionPlan.findUnique({
-      where: { id: planId },
-      select: {
-        id: true,
-        code: true,
-        name: true,
-        price: true,
-        durationMonths: true,
-        billingCycle: true,
-        visitorLimit: true,
-        features: true,
-        isActive: true,
-        createdAt: true,
-      },
-    });
+  res.status(201).json({
+    success: true,
+    message: 'Plan created successfully',
+    data: { plan },
+  });
+});
 
-    if (!plan) {
-      return res.status(404).json({
-        success: false,
-        message: 'Plan not found',
-      });
-    }
+export const updatePlan = asyncHandler(async (req, res) => {
+  const planId = parseInt(req.params.id);
+  const updatedPlan = await PlanService.updatePlan(planId, req.body);
 
-    res.json({
-      success: true,
-      message: 'Plan retrieved successfully',
-      data: { plan },
-    });
-  } catch (error) {
-    console.error('Get plan by ID error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve plan',
-      error: error.message,
-    });
-  }
-};
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.UPDATED,
+    entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
+    entityId: updatedPlan.id,
+    description: `Updated subscription plan: ${updatedPlan.name} (${updatedPlan.code})`,
+    req,
+  });
 
-/**
- * Create a new subscription plan
- * POST /api/v1/plans
- * Access: SUPER_ADMIN only
- */
-export const createPlan = async (req, res) => {
-  try {
-    const { code, name, price, durationMonths, billingCycle, visitorLimit, features, isActive } =
-      req.body;
+  res.json({
+    success: true,
+    message: 'Plan updated successfully',
+    data: { plan: updatedPlan },
+  });
+});
 
-    // Validation
-    if (!code || !name || price === undefined || !durationMonths || !billingCycle) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields: code, name, price, durationMonths, billingCycle',
-      });
-    }
+export const togglePlanStatus = asyncHandler(async (req, res) => {
+  const planId = parseInt(req.params.id);
+  const updatedPlan = await PlanService.togglePlanStatus(planId);
 
-    if (price < 0 || durationMonths < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Price must be >= 0 and durationMonths must be >= 1',
-      });
-    }
+  await logAction({
+    user: req.user,
+    action: updatedPlan.isActive ? AUDIT_ACTIONS.ACTIVATED : AUDIT_ACTIONS.DEACTIVATED,
+    entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
+    entityId: updatedPlan.id,
+    description: `${updatedPlan.isActive ? 'Activated' : 'Deactivated'} subscription plan: ${updatedPlan.name} (${updatedPlan.code})`,
+    req,
+  });
 
-    // Fix sequence if out of sync
-    await fixSequence('subscription_plans');
+  res.json({
+    success: true,
+    message: `Plan ${updatedPlan.isActive ? 'activated' : 'deactivated'} successfully`,
+    data: { plan: updatedPlan },
+  });
+});
 
-    const plan = await prisma.subscriptionPlan.create({
-      data: {
-        code,
-        name,
-        price: parseInt(price),
-        durationMonths: parseInt(durationMonths),
-        billingCycle,
-        visitorLimit: visitorLimit ? parseInt(visitorLimit) : null,
-        features: features || {},
-        isActive: isActive !== undefined ? isActive : true,
-      },
-    });
+export const getAllPlans = asyncHandler(async (req, res) => {
+  const plans = await PlanService.getAllPlans();
+  res.json({
+    success: true,
+    message: 'All plans retrieved successfully',
+    data: { plans },
+  });
+});
 
-    // Log action
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.CREATED,
-      entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
-      entityId: plan.id,
-      description: `Created subscription plan: ${plan.name} (${plan.code})`,
-      req,
-    });
+export const deletePlan = asyncHandler(async (req, res) => {
+  const planId = parseInt(req.params.id);
+  const deletedPlan = await PlanService.deletePlan(planId);
 
-    res.status(201).json({
-      success: true,
-      message: 'Plan created successfully',
-      data: { plan },
-    });
-  } catch (error) {
-    console.error('Create plan error:', error);
-    if (error.code === 'P2002') {
-      return res.status(409).json({
-        success: false,
-        message: 'Plan with this code already exists',
-      });
-    }
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create plan',
-      error: error.message,
-    });
-  }
-};
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.DELETED,
+    entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
+    entityId: planId,
+    description: `Deleted subscription plan: ${deletedPlan.name} (${deletedPlan.code})`,
+    req,
+  });
 
-/**
- * Update a subscription plan
- * PUT /api/v1/plans/:id
- * Access: SUPER_ADMIN only
- */
-export const updatePlan = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, price, durationMonths, billingCycle, visitorLimit, features, isActive } =
-      req.body;
-
-    const planId = parseInt(id);
-    if (isNaN(planId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid plan ID',
-      });
-    }
-
-    // Check if plan exists
-    const existingPlan = await prisma.subscriptionPlan.findUnique({
-      where: { id: planId },
-    });
-
-    if (!existingPlan) {
-      return res.status(404).json({
-        success: false,
-        message: 'Plan not found',
-      });
-    }
-
-    // Build update data
-    const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (price !== undefined) updateData.price = parseInt(price);
-    if (durationMonths !== undefined) updateData.durationMonths = parseInt(durationMonths);
-    if (billingCycle !== undefined) updateData.billingCycle = billingCycle;
-    if (visitorLimit !== undefined)
-      updateData.visitorLimit = visitorLimit ? parseInt(visitorLimit) : null;
-    if (features !== undefined) updateData.features = features;
-    if (isActive !== undefined) updateData.isActive = isActive;
-
-    const updatedPlan = await prisma.subscriptionPlan.update({
-      where: { id: planId },
-      data: updateData,
-    });
-
-    // Log action
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.UPDATED,
-      entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
-      entityId: updatedPlan.id,
-      description: `Updated subscription plan: ${updatedPlan.name} (${updatedPlan.code})`,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: 'Plan updated successfully',
-      data: { plan: updatedPlan },
-    });
-  } catch (error) {
-    console.error('Update plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update plan',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Disable/Enable a subscription plan
- * POST /api/v1/plans/:id/toggle
- * Access: SUPER_ADMIN only
- */
-export const togglePlanStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const planId = parseInt(id);
-
-    if (isNaN(planId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid plan ID',
-      });
-    }
-
-    const existingPlan = await prisma.subscriptionPlan.findUnique({
-      where: { id: planId },
-    });
-
-    if (!existingPlan) {
-      return res.status(404).json({
-        success: false,
-        message: 'Plan not found',
-      });
-    }
-
-    const updatedPlan = await prisma.subscriptionPlan.update({
-      where: { id: planId },
-      data: { isActive: !existingPlan.isActive },
-    });
-
-    // Log action
-    await logAction({
-      user: req.user,
-      action: updatedPlan.isActive ? AUDIT_ACTIONS.ACTIVATED : AUDIT_ACTIONS.DEACTIVATED,
-      entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
-      entityId: updatedPlan.id,
-      description: `${updatedPlan.isActive ? 'Activated' : 'Deactivated'} subscription plan: ${updatedPlan.name} (${updatedPlan.code})`,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: `Plan ${updatedPlan.isActive ? 'activated' : 'deactivated'} successfully`,
-      data: { plan: updatedPlan },
-    });
-  } catch (error) {
-    console.error('Toggle plan status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to toggle plan status',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Get all plans (including inactive) - Super Admin
- * GET /api/v1/plans/all
- * Access: SUPER_ADMIN only
- */
-export const getAllPlans = async (req, res) => {
-  try {
-    const plans = await prisma.subscriptionPlan.findMany({
-      select: {
-        id: true,
-        code: true,
-        name: true,
-        price: true,
-        durationMonths: true,
-        billingCycle: true,
-        visitorLimit: true,
-        features: true,
-        isActive: true,
-        createdAt: true,
-        _count: {
-          select: {
-            subscriptions: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    res.json({
-      success: true,
-      message: 'All plans retrieved successfully',
-      data: { plans },
-    });
-  } catch (error) {
-    console.error('Get all plans error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve plans',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Delete a subscription plan
- * DELETE /api/v1/plans/:id
- * Access: SUPER_ADMIN only
- */
-export const deletePlan = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const planId = parseInt(id);
-
-    if (isNaN(planId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid plan ID',
-      });
-    }
-
-    // Check if plan exists
-    const existingPlan = await prisma.subscriptionPlan.findUnique({
-      where: { id: planId },
-    });
-
-    if (!existingPlan) {
-      return res.status(404).json({
-        success: false,
-        message: 'Plan not found',
-      });
-    }
-
-    const deletedPlan = await prisma.subscriptionPlan.delete({
-      where: { id: planId },
-    });
-
-    // Log action
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.DELETED,
-      entity: AUDIT_ENTITIES.SUBSCRIPTION_PLAN,
-      entityId: planId,
-      description: `Deleted subscription plan: ${deletedPlan.name} (${deletedPlan.code})`,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: 'Plan deleted successfully',
-      data: { plan: deletedPlan },
-    });
-  } catch (error) {
-    console.error('Delete plan error:', error);
-    // P2003 is Prisma's error code for foreign key constraint violation
-    if (error.code === 'P2003') {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete plan as it is associated with existing subscriptions',
-      });
-    }
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete plan',
-      error: error.message,
-    });
-  }
-};
+  res.json({
+    success: true,
+    message: 'Plan deleted successfully',
+    data: { plan: deletedPlan },
+  });
+});
