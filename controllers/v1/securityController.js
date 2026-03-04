@@ -6,6 +6,7 @@ import {
   sendNotificationToUnitResidents,
   sendNotificationToUnitResidentsByFlatNo,
 } from '../../utils/notificationHelper.js';
+import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
 import asyncHandler from '../../utils/asyncHandler.js';
 
 export const getDashboardOverview = asyncHandler(async (req, res) => {
@@ -48,6 +49,16 @@ export const visitorEntry = asyncHandler(async (req, res) => {
   const result = await VisitorLogService.createEntry({
     ...req.body,
     user: req.user,
+  });
+
+  // Log action
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.VISITOR_ENTRY,
+    entity: AUDIT_ENTITIES.VISITOR_LOG,
+    entityId: result.id,
+    description: `Visitor entry requested for ${result.visitor?.name || 'Unknown'} at gate ${result.gate?.name || 'Unknown'}`,
+    req,
   });
 
   // Notifications
@@ -98,6 +109,16 @@ export const raiseEmergency = asyncHandler(async (req, res) => {
   const result = await EmergencyService.raiseEmergency({
     ...req.body,
     reqUser: req.user,
+  });
+
+  // Log action
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.EMERGENCY_RAISED,
+    entity: AUDIT_ENTITIES.EMERGENCY_REQUEST,
+    entityId: result.id,
+    description: `${result.emergencyType} emergency raised by ${req.user.name}`,
+    req,
   });
 
   // Notifications
