@@ -1,774 +1,121 @@
-import prisma from '../../lib/prisma.js';
+import { PreApprovalService } from '../../services/preApprovalService.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
-import { fixSequence } from '../../utils/sequenceFix.js';
-import { normalizeBase64Image } from '../../utils/image.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 
-const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
+export const createPreApproval = asyncHandler(async (req, res) => {
+  const preApproval = await PreApprovalService.createPreApproval({
+    ...req.body,
+    reqUser: req.user,
+  });
 
-/**
- * Generate a unique 6-digit access code
- * Format: GV-XXXXXX (e.g., GV-483921)
- */
-const generateAccessCode = (prefix = 'GV') => {
-  const randomNum = Math.floor(100000 + Math.random() * 900000);
-  return `${prefix}-${randomNum}`;
-};
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.PRE_APPROVAL_CREATED,
+    entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
+    entityId: preApproval.id,
+    description: `Pre-approval code ${preApproval.accessCode} created for unit ${preApproval.unit.unitNo}`,
+    req,
+  });
 
-/**
- * Create pre-approved guest
- * POST /api/v1/pre-approvals
- * Access: RESIDENT only
- */
-export const createPreApproval = async (req, res) => {
-  try {
-    const {
-      guestName,
-      guestMobile,
-      validFrom,
-      validTill,
-      maxUses = 1,
-      unitId,
-      photoBase64,
-    } = req.body;
+  res.status(201).json({
+    success: true,
+    message: 'Pre-approval created successfully',
+    data: { preApproval },
+  });
+});
 
-    // Get resident's units
-    const userUnits = await prisma.unitMember.findMany({
-      where: {
-        userId: req.user.id,
+export const getPreApprovals = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const { preApprovals, total } = await PreApprovalService.getPreApprovals({
+    ...req.query,
+    reqUser: req.user,
+  });
+
+  res.json({
+    success: true,
+    message: 'Pre-approvals retrieved successfully',
+    data: {
+      preApprovals,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: total ? Math.ceil(total / parseInt(limit)) : 0,
       },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            societyId: true,
-            unitNo: true,
-          },
-        },
-      },
-    });
-
-    if (userUnits.length === 0) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You must be associated with a unit to create pre-approvals.',
-      });
-    }
-
-    // Select unit logic
-    let selectedUnit;
-    if (unitId) {
-      // If unitId provided, verify it belongs to user
-      const unitMember = userUnits.find((um) => um.unitId === parseInt(unitId));
-      if (!unitMember) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. You are not associated with the specified unit.',
-        });
-      }
-      selectedUnit = unitMember.unit;
-    } else {
-      // Prioritize primary, otherwise use first one
-      const selectedUnitMember = userUnits.find((um) => um.isPrimary) || userUnits[0];
-      selectedUnit = selectedUnitMember.unit;
-    }
-
-    const finalUnitId = selectedUnit.id;
-
-    // Validation
-    if (!validFrom || !validTill) {
-      return res.status(400).json({
-        success: false,
-        message: 'validFrom and validTill are required',
-      });
-    }
-
-    const validFromDate = new Date(validFrom);
-    const validTillDate = new Date(validTill);
-
-    if (validTillDate <= validFromDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'validTill must be after validFrom',
-      });
-    }
-
-    if (maxUses < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'maxUses must be at least 1',
-      });
-    }
-
-    if (selectedUnit.societyId !== req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Unit does not belong to your society.',
-      });
-    }
-
-    let normalizedPhoto = null;
-    if (photoBase64 !== undefined) {
-      try {
-        normalizedPhoto =
-          photoBase64 === null
-            ? null
-            : normalizeBase64Image(photoBase64, { maxBytes: MAX_PHOTO_BYTES });
-      } catch (error) {
-        return res.status(400).json({
-          success: false,
-          message: error.message || 'Invalid photo data',
-        });
-      }
-    }
-
-    // Generate unique access code
-    let accessCode;
-    let isUnique = false;
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    while (!isUnique && attempts < maxAttempts) {
-      accessCode = generateAccessCode();
-      const existing = await prisma.preApprovedGuest.findUnique({
-        where: { accessCode },
-      });
-      if (!existing) {
-        isUnique = true;
-      }
-      attempts++;
-    }
-
-    if (!isUnique) {
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to generate unique access code. Please try again.',
-      });
-    }
-
-    // Fix sequence if out of sync
-    await fixSequence('pre_approved_guests');
-
-    // Create pre-approval
-    const preApproval = await prisma.preApprovedGuest.create({
-      data: {
-        societyId: selectedUnit.societyId,
-        unitId: parseInt(finalUnitId),
-        residentId: req.user.id,
-        guestName: guestName || null,
-        guestMobile: guestMobile || null,
-        photoBase64: normalizedPhoto,
-        accessCode,
-        validFrom: validFromDate,
-        validTill: validTillDate,
-        maxUses: parseInt(maxUses),
-        usedCount: 0,
-        status: 'ACTIVE',
-      },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-          },
-        },
-        resident: {
-          select: {
-            id: true,
-            name: true,
-            mobile: true,
-          },
-        },
-      },
-    });
-
-    // Log pre-approval creation
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.PRE_APPROVAL_CREATED,
-      entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
-      entityId: preApproval.id,
-      description: `Pre-approval code ${accessCode} created for unit ${preApproval.unit.unitNo}`,
-      req,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Pre-approval created successfully',
-      data: { preApproval },
-    });
-  } catch (error) {
-    console.error('Create pre-approval error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create pre-approval',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Get all pre-approvals for resident
- * GET /api/v1/pre-approvals
- * Access: RESIDENT only
- */
-export const getPreApprovals = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Build where clause
-    const where = {
-      societyId: req.user.society_id,
-    };
-
-    // If resident, only show own pre-approvals
-    if (req.user.role_name === 'RESIDENT') {
-      where.residentId = req.user.id;
-    }
-
-    if (status) {
-      where.status = status;
-    }
-
-    const [preApprovals, total] = await Promise.all([
-      prisma.preApprovedGuest.findMany({
-        where,
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' },
-        include: {
-          unit: {
-            select: {
-              id: true,
-              unitNo: true,
-              unitType: true,
-              floor: true,
-              block: true,
-            },
-          },
-        },
-      }),
-      prisma.preApprovedGuest.count({ where }),
-    ]);
-
-    res.json({
-      success: true,
-      message: 'Pre-approvals retrieved successfully',
-      data: {
-        preApprovals,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          pages: Math.ceil(total / parseInt(limit)),
-        },
-      },
-    });
-  } catch (error) {
-    console.error('Get pre-approvals error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve pre-approvals',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Get pre-approval by ID
- * GET /api/v1/pre-approvals/:id
- * Access: RESIDENT only
- */
-export const getPreApprovalById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const preApprovalId = parseInt(id);
-
-    if (isNaN(preApprovalId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid pre-approval ID',
-      });
-    }
-
-    const preApproval = await prisma.preApprovedGuest.findUnique({
-      where: { id: preApprovalId },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-          },
-        },
-        resident: {
-          select: {
-            id: true,
-            name: true,
-            mobile: true,
-          },
-        },
-      },
-    });
-
-    if (!preApproval) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pre-approval not found',
-      });
-    }
-
-    // Check permissions
-    if (req.user.role_name === 'RESIDENT') {
-      // Resident can only view their own
-      if (preApproval.residentId !== req.user.id) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. You can only view your own pre-approvals.',
-        });
-      }
-    } else {
-      // Admin/Security can view any in their society
-      if (preApproval.societyId !== req.user.society_id) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. Pre-approval does not belong to your society.',
-        });
-      }
-    }
-
-    res.json({
-      success: true,
-      message: 'Pre-approval retrieved successfully',
-      data: { preApproval },
-    });
-  } catch (error) {
-    console.error('Get pre-approval error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve pre-approval',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Revoke pre-approval
- * POST /api/v1/pre-approvals/:id/revoke
- * Access: RESIDENT only
- */
-export const revokePreApproval = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const preApprovalId = parseInt(id);
-
-    if (isNaN(preApprovalId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid pre-approval ID',
-      });
-    }
-
-    const preApproval = await prisma.preApprovedGuest.findUnique({
-      where: { id: preApprovalId },
-    });
-
-    if (!preApproval) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pre-approval not found',
-      });
-    }
-
-    // Check if resident owns this pre-approval
-    if (preApproval.residentId !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You can only revoke your own pre-approvals.',
-      });
-    }
-
-    // Check if already revoked or used
-    if (preApproval.status === 'REVOKED' || preApproval.status === 'USED') {
-      return res.status(400).json({
-        success: false,
-        message: `Pre-approval is already ${preApproval.status.toLowerCase()}`,
-        data: { preApproval },
-      });
-    }
-
-    // Update status to REVOKED
-    const updated = await prisma.preApprovedGuest.update({
-      where: { id: preApprovalId },
-      data: { status: 'REVOKED' },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-          },
-        },
-      },
-    });
-
-    // Log pre-approval revocation
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.PRE_APPROVAL_REVOKED,
-      entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
-      entityId: preApproval.id,
-      description: `Pre-approval code ${preApproval.accessCode} revoked`,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: 'Pre-approval revoked successfully',
-      data: { preApproval: updated },
-    });
-  } catch (error) {
-    console.error('Revoke pre-approval error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to revoke pre-approval',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Verify pre-approval code and create visitor entry
- * POST /api/v1/pre-approvals/verify
- * Access: SECURITY only
- */
-export const verifyPreApprovalCode = async (req, res) => {
-  try {
-    const { accessCode, gateId, visitorId } = req.body;
-
-    if (!accessCode) {
-      return res.status(400).json({
-        success: false,
-        message: 'accessCode is required',
-      });
-    }
-
-    if (!gateId) {
-      return res.status(400).json({
-        success: false,
-        message: 'gateId is required',
-      });
-    }
-
-    // Security guard must have a society
-    if (!req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Security guard must be associated with a society',
-      });
-    }
-
-    // Find pre-approval by code
-    const preApproval = await prisma.preApprovedGuest.findUnique({
-      where: { accessCode },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-            societyId: true,
-          },
-        },
-      },
-    });
-
-    if (!preApproval) {
-      return res.status(404).json({
-        success: false,
-        message: 'Invalid access code',
-      });
-    }
-
-    // Check if pre-approval belongs to security's society
-    if (preApproval.societyId !== req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. This code does not belong to your society.',
-      });
-    }
-
-    // Verify gate belongs to society
-    const gate = await prisma.gate.findUnique({
-      where: { id: parseInt(gateId) },
-    });
-
-    if (!gate) {
-      return res.status(404).json({
-        success: false,
-        message: 'Gate not found',
-      });
-    }
-
-    if (gate.societyId !== req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Gate does not belong to your society',
-      });
-    }
-
-    const now = new Date();
-
-    // Validate code status and validity
-    if (preApproval.status !== 'ACTIVE') {
-      return res.status(400).json({
-        success: false,
-        message: `Code is ${preApproval.status.toLowerCase()}`,
-        data: { preApproval },
-      });
-    }
-
-    if (now < preApproval.validFrom) {
-      return res.status(400).json({
-        success: false,
-        message: 'Code is not yet valid',
-        data: { preApproval },
-      });
-    }
-
-    if (now > preApproval.validTill) {
-      // Auto-expire if past validTill
-      await prisma.preApprovedGuest.update({
-        where: { id: preApproval.id },
-        data: { status: 'EXPIRED' },
-      });
-
-      return res.status(400).json({
-        success: false,
-        message: 'Code has expired',
-        data: { preApproval },
-      });
-    }
-
-    if (preApproval.usedCount >= preApproval.maxUses) {
-      // Auto-mark as used if max uses reached
-      await prisma.preApprovedGuest.update({
-        where: { id: preApproval.id },
-        data: { status: 'USED' },
-      });
-
-      return res.status(400).json({
-        success: false,
-        message: 'Code has reached maximum uses',
-        data: { preApproval },
-      });
-    }
-
-    // Create or find visitor if visitorId provided
-    let finalVisitorId = visitorId ? parseInt(visitorId) : null;
-
-    if (!finalVisitorId && preApproval.guestMobile) {
-      // Try to find existing visitor by mobile
-      const existingVisitor = await prisma.visitor.findFirst({
-        where: { mobile: preApproval.guestMobile },
-      });
-
-      if (existingVisitor) {
-        finalVisitorId = existingVisitor.id;
-      } else if (preApproval.guestName) {
-        // Fix sequence if out of sync
-        await fixSequence('visitors');
-
-        // Create new visitor if mobile exists but visitor doesn't
-        const newVisitor = await prisma.visitor.create({
-          data: {
-            name: preApproval.guestName,
-            mobile: preApproval.guestMobile,
-            photoBase64: preApproval.photoBase64 || null,
-          },
-        });
-        finalVisitorId = newVisitor.id;
-      }
-    }
-
-    if (finalVisitorId && preApproval.photoBase64) {
-      await prisma.visitor.update({
-        where: { id: finalVisitorId },
-        data: { photoBase64: preApproval.photoBase64 },
-      });
-    }
-
-    // Fix sequence if out of sync
-    await fixSequence('visitor_logs');
-
-    // Create visitor log entry (auto-approved)
-    const visitorLog = await prisma.visitorLog.create({
-      data: {
-        societyId: preApproval.societyId,
-        gateId: parseInt(gateId),
-        visitorId: finalVisitorId,
-        unitId: preApproval.unitId,
-        purpose: `Pre-approved guest - Code: ${accessCode}`,
-        entryTime: new Date(),
-        status: 'approved', // Auto-approved
-        createdBy: req.user.id,
-        preApprovalId: preApproval.id,
-      },
-      include: {
-        visitor: {
-          select: {
-            id: true,
-            name: true,
-            mobile: true,
-            photoBase64: true,
-          },
-        },
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-          },
-        },
-        gate: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        createdByUser: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    // Update pre-approval usage count
-    const newUsedCount = preApproval.usedCount + 1;
-    const newStatus = newUsedCount >= preApproval.maxUses ? 'USED' : 'ACTIVE';
-
-    const updatedPreApproval = await prisma.preApprovedGuest.update({
-      where: { id: preApproval.id },
-      data: {
-        usedCount: newUsedCount,
-        status: newStatus,
-      },
-    });
-
-    // Log pre-approval code usage
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.PRE_APPROVAL_USED,
-      entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
-      entityId: preApproval.id,
-      description: `Pre-approval code ${accessCode} used for visitor entry (visitor log ID: ${visitorLog.id})`,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: 'Access code verified and entry approved successfully',
-      data: {
-        visitorLog,
-        preApproval: updatedPreApproval,
-        unit: preApproval.unit,
-      },
-    });
-  } catch (error) {
-    console.error('Verify pre-approval code error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to verify access code',
-      error: error.message,
-    });
-  }
-};
-/**
- * Get pre-approval by access code
- * GET /api/v1/pre-approvals/access-code/:code
- * Access: SECURITY only
- */
-export const getPreApprovalByCode = async (req, res) => {
-  try {
-    const { code } = req.params;
-
-    if (!code) {
-      return res.status(400).json({
-        success: false,
-        message: 'Access code is required',
-      });
-    }
-
-    // Security guard must have a society
-    if (!req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Security guard must be associated with a society',
-      });
-    }
-
-    const preApproval = await prisma.preApprovedGuest.findUnique({
-      where: { accessCode: code },
-      include: {
-        unit: {
-          select: {
-            id: true,
-            unitNo: true,
-            unitType: true,
-            floor: true,
-            block: true,
-            societyId: true,
-          },
-        },
-        resident: {
-          select: {
-            id: true,
-            name: true,
-            mobile: true,
-          },
-        },
-      },
-    });
-
-    if (!preApproval) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pre-approval not found for this code',
-      });
-    }
-
-    // Security must be in the same society
-    if (preApproval.societyId !== req.user.society_id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. This pre-approval does not belong to your society.',
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Pre-approval details retrieved successfully',
-      data: { preApproval },
-    });
-  } catch (error) {
-    console.error('Get pre-approval by code error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve pre-approval details',
-      error: error.message,
-    });
-  }
-};
+    },
+  });
+});
+
+export const getPreApprovalById = asyncHandler(async (req, res) => {
+  const preApproval = await PreApprovalService.getPreApprovalById({
+    preApprovalId: parseInt(req.params.id),
+    reqUser: req.user,
+  });
+
+  res.json({
+    success: true,
+    message: 'Pre-approval retrieved successfully',
+    data: { preApproval },
+  });
+});
+
+export const revokePreApproval = asyncHandler(async (req, res) => {
+  const { preApproval, accessCode } = await PreApprovalService.revokePreApproval({
+    preApprovalId: parseInt(req.params.id),
+    reqUser: req.user,
+  });
+
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.PRE_APPROVAL_REVOKED,
+    entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
+    entityId: preApproval.id,
+    description: `Pre-approval code ${accessCode} revoked`,
+    req,
+  });
+
+  res.json({
+    success: true,
+    message: 'Pre-approval revoked successfully',
+    data: { preApproval },
+  });
+});
+
+export const verifyPreApprovalCode = asyncHandler(async (req, res) => {
+  const { visitorLog, preApproval, unit } = await PreApprovalService.verifyPreApprovalCode({
+    ...req.body,
+    reqUser: req.user,
+  });
+
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.PRE_APPROVAL_USED,
+    entity: AUDIT_ENTITIES.PRE_APPROVED_GUEST,
+    entityId: preApproval.id,
+    description: `Pre-approval code ${req.body.accessCode} used for visitor entry (visitor log ID: ${visitorLog.id})`,
+    req,
+  });
+
+  res.json({
+    success: true,
+    message: 'Access code verified and entry approved successfully',
+    data: {
+      visitorLog,
+      preApproval,
+      unit,
+    },
+  });
+});
+
+export const getPreApprovalByCode = asyncHandler(async (req, res) => {
+  const preApproval = await PreApprovalService.getPreApprovalByCode({
+    code: req.params.code,
+    reqUser: req.user,
+  });
+
+  res.json({
+    success: true,
+    message: 'Pre-approval details retrieved successfully',
+    data: { preApproval },
+  });
+});
