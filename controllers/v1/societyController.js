@@ -1,413 +1,101 @@
-import prisma from '../../lib/prisma.js';
+import { SocietyService } from '../../services/societyService.js';
 import { logAction, AUDIT_ACTIONS, AUDIT_ENTITIES } from '../../utils/auditLogger.js';
-import { fixSequence } from '../../utils/sequenceFix.js';
+import asyncHandler from '../../utils/asyncHandler.js';
 
-/**
- * Create a new society
- * POST /api/v1/societies
- * Access: SUPER_ADMIN only
- */
-export const createSociety = async (req, res) => {
-  try {
-    const { name, type, address, city, state, pincode, subscriptionId, razorpayKey } = req.body;
+export const createSociety = asyncHandler(async (req, res) => {
+  const society = await SocietyService.createSociety(req.body);
 
-    // Validation
-    if (!name || !type) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name and type are required',
-      });
-    }
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.CREATE_SOCIETY,
+    entity: AUDIT_ENTITIES.SOCIETY,
+    entityId: society.id,
+    description: `Society "${society.name}" created (${society.type})`,
+    req,
+  });
 
-    if (!['apartment', 'office'].includes(type.toLowerCase())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Type must be either "apartment" or "office"',
-      });
-    }
+  res.status(201).json({
+    success: true,
+    message: 'Society created successfully',
+    data: { society },
+  });
+});
 
-    // Fix sequence if out of sync
-    await fixSequence('societies');
+export const getSocieties = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+  const { societies, total } = await SocietyService.getSocieties(req.query);
 
-    // Create society
-    // Create society and default gate
-    const society = await prisma.$transaction(async (tx) => {
-      // Create Society
-      const newSociety = await tx.society.create({
-        data: {
-          name,
-          type: type.toLowerCase(),
-          address,
-          city,
-          state,
-          pincode,
-          razorpayKey,
-          subscriptionId,
-          status: 'active',
-        },
-      });
-
-      // Create Default Main Gate
-      await fixSequence('gates');
-      await tx.gate.create({
-        data: {
-          societyId: newSociety.id,
-          name: 'Main Gate',
-        },
-      });
-
-      return newSociety;
-    });
-
-    // Log society creation
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.CREATE_SOCIETY,
-      entity: AUDIT_ENTITIES.SOCIETY,
-      entityId: society.id,
-      description: `Society "${society.name}" created (${society.type})`,
-      req,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Society created successfully',
-      data: { society },
-    });
-  } catch (error) {
-    console.error('Create society error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create society',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Get all societies
- * GET /api/v1/societies
- * Access: SUPER_ADMIN only
- */
-export const getSocieties = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status, type, search, source } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Build where clause
-    const where = {};
-    if (status) where.status = status;
-    if (type) where.type = type.toLowerCase();
-    if (source) where.source = source;
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
-        { state: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-
-    const [societies, total] = await Promise.all([
-      prisma.society.findMany({
-        where,
-        skip,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' },
-        include: {
-          _count: {
-            select: { users: true },
-          },
-        },
-      }),
-      prisma.society.count({ where }),
-    ]);
-
-    res.json({
-      success: true,
-      message: 'Societies retrieved successfully',
-      data: {
-        societies,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          pages: Math.ceil(total / parseInt(limit)),
-        },
+  res.json({
+    success: true,
+    message: 'Societies retrieved successfully',
+    data: {
+      societies,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: total ? Math.ceil(total / parseInt(limit)) : 0,
       },
-    });
-  } catch (error) {
-    console.error('Get societies error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve societies',
-      error: error.message,
-    });
-  }
-};
+    },
+  });
+});
 
-/**
- * Get society by ID
- * GET /api/v1/societies/:id
- * Access: SUPER_ADMIN, SOCIETY_ADMIN (own society only)
- */
-export const getSocietyById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const societyId = parseInt(id);
+export const getSocietyById = asyncHandler(async (req, res) => {
+  const society = await SocietyService.getSocietyById({
+    societyId: parseInt(req.params.id),
+    reqUser: req.user,
+  });
 
-    if (isNaN(societyId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid society ID',
-      });
-    }
+  res.json({
+    success: true,
+    message: 'Society retrieved successfully',
+    data: { society },
+  });
+});
 
-    // If user is not SUPER_ADMIN, only allow access to their own society
-    const restrictedRoles = ['SOCIETY_ADMIN', 'RESIDENT', 'SECURITY'];
-    if (restrictedRoles.includes(req.user.role_name) && req.user.society_id !== societyId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You can only view your own society.',
-      });
-    }
+export const updateSociety = asyncHandler(async (req, res) => {
+  const { society, changes } = await SocietyService.updateSociety({
+    societyId: parseInt(req.params.id),
+    ...req.body,
+    reqUser: req.user,
+  });
 
-    const society = await prisma.society.findUnique({
-      where: { id: societyId },
-      include: {
-        _count: {
-          select: { users: true },
-        },
-      },
-    });
+  const description =
+    changes.length > 0
+      ? `Society "${society.name}" updated: ${changes.join(', ')}`
+      : `Society "${society.name}" updated`;
 
-    if (!society) {
-      return res.status(404).json({
-        success: false,
-        message: 'Society not found',
-      });
-    }
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.UPDATE_SOCIETY,
+    entity: AUDIT_ENTITIES.SOCIETY,
+    entityId: society.id,
+    description,
+    req,
+  });
 
-    res.json({
-      success: true,
-      message: 'Society retrieved successfully',
-      data: { society },
-    });
-  } catch (error) {
-    console.error('Get society error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve society',
-      error: error.message,
-    });
-  }
-};
+  res.json({
+    success: true,
+    message: 'Society updated successfully',
+    data: { society },
+  });
+});
 
-/**
- * Update society
- * PUT /api/v1/societies/:id
- * Access: SUPER_ADMIN, SOCIETY_ADMIN (own society only)
- */
-export const updateSociety = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const societyId = parseInt(id);
-    const { name, type, address, city, state, pincode, subscriptionId, status, razorpayKey } =
-      req.body;
+export const deleteSociety = asyncHandler(async (req, res) => {
+  const societyId = parseInt(req.params.id);
+  const society = await SocietyService.deleteSociety({ societyId });
 
-    if (isNaN(societyId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid society ID',
-      });
-    }
+  await logAction({
+    user: req.user,
+    action: AUDIT_ACTIONS.DELETE_SOCIETY,
+    entity: AUDIT_ENTITIES.SOCIETY,
+    entityId: societyId,
+    description: `Society "${society.name}" deleted`,
+    req,
+  });
 
-    // Role-based access control
-    if (req.user.role_name === 'SOCIETY_ADMIN' && req.user.society_id !== societyId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. You can only update your own society.',
-      });
-    }
-
-    // Check if society exists
-    const existingSociety = await prisma.society.findUnique({
-      where: { id: societyId },
-    });
-
-    if (!existingSociety) {
-      return res.status(404).json({
-        success: false,
-        message: 'Society not found',
-      });
-    }
-
-    // Role-based field restrictions for SOCIETY_ADMIN
-    if (req.user.role_name === 'SOCIETY_ADMIN') {
-      if (subscriptionId !== undefined || status !== undefined) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied. Only Super Admin can update status and subscription.',
-        });
-      }
-    }
-
-    // Validate type if provided
-    if (type && !['apartment', 'office'].includes(type.toLowerCase())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Type must be either "apartment" or "office"',
-      });
-    }
-
-    // Validate status if provided (only SUPER_ADMIN can reach here if status is provided)
-    if (status && !['active', 'expired'].includes(status.toLowerCase())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Status must be either "active" or "expired"',
-      });
-    }
-
-    // Update society
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (type) updateData.type = type.toLowerCase();
-    if (address !== undefined) updateData.address = address;
-    if (city !== undefined) updateData.city = city;
-    if (state !== undefined) updateData.state = state;
-    if (pincode !== undefined) updateData.pincode = pincode;
-    if (razorpayKey !== undefined) updateData.razorpayKey = razorpayKey;
-
-    // Only SUPER_ADMIN can update these
-    if (req.user.role_name === 'SUPER_ADMIN') {
-      if (subscriptionId !== undefined) updateData.subscriptionId = subscriptionId;
-      if (status) updateData.status = status.toLowerCase();
-    }
-
-    const society = await prisma.society.update({
-      where: { id: societyId },
-      data: updateData,
-    });
-
-    // Build description of what changed
-    const changes = [];
-    if (name && name !== existingSociety.name)
-      changes.push(`name: "${existingSociety.name}" → "${name}"`);
-    if (type && type.toLowerCase() !== existingSociety.type)
-      changes.push(`type: "${existingSociety.type}" → "${type.toLowerCase()}"`);
-    if (status && status.toLowerCase() !== existingSociety.status)
-      changes.push(`status: "${existingSociety.status}" → "${status.toLowerCase()}"`);
-    if (address !== undefined && address !== existingSociety.address)
-      changes.push('address updated');
-    if (city !== undefined && city !== existingSociety.city)
-      changes.push(`city: "${existingSociety.city || 'N/A'}" → "${city || 'N/A'}"`);
-    if (state !== undefined && state !== existingSociety.state)
-      changes.push(`state: "${existingSociety.state || 'N/A'}" → "${state || 'N/A'}"`);
-    if (pincode !== undefined && pincode !== existingSociety.pincode)
-      changes.push('pincode updated');
-    if (razorpayKey !== undefined && razorpayKey !== existingSociety.razorpayKey)
-      changes.push('razorpayKey updated');
-    if (subscriptionId !== undefined && subscriptionId !== existingSociety.subscriptionId)
-      changes.push(
-        `subscriptionId: ${existingSociety.subscriptionId || 'N/A'} → ${subscriptionId || 'N/A'}`
-      );
-
-    const description =
-      changes.length > 0
-        ? `Society "${society.name}" updated: ${changes.join(', ')}`
-        : `Society "${society.name}" updated`;
-
-    // Log society update
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.UPDATE_SOCIETY,
-      entity: AUDIT_ENTITIES.SOCIETY,
-      entityId: society.id,
-      description,
-      req,
-    });
-
-    res.json({
-      success: true,
-      message: 'Society updated successfully',
-      data: { society },
-    });
-  } catch (error) {
-    console.error('Update society error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update society',
-      error: error.message,
-    });
-  }
-};
-
-/**
- * Delete society
- * DELETE /api/v1/societies/:id
- * Access: SUPER_ADMIN only
- */
-export const deleteSociety = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const societyId = parseInt(id);
-
-    if (isNaN(societyId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid society ID',
-      });
-    }
-
-    // Check if society exists
-    const society = await prisma.society.findUnique({
-      where: { id: societyId },
-      include: {
-        _count: {
-          select: { users: true },
-        },
-      },
-    });
-
-    if (!society) {
-      return res.status(404).json({
-        success: false,
-        message: 'Society not found',
-      });
-    }
-
-    // Check if society has users
-    if (society._count.users > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete society with existing users. Please remove users first.',
-      });
-    }
-
-    // Log society deletion before deleting
-    await logAction({
-      user: req.user,
-      action: AUDIT_ACTIONS.DELETE_SOCIETY,
-      entity: AUDIT_ENTITIES.SOCIETY,
-      entityId: society.id,
-      description: `Society "${society.name}" deleted`,
-      req,
-    });
-
-    // Delete society
-    await prisma.society.delete({
-      where: { id: societyId },
-    });
-
-    res.json({
-      success: true,
-      message: 'Society deleted successfully',
-    });
-  } catch (error) {
-    console.error('Delete society error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete society',
-      error: error.message,
-    });
-  }
-};
+  res.json({
+    success: true,
+    message: 'Society deleted successfully',
+  });
+});
