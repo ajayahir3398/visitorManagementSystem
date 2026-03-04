@@ -1,14 +1,14 @@
 // verify-bulk-upload.js
 import fs from 'fs';
-import axios from 'axios';
+import _axios from 'axios';
 import FormData from 'form-data';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const _dirname = path.dirname(__filename);
 
-async function testUpload() {
+async function _testUpload() {
   const form = new FormData();
   form.append('file', fs.createReadStream('test_residents.csv'));
 
@@ -31,8 +31,8 @@ async function testUpload() {
 
 // Mock test directly calling controller logic (skipping auth/route)
 // This is safer to verifying logic without needing a running server with auth token
-import { bulkUploadResidents } from './controllers/v1/userController.js';
-import busboy from 'busboy';
+import { bulkUploadResidents as _bulkUploadResidents } from './controllers/v1/userController.js';
+import _busboy from 'busboy';
 
 // We can't easily mock busboy stream without a complex setup.
 // So let's write a simple script to login as admin and then upload.

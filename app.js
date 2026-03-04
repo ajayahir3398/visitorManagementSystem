@@ -6,6 +6,8 @@ import apiRoutes from './routes/index.js';
 import swaggerSpec from './swagger/index.js';
 import { healthCheck } from './controllers/v1/healthController.js';
 import helmet from 'helmet';
+import { requestIdMiddleware } from './middleware/requestId.js';
+import logger from './utils/logger.js';
 
 const app = express();
 
@@ -16,10 +18,13 @@ app.use(
   })
 );
 
+// Request Trace & Logging Middleware
+app.use(requestIdMiddleware);
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
-app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
 // Swagger Documentation
@@ -53,11 +58,14 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
+app.use((err, req, res, _next) => {
+  const reqLogger = req.logger || logger;
+  reqLogger.error('Unhandled Error:', err);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error',
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 });
 
